@@ -122,3 +122,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
 ## License
 
 Proprietary. All rights reserved.
+
