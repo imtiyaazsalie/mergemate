@@ -8,7 +8,6 @@
 
 Runs a focused analysis of the diff and attaches relevant labels. Unlike `/describe`, this tool does nothing but labels — no title, no summary, no walkthrough.
 
-![Generate Labels Result](https://mergemate.ai/images/mergemate/generate_labels_result.png){width=512}
 
 ## `/generate_labels` vs `/describe` labels
 

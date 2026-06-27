@@ -8,7 +8,6 @@
 
 MergeMate reads the code changes and responds inline. Each question is stateless — it doesn't remember earlier queries.
 
-![Ask](https://mergemate.ai/images/mergemate/ask.png){width=512}
 
 ## Asking about specific lines
 
@@ -18,7 +17,6 @@ From the PR diff view, select one or more lines (click the `+` next to the line 
 /ask "Is this null check redundant given the guard above?"
 ```
 
-![Ask Line](https://mergemate.ai/images/mergemate/Ask_line.png){width=512}
 
 The tool sees only the selected lines plus surrounding file context.
 

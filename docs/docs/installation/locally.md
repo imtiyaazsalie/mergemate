@@ -70,7 +70,7 @@ The fastest way to try MergeMate. Pick your git provider and run:
     -e GITEA__URL=https://gitea.mycompany.com
     ```
 
-For any other git platform, adjust `CONFIG__GIT_PROVIDER` and check the [secrets template](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/.secrets_template.toml) for the correct environment variable names.
+For any other git platform, adjust `CONFIG__GIT_PROVIDER` and check the [secrets template](https://github.com/imtiyaazsalie/mergemate/blob/main/mergemate/settings/.secrets_template.toml) for the correct environment variable names.
 
 ### Driving Configuration Through Environment Variables
 
@@ -116,7 +116,7 @@ def main():
     provider = "github"  # github | gitlab | bitbucket | azure_devops
     user_token = "..."   # your git platform token
     openai_key = "..."   # your model provider key
-    pr_url = "..."       # e.g. https://github.com/mergemate/mergemate/pull/809
+    pr_url = "..."       # e.g. https://github.com/imtiyaazsalie/mergemate/pull/809
     command = "/review"  # /review, /describe, /ask="...", /improve, etc.
 
     # Wire up config
@@ -138,7 +138,7 @@ Results land directly as comments on the PR.
 1. Grab the repo:
 
     ```bash
-    git clone https://github.com/mergemate/mergemate.git
+    git clone https://github.com/imtiyaazsalie/mergemate.git
     ```
 
 2. Hop into the `mergemate` directory and install (a virtual environment is strongly recommended):

@@ -15,7 +15,7 @@
 4. Clone the repo:
 
     ```bash
-    git clone https://github.com/mergemate/mergemate.git
+    git clone https://github.com/imtiyaazsalie/mergemate.git
     ```
 
 5. Wire up your config. If you're not setting these as environment variables at runtime:

@@ -69,7 +69,7 @@ Tweak config on the fly:
 /review --pr_reviewer.extra_instructions="..." --pr_reviewer.require_score_review=false
 ```
 
-Any setting from the [config file](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/configuration.toml) can be overridden this way. Run `/config` to see what's available.
+Any setting from the [config file](https://github.com/imtiyaazsalie/mergemate/blob/main/mergemate/settings/configuration.toml) can be overridden this way. Run `/config` to see what's available.
 
 ---
 

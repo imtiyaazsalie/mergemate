@@ -34,7 +34,6 @@ generate_ai_title = true
 
 MergeMate strips the markdown wrapper automatically.
 
-![Wiki config example](https://mergemate.ai/images/mergemate/wiki_configuration.png){width=512}
 
 ---
 
@@ -81,7 +80,7 @@ Create a repo called `mergemate-settings` in your org. Every repo in that org in
 
 Local `.mergemate.toml` files override it per-repo.
 
-**Example:** `https://github.com/mergemate-ai/mergemate-settings` serves as the global config for all repos under the `mergemate-ai` org.
+**Example:** `https://github.com/imtiyaazsalie/mergemate-settings` serves as the global config for all repos under the `mergemate-ai` org.
 
 ---
 

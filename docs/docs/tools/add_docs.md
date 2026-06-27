@@ -8,7 +8,6 @@
 
 MergeMate scans the PR diff, identifies undocumented components, and posts inline documentation suggestions you can commit with one click.
 
-![Add Docs Result](https://mergemate.ai/images/mergemate/add_docs_result.png){width=512}
 
 ## Language support
 

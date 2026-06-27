@@ -16,7 +16,6 @@ When you're already in a PR thread, just drop:
 
 MergeMate responds in ~30 seconds with a breakdown of findings, security concerns, review effort, and any sections you've enabled.
 
-![review](https://mergemate.ai/images/mergemate/review3.png){width=512}
 
 To tweak behaviour on the fly, append config overrides:
 

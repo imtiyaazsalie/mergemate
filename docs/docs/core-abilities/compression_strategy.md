@@ -57,4 +57,3 @@ Using [tiktoken](https://github.com/openai/tiktoken), MergeMate tokenizes the re
 
 #### Visual Summary
 
-![Compression flow](https://mergemate.ai/images/git_patch_logic.png){width=768}

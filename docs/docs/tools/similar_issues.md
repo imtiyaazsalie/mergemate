@@ -8,7 +8,6 @@
 
 MergeMate indexes all past issues once, then retrieves the closest matches whenever you call the tool — handy for spotting duplicates or finding earlier discussions.
 
-![similar_issue](https://mergemate.ai/images/mergemate/similar_issue.png){width=768}
 
 Trigger it from the CLI:
 

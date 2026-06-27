@@ -8,7 +8,6 @@
 
 By default, the tool publishes the proposed entry as a PR comment. Turn on `push_changelog_changes` and it commits directly.
 
-![update_changelog](https://mergemate.ai/images/mergemate/update_changelog.png){width=768}
 
 ## Configuration
 

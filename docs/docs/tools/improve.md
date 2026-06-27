@@ -16,7 +16,6 @@ In a PR thread:
 
 By default, suggestions appear as a compact table. Click any row to expand the full diff. Switch to inline committable comments with a config toggle.
 
-![code_suggestions_as_comment_closed](https://mergemate.ai/images/mergemate/code_suggestions_as_comment_closed.png){width=512}
 
 Override settings inline:
 

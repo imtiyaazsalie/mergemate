@@ -42,7 +42,6 @@ The review tool uses ticket content the same way, and goes one step further — 
 - **Not Compliant** — the PR doesn't match the ticket's intent
 - **PR Code Verified** — the code looks right, but needs manual QA (e.g. UI testing across platforms)
 
-![Ticket compliance review](https://www.mergemate.ai/images/mergemate/ticket_compliance_review.png){width=768}
 
 #### Configuration
 

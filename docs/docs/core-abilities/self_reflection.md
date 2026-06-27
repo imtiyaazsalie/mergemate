@@ -33,8 +33,6 @@ The outcome: suggestions are reliably ordered by importance, clearly wrong ones 
 
 ## Example
 
-![Self-reflection scoring](https://mergemate.ai/images/mergemate/self_reflection1.png){width=768}
-![Self-reflection re-ranking](https://mergemate.ai/images/mergemate/self_reflection2.png){width=768}
 
 ## Configuration
 

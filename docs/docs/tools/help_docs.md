@@ -8,7 +8,6 @@
 
 MergeMate pulls files from the docs directory, feeds them to the model as context, and replies with a direct answer.
 
-![help_docs response](https://mergemate.ai/images/mergemate/help_docs_response.png){width=512}
 
 ## Pointing at a different repo
 

@@ -16,7 +16,6 @@ Or comment on the PR:
 
 Within ~30 seconds the tool fills in — or updates — the PR description.
 
-![Describe New](https://mergemate.ai/images/mergemate/describe_new.png){width=512}
 
 Pass config overrides inline:
 

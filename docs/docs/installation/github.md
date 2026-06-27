@@ -44,7 +44,7 @@ The simplest path. MergeMate ships as a pre-built action that slots right into y
 
 3. Merge to your main branch. The next time you open a PR, you'll see MergeMate's review appear as a comment, along with instructions for the rest of the tool suite.
 
-4. Tweak behaviour by layering any [config option](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/configuration.toml) into the `env` block:
+4. Tweak behaviour by layering any [config option](https://github.com/imtiyaazsalie/mergemate/blob/main/mergemate/settings/configuration.toml) into the `env` block:
 
     ```yaml
           env:
@@ -386,7 +386,7 @@ Prefer a standalone deployment? The GitHub App path gives you full control over 
 4. Clone MergeMate:
 
     ```bash
-    git clone https://github.com/mergemate/mergemate.git
+    git clone https://github.com/imtiyaazsalie/mergemate.git
     ```
 
 5. Copy the secrets template and fill in your values:

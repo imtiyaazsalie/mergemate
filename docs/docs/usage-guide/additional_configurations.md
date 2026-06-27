@@ -4,7 +4,7 @@
 
 ## Seeing what's configured
 
-All available settings live in the [config reference](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/configuration.toml). Per-tool options are documented on each [tool's page](../tools/index.md).
+All available settings live in the [config reference](https://github.com/imtiyaazsalie/mergemate/blob/main/mergemate/settings/configuration.toml). Per-tool options are documented on each [tool's page](../tools/index.md).
 
 To print the current config as a PR comment:
 
@@ -12,7 +12,6 @@ To print the current config as a PR comment:
 /config
 ```
 
-![Config output](https://mergemate.ai/images/mergemate/possible_config1.png){width=512}
 
 To see the *actual* resolved config for a specific tool (after all overrides are applied):
 
@@ -20,7 +19,6 @@ To see the *actual* resolved config for a specific tool (after all overrides are
 /improve --config.output_relevant_configurations=true
 ```
 
-![Resolved config](https://mergemate.ai/images/mergemate/possible_config2.png){width=512}
 
 ---
 
@@ -200,7 +198,7 @@ Regex list. Note: bots that create PRs with *failing tests* will still get a res
 ignore_language_framework = ['protobuf']
 ```
 
-Patterns come from [`generated_code_ignore.toml`](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/generated_code_ignore.toml).
+Patterns come from [`generated_code_ignore.toml`](https://github.com/imtiyaazsalie/mergemate/blob/main/mergemate/settings/generated_code_ignore.toml).
 
 ### By ticket label
 

@@ -50,12 +50,11 @@ This fires `describe`, `review`, and `improve` on every merge request. You'll ne
 - `azure_devops_pat` — your Azure DevOps PAT
 - `OPENAI_KEY` — your model provider key
 
-![Variable group setup](https://mergemate.ai/images/mergemate/azure_devops_pipeline_secrets.png){width=468}
 
 Make sure the pipeline has permission to access the `mergemate` variable group.
 
 !!! note "PR comment triggers"
-    Azure Pipelines doesn't support triggering workflows from PR comments. If you find a workable solution, we'd love to see it — drop it in the [issue tracker](https://github.com/mergemate/mergemate/issues).
+    Azure Pipelines doesn't support triggering workflows from PR comments. If you find a workable solution, we'd love to see it — drop it in the [issue tracker](https://github.com/imtiyaazsalie/mergemate/issues).
 
 ### Build Validation for Azure Repos Git
 

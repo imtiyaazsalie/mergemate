@@ -312,7 +312,7 @@ key = ...
 
 ## Custom models
 
-If your model isn't in the [supported list](https://github.com/mergemate/mergemate/blob/main/mergemate/algo/__init__.py), you can still use it:
+If your model isn't in the [supported list](https://github.com/imtiyaazsalie/mergemate/blob/main/mergemate/algo/__init__.py), you can still use it:
 
 1. Set the name:
    ```toml

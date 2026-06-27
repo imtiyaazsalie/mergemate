@@ -15,15 +15,15 @@ Deeper dives into how LLMs perform on real-world coding tasks:
 
 ### Code Generation & LLMs
 
-- [Effective AI code suggestions: less is more](https://www.mergemate.ai/blog/effective-code-suggestions-llms-less-is-more/)
-- [State-of-the-art Code Generation with AlphaMergeMate — From Prompt Engineering to Flow Engineering](https://www.mergemate.ai/blog/mergemateflow-state-of-the-art-code-generation-for-code-contests/)
-- [RAG for a Codebase with 10k Repos](https://www.mergemate.ai/blog/rag-for-large-scale-code-repos/)
+- [Effective AI code suggestions: less is more](https://https://github.com/imtiyaazsalie/mergemate/blob/main/effective-code-suggestions-llms-less-is-more/)
+- [State-of-the-art Code Generation with AlphaMergeMate — From Prompt Engineering to Flow Engineering](https://https://github.com/imtiyaazsalie/mergemate/blob/main/mergemateflow-state-of-the-art-code-generation-for-code-contests/)
+- [RAG for a Codebase with 10k Repos](https://https://github.com/imtiyaazsalie/mergemate/blob/main/rag-for-large-scale-code-repos/)
 
 ### Development Workflows
 
-- [Understanding the Challenges and Pain Points of the Pull Request Cycle](https://www.mergemate.ai/blog/understanding-the-challenges-and-pain-points-of-the-pull-request-cycle/)
-- [Introduction to Code Coverage Testing](https://www.mergemate.ai/blog/introduction-to-code-coverage-testing/)
+- [Understanding the Challenges and Pain Points of the Pull Request Cycle](https://https://github.com/imtiyaazsalie/mergemate/blob/main/understanding-the-challenges-and-pain-points-of-the-pull-request-cycle/)
+- [Introduction to Code Coverage Testing](https://https://github.com/imtiyaazsalie/mergemate/blob/main/introduction-to-code-coverage-testing/)
 
 ### Cost Optimisation
 
-- [Reduce Your Costs by 30% When Using GPT for Python Code](https://www.mergemate.ai/blog/reduce-your-costs-by-30-when-using-gpt-3-for-python-code/)
+- [Reduce Your Costs by 30% When Using GPT for Python Code](https://https://github.com/imtiyaazsalie/mergemate/blob/main/reduce-your-costs-by-30-when-using-gpt-3-for-python-code/)

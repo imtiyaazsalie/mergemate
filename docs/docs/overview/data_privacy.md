@@ -22,4 +22,4 @@ We track anonymous usage signals (command counts, feature adoption, error rates)
 
 ## Questions?
 
-See the [FAQ](../faq/index.md) or reach out via the channels in our [security policy](https://github.com/mergemate/mergemate/security).
+See the [FAQ](../faq/index.md) or reach out via the channels in our [security policy](https://github.com/imtiyaazsalie/mergemate/security).
