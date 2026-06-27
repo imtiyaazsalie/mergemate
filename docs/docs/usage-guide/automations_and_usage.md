@@ -1,104 +1,96 @@
-## Local repo (CLI)
+# Running & automating MergeMate
 
-When running from your locally cloned MergeMate repo (CLI), your local configuration file will be used.
-Examples of invoking the different tools via the CLI:
+## CLI
 
-- **Review**:       `python -m mergemate.cli --pr_url=<pr_url>  review`
-- **Describe**:     `python -m mergemate.cli --pr_url=<pr_url>  describe`
-- **Improve**:      `python -m mergemate.cli --pr_url=<pr_url>  improve`
-- **Ask**:          `python -m mergemate.cli --pr_url=<pr_url>  ask "Write me a poem about this PR"`
-- **Update Changelog**:      `python -m mergemate.cli --pr_url=<pr_url>  update_changelog`
+Fire off tools from your terminal. Your local config drives everything.
 
-`<pr_url>` is the url of the relevant PR (for example: [#50](https://github.com/mergemate/mergemate/pull/50)).
+```bash
+# Review a PR
+python -m mergemate.cli --pr_url=https://github.com/owner/repo/pull/50 review
 
-**Notes:**
+# Generate a description
+python -m mergemate.cli --pr_url=https://github.com/owner/repo/pull/50 describe
 
-1. in addition to editing your local configuration file, you can also change any configuration value by adding it to the command line:
+# Suggest improvements
+python -m mergemate.cli --pr_url=https://github.com/owner/repo/pull/50 improve
 
+# Ask anything
+python -m mergemate.cli --pr_url=https://github.com/owner/repo/pull/50 ask "Summarize the security impact of this PR"
+
+# Update the changelog
+python -m mergemate.cli --pr_url=https://github.com/owner/repo/pull/50 update_changelog
 ```
-python -m mergemate.cli --pr_url=<pr_url>  /review --pr_reviewer.extra_instructions="focus on the file: ..."
+
+**Pro tips:**
+
+Override any config value inline:
+
+```bash
+python -m mergemate.cli --pr_url=<url> review --pr_reviewer.extra_instructions="Focus on error handling"
 ```
 
-2. You can print results locally, without publishing them, by setting in `configuration.toml`:
+Run locally without publishing (great for testing):
 
-```
+```toml
 [config]
-publish_output=false
-verbosity_level=2
+publish_output = false
+verbosity_level = 2
 ```
 
-This is useful for debugging or experimenting with different tools.
+**Git providers:** set the `git_provider` field to `github` (default), `gitlab`, `bitbucket`, `azure`, `codecommit`, `local`, or `gitea`.
 
-3. **git provider**: The [git_provider](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/configuration.toml#L12) field in a configuration file determines the GIT provider that will be used by MergeMate. Currently, the following providers are supported:
-`github` **(default)**, `gitlab`, `bitbucket`, `azure`, `codecommit`, `local`, and `gitea`.
+### Health check
 
-### CLI Health Check
-
-To verify that MergeMate has been configured correctly, you can run this health check command from the repository root:
+Confirm everything is wired up:
 
 ```bash
 python -m tests.health_test.main
 ```
 
-If the health check passes, you will see the following output:
+You'll need an LLM provider configured and a valid token set before running this.
 
-```
-========
-Health test passed successfully
-========
-```
-
-At the end of the run.
-
-Before running the health check, ensure you have:
-
-- Configured your [LLM provider](./changing_a_model.md)
-- Added a valid GitHub token to your configuration file
+---
 
 ## Online usage
 
-Online usage means invoking MergeMate tools by [comments](https://github.com/mergemate/mergemate/pull/229#issuecomment-1695021901) on a PR.
-Commands for invoking the different tools via comments:
+Trigger MergeMate by commenting on a PR:
 
-- **Review**:       `/review`
-- **Describe**:     `/describe`
-- **Improve**:      `/improve`  (or `/improve_code` for bitbucket, since `/improve` is sometimes reserved)
-- **Ask**:          `/ask "..."`
-- **Update Changelog**:      `/update_changelog`
+| Command | What it does |
+|---|---|
+| `/review` | Full code review |
+| `/describe` | PR summary + labels |
+| `/improve` | Code suggestions |
+| `/ask "..."` | Ask a question about the PR |
+| `/update_changelog` | Update the changelog |
 
-To edit a specific configuration value, just add `--config_path=<value>` to any command.
-For example, if you want to edit the `review` tool configurations, you can run:
+Tweak config on the fly:
 
 ```
 /review --pr_reviewer.extra_instructions="..." --pr_reviewer.require_score_review=false
 ```
 
-Any configuration value in [configuration file](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/configuration.toml) file can be similarly edited. Comment `/config` to see the list of available configurations.
+Any setting from the [config file](https://github.com/imtiyaazsalie/mergemate/blob/main/mergemate/settings/configuration.toml) can be overridden this way. Run `/config` to see what's available.
 
-## MergeMate Automatic Feedback
+---
 
-### Disabling all automatic feedback
+## Automatic feedback
 
-To easily disable all automatic feedback from MergeMate (GitHub App, GitLab Webhook, BitBucket App, Azure DevOps Webhook), set in a configuration file:
+### Kill switch
+
+To silence all automatic feedback across every platform:
 
 ```toml
 [config]
 disable_auto_feedback = true
 ```
 
-When this parameter is set to `true`, MergeMate will not run any automatic tools (like `describe`, `review`, `improve`) when a new PR is opened, or when new code is pushed to an open PR.
+No tools will fire on PR open or push events.
 
 ### GitHub App
 
-!!! note "Configurations for MergeMate"
-    MergeMate for GitHub is an App, hosted by MergeMate. So all the instructions below are relevant for MergeMate users.
-    Same goes for [GitLab webhook](#gitlab-webhook) and [BitBucket App](#bitbucket-app) sections.
+#### On new PRs
 
-#### GitHub app automatic tools when a new PR is opened
-
-The [github_app](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/configuration.toml#L223) section defines GitHub app specific configurations.
-
-The configuration parameter `pr_commands` defines the list of tools that will be **run automatically** when a new PR is opened:
+Define which tools run automatically when a PR opens:
 
 ```toml
 [github_app]
@@ -109,50 +101,38 @@ pr_commands = [
 ]
 ```
 
-This means that when a new PR is opened/reopened or marked as ready for review, MergeMate will run the `describe`, `review` and `improve` tools.  
+This fires on open, reopen, and ready-for-review transitions.
 
-**Draft PRs:** 
-
-By default, draft PRs are not considered for automatic tools, but you can change this by setting the `feedback_on_draft_pr` parameter to `true` in the configuration file.
+**Draft PRs** are skipped by default. To include them:
 
 ```toml
 [github_app]
 feedback_on_draft_pr = true
 ```
 
-**Changing default tool parameters:**
-
-You can override the default tool parameters by using one the three options for a [configuration file](./configuration_options.md): **wiki**, **local**, or **global**.
-For example, if your configuration file contains:
+**Customize tool params for auto-runs:**
 
 ```toml
 [pr_description]
 generate_ai_title = true
 ```
 
-Every time you run the `describe` tool (including automatic runs) the PR title will be generated by the AI.
-
-
-**Parameters for automated runs:**
-
-You can customize configurations specifically for automated runs by using the `--config_path=<value>` parameter.
-For instance, to modify the `review` tool settings only for newly opened PRs, use:
+Or target specific automated runs:
 
 ```toml
 [github_app]
 pr_commands = [
     "/describe",
-    "/review --pr_reviewer.extra_instructions='focus on the file: ...'",
+    "/review --pr_reviewer.extra_instructions='Focus on SQL injection patterns'",
     "/improve",
 ]
 ```
 
-#### GitHub app automatic tools for push actions (commits to an open PR)
+Configuration follows the same [precedence rules](./configuration_options.md) (wiki → local → global).
 
-In addition to running automatic tools when a PR is opened, the GitHub app can also respond to new code that is pushed to an open PR.
+#### On new commits
 
-The configuration toggle `handle_push_trigger` can be used to enable this feature.
-The configuration parameter `push_commands` defines the list of tools that will be **run automatically** when new code is pushed to the PR.
+Respond to pushes on open PRs:
 
 ```toml
 [github_app]
@@ -163,50 +143,35 @@ push_commands = [
 ]
 ```
 
-This means that when new code is pushed to the PR, MergeMate will run the `describe` and `review` tools, with the specified parameters.
-
 ### GitHub Action
 
-`GitHub Action` is a different way to trigger MergeMate tools, and uses a different configuration mechanism than `GitHub App`.<br>
-You can configure settings for `GitHub Action` by adding environment variables under the env section in `.github/workflows/mergemate.yml` file.
-Specifically, start by setting the following environment variables:
+GitHub Actions use environment variables, not the app config:
 
 ```yaml
-      env:
-        OPENAI_KEY: ${{ secrets.OPENAI_KEY }} # Make sure to add your OpenAI key to your repo secrets
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Make sure to add your GitHub token to your repo secrets
-        github_action_config.auto_review: "true" # enable\disable auto review
-        github_action_config.auto_describe: "true" # enable\disable auto describe
-        github_action_config.auto_improve: "true" # enable\disable auto improve
-        github_action_config.pr_actions: '["opened", "reopened", "ready_for_review", "review_requested"]'
+env:
+  OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  github_action_config.auto_review: "true"
+  github_action_config.auto_describe: "true"
+  github_action_config.auto_improve: "true"
+  github_action_config.pr_actions: '["opened", "reopened", "ready_for_review", "review_requested"]'
 ```
 
-`github_action_config.auto_review`, `github_action_config.auto_describe` and `github_action_config.auto_improve` are used to enable/disable automatic tools that run when a new PR is opened.
-If not set, the default configuration is for all three tools to run automatically when a new PR is opened.
+The three `auto_*` flags control what runs on PR open. Default: all three are on.
 
-`github_action_config.pr_actions` is used to configure which `pull_requests` events will trigger the enabled auto flags
-If not set, the default configuration is `["opened", "reopened", "ready_for_review", "review_requested"]`
+`pr_actions` sets which pull request events trigger the automation. Default: `["opened", "reopened", "ready_for_review", "review_requested"]`.
 
-`github_action_config.enable_output` are used to enable/disable github actions [output parameter](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-docker-container-and-javascript-actions) (default is `true`).
-Review result is output as JSON to `steps.{step-id}.outputs.review` property.
-The JSON structure is equivalent to the yaml data structure defined in [pr_reviewer_prompts.toml](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/pr_reviewer_prompts.toml).
+`github_action_config.enable_output` toggles the action's JSON output parameter (default `true`).
 
-Note that you can give additional config parameters by adding environment variables to `.github/workflows/mergemate.yml`, or by using a `.mergemate.toml` [configuration file](./configuration_options.md#global-configuration-file) in the root of your repo
+You can also drop a `.mergemate.toml` in your repo root for additional config, or set more env vars:
 
-For example, you can set an environment variable: `pr_description.publish_labels=false`, or add a `.mergemate.toml` file with the following content:
-
-```toml
-[pr_description]
-publish_labels = false
+```yaml
+pr_description.publish_labels: "false"
 ```
 
-to prevent MergeMate from publishing labels when running the `describe` tool.
+#### Enable PR comment triggers
 
-#### Enable using commands in PR
-
-You can configure your GitHub Actions workflow to trigger on `issue_comment` [events](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#issue_comment) (`created` and `edited`).
-
-Example GitHub Actions workflow configuration:
+Add `issue_comment` events to your workflow:
 
 ```yaml
 on:
@@ -214,30 +179,23 @@ on:
     types: [created, edited]
 ```
 
-When this is configured, MergeMate can be invoked by commenting on the PR.
+#### Quick model config for GitHub Actions
 
-#### Quick Reference: Model Configuration in GitHub Actions
+| Model | Key env vars |
+|---|---|
+| **OpenAI** | `config.model: "gpt-5.4"`, `OPENAI_KEY` |
+| **Gemini** | `config.model: "gemini/gemini-1.5-flash"`, `GOOGLE_AI_STUDIO.GEMINI_API_KEY` |
+| **Claude** | `config.model: "anthropic/claude-3-opus-20240229"`, `ANTHROPIC.KEY` |
+| **Azure OpenAI** | `OPENAI.API_TYPE: "azure"`, `OPENAI.API_BASE`, `OPENAI.DEPLOYMENT_ID` |
+| **Local (Ollama)** | `config.model: "ollama/model-name"`, `OLLAMA.API_BASE` |
 
-For detailed step-by-step examples of configuring different models (Gemini, Claude, Azure OpenAI, etc.) in GitHub Actions, see the [Configuration Examples](../installation/github.md#configuration-examples) section in the installation guide.
+Environment variable format: use dots for nesting (`config.model`), strings for booleans (`"true"`), and JSON strings for arrays (`'["a", "b"]'`).
 
-**Common Model Configuration Patterns:**
-
-- **OpenAI**: Set `config.model: "gpt-5.4"` and `OPENAI_KEY`
-- **Gemini**: Set `config.model: "gemini/gemini-1.5-flash"` and `GOOGLE_AI_STUDIO.GEMINI_API_KEY` (no `OPENAI_KEY` needed)
-- **Claude**: Set `config.model: "anthropic/claude-3-opus-20240229"` and `ANTHROPIC.KEY` (no `OPENAI_KEY` needed)
-- **Azure OpenAI**: Set `OPENAI.API_TYPE: "azure"`, `OPENAI.API_BASE`, and `OPENAI.DEPLOYMENT_ID`
-- **Local Models**: Set `config.model: "ollama/model-name"` and `OLLAMA.API_BASE`
-
-**Environment Variable Format:**
-- Use dots (`.`) to separate sections and keys: `config.model`, `pr_reviewer.extra_instructions`
-- Boolean values as strings: `"true"` or `"false"`
-- Arrays as JSON strings: `'["item1", "item2"]'`
-
-For complete model configuration details, see [Changing a model in MergeMate](changing_a_model.md).
+Full model setup guide: [Changing a model →](changing_a_model.md)
 
 ### GitLab Webhook
 
-After setting up a GitLab webhook, to control which commands will run automatically when a new MR is opened, you can set the `pr_commands` parameter in the configuration file, similar to the GitHub App:
+Same pattern as GitHub App:
 
 ```toml
 [gitlab]
@@ -248,9 +206,7 @@ pr_commands = [
 ]
 ```
 
-the GitLab webhook can also respond to new code that is pushed to an open MR.
-The configuration toggle `handle_push_trigger` can be used to enable this feature.
-The configuration parameter `push_commands` defines the list of tools that will be **run automatically** when new code is pushed to the MR.
+Push-trigger support:
 
 ```toml
 [gitlab]
@@ -261,31 +217,28 @@ push_commands = [
 ]
 ```
 
-Note that to use the 'handle_push_trigger' feature, you need to give the gitlab webhook also the "Push events" scope.
+Make sure your webhook has "Push events" scope enabled for `handle_push_trigger`.
 
-### BitBucket App
+### Bitbucket App
 
-Similar to GitHub app, when running MergeMate from BitBucket App, the default [configuration file](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/configuration.toml) will be initially loaded.
+Bitbucket loads config from a `.mergemate.toml` file at the root of your repo's default branch. Upload it *before* creating PRs.
 
-By uploading a local `.mergemate.toml` file to the root of the repo's default branch, you can edit and customize any configuration parameter. Note that you need to upload `.mergemate.toml` prior to creating a PR, in order for the configuration to take effect.
-
-For example, if your local `.mergemate.toml` file contains:
+Example local overrides:
 
 ```toml
 [pr_reviewer]
-extra_instructions = "Answer in japanese"
+extra_instructions = "Answer in Japanese"
 ```
 
-Each time you invoke a `/review` tool, it will use the extra instructions you set in the local configuration file.
+**Rate limit note:** Bitbucket caps app requests at ~1000/hour with no usage API. If you get spotty responses, try:
 
-Note that among other limitations, BitBucket provides relatively low rate-limits for applications (up to 1000 requests per hour), and does not provide an API to track the actual rate-limit usage.
-If you experience a lack of responses from MergeMate, you might want to set: `bitbucket_app.avoid_full_files=true` in your configuration file.
-This will prevent MergeMate from acquiring the full file content, and will only use the diff content. This will reduce the number of requests made to BitBucket, at the cost of small decrease in accuracy, as dynamic context will not be applicable.
+```toml
+bitbucket_app.avoid_full_files = true
+```
 
-#### BitBucket Self-Hosted App automatic tools
+This skips full-file fetches (slight accuracy trade-off, fewer API calls).
 
-To control which commands will run automatically when a new PR is opened, you can set the `pr_commands` parameter in the configuration file:
-Specifically, set the following values:
+#### Auto-run on PR open
 
 ```toml
 [bitbucket_app]
@@ -295,10 +248,9 @@ pr_commands = [
 ]
 ```
 
-Note that we set specifically for bitbucket, we recommend using: `--pr_code_suggestions.suggestions_score_threshold=7` and that is the default value we set for bitbucket.
-Since this platform only supports inline code suggestions, we want to limit the number of suggestions, and only present a limited number.
+We recommend `suggestions_score_threshold=7` for Bitbucket since it only supports inline suggestions — fewer, higher-quality hits.
 
-To enable BitBucket app to respond to each **push** to the PR, set (for example):
+Push-trigger:
 
 ```toml
 [bitbucket_app]
@@ -309,33 +261,31 @@ push_commands = [
 ]
 ```
 
-### Azure DevOps provider
+### Azure DevOps
 
-To use Azure DevOps provider use the following settings in configuration.toml:
+Set the provider and auth in config:
 
 ```toml
 [config]
-git_provider="azure"
+git_provider = "azure"
 ```
 
-Azure DevOps provider supports [PAT token](https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows) or [DefaultAzureCredential](https://learn.microsoft.com/en-us/azure/developer/python/sdk/authentication-overview#authentication-in-server-environments) authentication.
-PAT is faster to create, but has build in expiration date, and will use the user identity for API calls.
-Using DefaultAzureCredential you can use managed identity or Service principle, which are more secure and will create separate ADO user identity (via AAD) to the agent.
+Two auth options:
 
-If PAT was chosen, you can assign the value in .secrets.toml.
-If DefaultAzureCredential was chosen, you can assigned the additional env vars like AZURE_CLIENT_SECRET directly,
-or use managed identity/az cli (for local development) without any additional configuration.
-in any case, 'org' value must be assigned in .secrets.toml:
+- **PAT token** — quicker setup, inherits your user identity, expires by design
+- **DefaultAzureCredential** — managed identity or service principal, more secure, separate identity
 
-```
+Secrets go in `.secrets.toml`:
+
+```toml
 [azure_devops]
 org = "https://dev.azure.com/YOUR_ORGANIZATION/"
-# pat = "YOUR_PAT_TOKEN" needed only if using PAT for authentication
+# pat = "YOUR_PAT_TOKEN"  # only if using PAT auth
 ```
 
-#### Azure DevOps Webhook
+For DefaultAzureCredential, set `AZURE_CLIENT_SECRET` (or use managed identity / `az login` locally).
 
-To control which commands will run automatically when a new PR is opened, you can set the `pr_commands` parameter in the configuration file, similar to the GitHub App:
+#### Webhook auto-run
 
 ```toml
 [azure_devops_server]
@@ -347,8 +297,6 @@ pr_commands = [
 ```
 
 ### Gitea Webhook
-
-After setting up a Gitea webhook, to control which commands will run automatically when a new MR is opened, you can set the `pr_commands` parameter in the configuration file, similar to the GitHub App:
 
 ```toml
 [gitea]

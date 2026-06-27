@@ -1,57 +1,59 @@
+# Compression Strategy
 
-`Supported Git Platforms: GitHub, GitLab, Bitbucket`
+`Supported on: GitHub, GitLab, Bitbucket`
 
+## The Two Scenarios
 
-## Overview
+Every PR falls into one of two buckets:
 
-There are two scenarios:
+1. Small enough to fit in a single model prompt (system prompt + code)
+2. Too large for a single prompt, requiring smart trimming
 
-1. The PR is small enough to fit in a single prompt (including system and user prompt)
-2. The PR is too large to fit in a single prompt (including system and user prompt)
+Both start with the same triage step.
 
-For both scenarios, we first use the following strategy
+### Language Prioritisation
 
-#### Repo language prioritization strategy
+Before compression even kicks in, MergeMate sorts your repo's files by relevance:
 
-We prioritize the languages of the repo based on the following criteria:
+1. Binary files and non-code assets (images, PDFs, etc.) are discarded immediately.
+2. The repo's primary languages are identified.
+3. PR files are grouped and sorted by language prevalence, descending:
 
-1. Exclude binary files and non code files (e.g. images, pdfs, etc)
-2. Given the main languages used in the repo
-3. We sort the PR files by the most common languages in the repo (in descending order):
-   * ```[[file.py, file2.py],[file3.js, file4.jsx],[readme.md]]```
+    ```
+    [[file.py, file2.py], [file3.js, file4.jsx], [readme.md]]
+    ```
 
-### Small PR
+### Small PRs
 
-In this case, we can fit the entire PR in a single prompt:
+When everything fits, MergeMate simply expands each patch's surrounding context by three lines above and below — no trimming needed.
 
-1. Exclude binary files and non code files (e.g. images, pdfs, etc)
-2. We Expand the surrounding context of each patch to 3 lines above and below the patch
+### Large PRs
 
-### Large PR
+#### Why Compression Matters
 
-#### Motivation
+Some PRs are enormous, packed with changes that vary wildly in relevance. The goal is to squeeze as much signal as possible into a single prompt while ruthlessly cutting noise.
 
-Pull Requests can be very long and contain a lot of information with varying degree of relevance to the mergemate.
-We want to be able to pack as much information as possible in a single LMM prompt, while keeping the information relevant to the mergemate.
+#### The Strategy
 
-#### Compression strategy
+MergeMate favours additions over deletions:
 
-We prioritize additions over deletions:
+- All deleted files are collapsed into a single list.
+- Within each file patch, hunks that only contain deletions are stripped out — they add noise without contributing to the review of what's new.
 
-* Combine all deleted files into a single list (`deleted files`)
-* File patches are a list of hunks, remove all hunks of type deletion-only from the hunks in the file patch
+#### Adaptive Token-Aware Fitting
 
-#### Adaptive and token-aware file patch fitting
+Using [tiktoken](https://github.com/openai/tiktoken), MergeMate tokenizes the remaining patches and fits them into the prompt with a greedy algorithm:
 
-We use [tiktoken](https://github.com/openai/tiktoken) to tokenize the patches after the modifications described above, and we use the following strategy to fit the patches into the prompt:
+1. Within each language group, files are sorted by token count (largest first):
 
-1. Within each language we sort the files by the number of tokens in the file (in descending order):
-    * ```[[file2.py, file.py],[file4.jsx, file3.js],[readme.md]]```
-2. Iterate through the patches in the order described above
-3. Add the patches to the prompt until the prompt reaches a certain buffer from the max token length
-4. If there are still patches left, add the remaining patches as a list called `other modified files` to the prompt until the prompt reaches the max token length (hard stop), skip the rest of the patches.
-5. If we haven't reached the max token length, add the `deleted files` to the prompt until the prompt reaches the max token length (hard stop), skip the rest of the patches.
+    ```
+    [[file2.py, file.py], [file4.jsx, file3.js], [readme.md]]
+    ```
 
-#### Example
+2. MergeMate walks through patches in priority order.
+3. Each patch is added until the prompt hits a buffer below the max token limit.
+4. Any remaining patches get listed as `other modified files` — added until the hard token cap is reached, then the rest are skipped.
+5. If there's still room, the `deleted files` list is appended until the cap, with the remainder dropped.
 
-![Core Abilities](https://mergemate.ai/images/git_patch_logic.png){width=768}
+#### Visual Summary
+

@@ -1,23 +1,36 @@
-## Overview
+# Update Changelog
 
-The `update_changelog` tool automatically updates the CHANGELOG.md file with the PR changes.
-It can be invoked manually by commenting on any PR:
+**Writes a changelog entry from the PR diff — either as a comment for review, or committed straight to `CHANGELOG.md`.**
 
 ```
 /update_changelog
 ```
 
-## Example usage
+By default, the tool publishes the proposed entry as a PR comment. Turn on `push_changelog_changes` and it commits directly.
 
-![update_changelog_comment](https://mergemate.ai/images/mergemate/update_changelog_comment.png){width=768}
 
-![update_changelog](https://mergemate.ai/images/mergemate/update_changelog.png){width=768}
+## Configuration
 
-## Configuration options
+(`[pr_update_changelog]` section)
 
-Under the section `pr_update_changelog`, the [configuration file](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/configuration.toml#L169) contains options to customize the 'update changelog' tool:
+| Option | Default | Notes |
+|---|---|---|
+| `push_changelog_changes` | `false` | When `true`, commits the entry to `CHANGELOG.md`. When `false`, posts it as a comment. |
+| `extra_instructions` | `""` | Guidance for the model, e.g. "group entries under Added / Changed / Fixed headings." |
+| `add_pr_link` | `true` | Includes a link back to the PR in the changelog entry. |
+| `skip_ci_on_push` | `true` | Adds `[skip ci]` to the commit message so CI doesn't trigger on changelog commits. |
 
-- `push_changelog_changes`: whether to push the changes to CHANGELOG.md, or just publish them as a comment. Default is false (publish as comment).
-- `extra_instructions`: Optional extra instructions to the tool. For example: "Use the following structure: ..."
-- `add_pr_link`: whether the model should try to add a link to the PR in the changelog. Default is true.
-- `skip_ci_on_push`: whether the commit message (when `push_changelog_changes` is true) will include the term "[skip ci]", preventing CI tests to be triggered on the changelog commit. Default is true.
+**Example config:**
+
+```toml
+[pr_update_changelog]
+push_changelog_changes = true
+extra_instructions = "Use the Keep a Changelog format with Added, Changed, Deprecated, Removed, Fixed, Security sections."
+```
+
+## Tips
+
+- **Preview first.** Keep `push_changelog_changes = false` until you trust the output, then switch it on.
+- **Use `skip_ci_on_push`** to avoid triggering a full pipeline for a changelog-only commit.
+- **Pair with `/describe`** — run `/describe` to get the PR type and summary, then `/update_changelog` to persist it.
+- **Extra instructions shape the format.** Tell the model exactly which sections you use and it'll follow suit.

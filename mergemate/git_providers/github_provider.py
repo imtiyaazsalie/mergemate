@@ -753,7 +753,8 @@ class GithubProvider(GitProvider):
 
     def get_languages(self):
         languages = self._get_repo().get_languages()
-        return languages
+        # GitHub includes a 'url' key — strip non-numeric values
+        return {k: v for k, v in languages.items() if isinstance(v, (int, float))}
 
     def get_pr_branch(self):
         return self.pr.head.ref

@@ -1,79 +1,62 @@
-## Overview
+# Generate Labels
 
-The `generate_labels` tool scans the PR code changes and generates custom labels for the PR based on the content and context of the changes.
-
-It can be invoked manually by commenting on any PR:
+**Assigns labels to a pull request based on the content and intent of the code changes.**
 
 ```
 /generate_labels
 ```
 
-## Example usage
+Runs a focused analysis of the diff and attaches relevant labels. Unlike `/describe`, this tool does nothing but labels — no title, no summary, no walkthrough.
 
-Invoke the tool manually by commenting `/generate_labels` on any PR:
 
-![Generate Labels](https://mergemate.ai/images/mergemate/generate_labels_comment.png){width=512}
+## `/generate_labels` vs `/describe` labels
 
-The tool will analyze the PR and add appropriate labels:
+| | `/generate_labels` | `/describe` |
+|---|---|---|
+| Output | Labels only | Full PR description + labels |
+| Speed | Faster — single-purpose | Covers more ground |
+| Use when | You just want labels | You want a complete PR write-up |
 
-![Generate Labels Result](https://mergemate.ai/images/mergemate/generate_labels_result.png){width=512}
+Both tools respect the same custom label definitions.
 
-## Configuration options
+## Custom labels
 
-The `generate_labels` tool uses configurations from the `[pr_description]` section for custom labels.
-
-### Enabling custom labels
-
-To use custom labels, you need to enable them in the configuration:
+Enable and define labels that match your team's workflow:
 
 ```toml
 [config]
 enable_custom_labels = true
-```
 
-### Defining custom labels
-
-You can define your own custom labels in the `[custom_labels]` section. See the [custom_labels.toml](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/custom_labels.toml) file for examples.
-
-Example configuration:
-
-```toml
 [custom_labels."Bug fix"]
-description = "A fix for a bug in the codebase"
+description = "A fix for a bug in production or pre-release code."
 
 [custom_labels."Feature"]
-description = "A new feature or enhancement"
+description = "A new feature or user-facing enhancement."
 
 [custom_labels."Documentation"]
-description = "Documentation changes only"
+description = "Changes that only touch docs, READMEs, or comments."
 
-[custom_labels."Tests"]
-description = "Adding or modifying tests"
+[custom_labels."Performance"]
+description = "Changes that measurably affect runtime speed or memory."
 
 [custom_labels."Refactoring"]
-description = "Code refactoring without functional changes"
+description = "Structural changes with no functional difference."
 ```
 
-### How labels are applied
+Each description is a prompt for the AI — write it as a conditional statement describing *when* the label fits.
 
-1. The tool analyzes the PR diff and commit messages
-2. It uses AI to determine which labels best match the PR content
-3. Labels are automatically applied to the PR (if the git provider supports it)
-4. If labels cannot be applied directly, they are published as a comment
+### Managing labels from the repo
 
-## Comparison with `/describe` labels
+On GitHub, go to the **Labels** tab under Issues. Create a label with a description prefixed by `mergemate:`:
 
-The `/describe` tool also generates labels as part of its output. The key differences are:
+```
+mergemate: Use when a new public API endpoint is introduced.
+```
 
-| Feature | `/generate_labels` | `/describe` |
-|---------|-------------------|-------------|
-| Purpose | Dedicated label generation | Full PR description with labels |
-| Output | Labels only | Title, summary, walkthrough, and labels |
-| Custom labels | ✅ Supported | ✅ Supported |
-| Use case | When you only need labels | When you want a complete PR description |
+MergeMate will discover these labels and use them automatically.
 
 ## Tips
 
-- Use custom labels that match your team's workflow and labeling conventions
-- Combine with automation to automatically label PRs when they are opened
-- Review the generated labels and adjust custom label descriptions if the AI consistently misclassifies PRs
+- **Define a small, precise set of labels.** Five to eight well-described labels work better than twenty vague ones.
+- **Combine with automation.** Add `/generate_labels` to `pr_commands` so every new PR is labelled immediately.
+- **Audit occasionally.** If the AI consistently mislabels certain PRs, tighten the label description or split the label into two.

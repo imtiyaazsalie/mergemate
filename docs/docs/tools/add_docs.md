@@ -1,66 +1,53 @@
-## Overview
+# Add Docs
 
-The `add_docs` tool scans the PR code changes and suggests documentation for any code components that are missing documentation, such as functions, classes, and methods.
-
-It can be invoked manually by commenting on any PR:
+**Generates documentation for code components that are missing it — functions, classes, methods, and more.**
 
 ```
 /add_docs
 ```
 
-## Example usage
+MergeMate scans the PR diff, identifies undocumented components, and posts inline documentation suggestions you can commit with one click.
 
-Invoke the tool manually by commenting `/add_docs` on any PR:
 
-![Add Docs](https://mergemate.ai/images/mergemate/add_docs_comment.png){width=512}
+## Language support
 
-The tool will generate documentation suggestions as inline code suggestions:
+The tool detects the language and picks the right format automatically:
 
-![Add Docs Result](https://mergemate.ai/images/mergemate/add_docs_result.png){width=512}
-
-### Language-specific documentation styles
-
-The tool automatically detects the programming language and generates documentation in the appropriate format:
-
-| Language | Documentation Format |
-|----------|---------------------|
-| Python | Docstrings (Sphinx, Google, Numpy styles) |
-| Java | Javadocs |
-| JavaScript/TypeScript | JSdocs |
+| Language | Doc style |
+|---|---|
+| Python | Docstrings (Sphinx, Google, NumPy) |
+| Java | Javadoc |
+| JavaScript / TypeScript | JSDoc |
 | C++ | Doxygen |
-| Other | Generic documentation |
+| Other | Generic comment blocks |
 
-## Configuration options
+## Configuration
 
-Under the section `[pr_add_docs]`, the following options are available:
+(`[pr_add_docs]` section)
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `extra_instructions` | string | `""` | Additional instructions for the AI model |
-| `docs_style` | string | `"Sphinx"` | Documentation style for Python. Options: `"Sphinx"`, `"Google Style with Args, Returns, Attributes...etc"`, `"Numpy Style"`, `"PEP257"`, `"reStructuredText"` |
-| `file` | string | `""` | Specific file to document (useful when multiple components have the same name) |
-| `class_name` | string | `""` | Specific class name to target (useful when methods have the same name in the same file) |
+| Option | Default | Notes |
+|---|---|---|
+| `extra_instructions` | `""` | Additional guidance, e.g. "include usage examples for public methods." |
+| `docs_style` | `"Sphinx"` | Python style: `"Sphinx"`, `"Google Style with Args, Returns, Attributes...etc"`, `"Numpy Style"`, `"PEP257"`, `"reStructuredText"`. |
+| `file` | `""` | Target a specific file when multiple components share a name. |
+| `class_name` | `""` | Target a specific class when methods share a name. |
 
-### Example configuration
+Override inline:
 
-To customize the documentation style, add the following to your configuration file:
+```
+/add_docs --pr_add_docs.docs_style="Numpy Style" --pr_add_docs.file="src/auth.py"
+```
+
+**Example config:**
 
 ```toml
 [pr_add_docs]
 docs_style = "Google Style with Args, Returns, Attributes...etc"
-extra_instructions = "Focus on documenting public methods and include usage examples"
+extra_instructions = "Focus on public interfaces and include type hints in examples."
 ```
 
-### Command line options
+## Tips
 
-You can pass configuration options directly in the command:
-
-```
-/add_docs --pr_add_docs.docs_style="Numpy Style"
-```
-
-## How it works
-
-1. The tool analyzes the PR diff to identify code components (functions, classes, methods) that lack documentation
-2. It uses AI to generate appropriate documentation based on the code context and language
-3. Documentation suggestions are published as inline code suggestions that can be applied with a single click
+- **Run `/add_docs` before `/review`** — documented code reduces noise in review feedback.
+- **Target a single file** with the `file` option when iterating on a specific module.
+- **Pick the doc style your team already uses** so the output blends into the codebase.

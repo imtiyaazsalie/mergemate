@@ -15,8 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # ── Prod stage ──────────────────────────────────────────────
 FROM base AS prod
 
-# Create non-root user
-RUN groupadd -r mergemate && useradd -r -g mergemate mergemate
+# Create non-root user with writable home
+RUN groupadd -r mergemate && useradd -r -g mergemate -m mergemate
 
 # Copy application code
 COPY --chown=mergemate:mergemate mergemate/ mergemate/

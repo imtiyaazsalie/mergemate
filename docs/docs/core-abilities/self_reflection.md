@@ -1,49 +1,44 @@
-`Supported Git Platforms: GitHub, GitLab, Bitbucket`
+# Self-Reflection
 
-MergeMate implements a **self-reflection** process where the AI model reflects, scores, and re-ranks its own suggestions, eliminating irrelevant or incorrect ones.
-This approach improves the quality and relevance of suggestions, saving users time and enhancing their experience.
-Configuration options allow users to set a score threshold for further filtering out suggestions.
+`Supported on: GitHub, GitLab, Bitbucket`
 
-## Introduction - Efficient Review with Hierarchical Presentation
+MergeMate doesn't just generate suggestions — it scores them, re-ranks them, and filters out the ones that don't hold up. This self-reflection loop means you see fewer irrelevant suggestions and spend less time triaging.
 
-Given that not all generated code suggestions will be relevant, it is crucial to enable users to review them in a fast and efficient way, allowing quick identification and filtering of non-applicable ones.
+## Why Hierarchical Presentation Matters
 
-To achieve this goal, MergeMate offers a dedicated hierarchical structure when presenting suggestions to users:
+Not every suggestion an AI generates is worth your attention. The key is making it fast to spot the good ones and dismiss the noise.
 
-- A "category" section groups suggestions by their category, allowing users to quickly dismiss irrelevant suggestions.
-- Each suggestion is first described by a one-line summary, which can be expanded to a full description by clicking on a collapsible.
-- Upon expanding a suggestion, the user receives a more comprehensive description, and a code snippet demonstrating the recommendation.
+MergeMate presents suggestions in a layered structure designed for rapid scanning:
 
-!!! note "Fast Review"
-    This hierarchical structure is designed to facilitate rapid review of each suggestion, with users spending an average of ~5-10 seconds per item.
+- Suggestions are grouped by **category**, so you can dismiss entire classes of suggestions at once.
+- Each suggestion starts as a **one-line summary**. Click to expand into a full description.
+- Expanded view gives you a **comprehensive explanation** and a **code snippet** showing the proposed change.
 
-## Self-reflection and Re-ranking
+Developers typically spend 5–10 seconds per suggestion with this format — enough time to assess relevance without breaking flow.
 
-The AI model is initially tasked with generating suggestions, and outputting them in order of importance.
-However, in practice we observe that models often struggle to simultaneously generate high-quality code suggestions and rank them well in a single pass.
-Furthermore, the initial set of generated suggestions sometimes contains easily identifiable errors.
+## How Self-Reflection Works
 
-To address these issues, we implemented a "self-reflection" process that refines suggestion ranking and eliminates irrelevant or incorrect proposals.
-This process consists of the following steps:
+The model's first pass generates suggestions and attempts to rank them by importance. In practice, models often struggle to do both well simultaneously — and the initial set sometimes contains obvious errors.
 
-1. Presenting the generated suggestions to the model in a follow-up call.
-2. Instructing the model to score each suggestion on a scale of 0-10 and provide a rationale for the assigned score.
-3. Utilizing these scores to re-rank the suggestions and filter out incorrect ones (with a score of 0).
-4. Optionally, filtering out all suggestions below a user-defined score threshold.
+The self-reflection step fixes this:
 
-Note that presenting all generated suggestions simultaneously provides the model with a comprehensive context, enabling it to make more informed decisions compared to evaluating each suggestion individually.
+1. All generated suggestions are fed back to the model in a follow-up call.
+2. The model scores each suggestion on a scale of 0–10, with a rationale.
+3. Scores are used to re-rank the suggestions. Suggestions scoring zero are discarded.
+4. Optionally, everything below a configurable threshold is filtered out.
 
-To conclude, the self-reflection process enables MergeMate to prioritize suggestions based on their importance, eliminate inaccurate or irrelevant proposals, and optionally exclude suggestions that fall below a specified threshold of significance.
-This results in a more refined and valuable set of suggestions for the user, saving time and improving the overall experience.
+Presenting all suggestions together gives the model a full view, helping it make more consistent decisions than evaluating each one in isolation.
 
-## Example Results
+The outcome: suggestions are reliably ordered by importance, clearly wrong ones are eliminated, and you can set a minimum quality bar that fits your team's standards.
 
-![self_reflection](https://mergemate.ai/images/mergemate/self_reflection1.png){width=768}
-![self_reflection](https://mergemate.ai/images/mergemate/self_reflection2.png){width=768}
+## Example
 
-## Appendix - Relevant Configuration Options
+
+## Configuration
 
 ```toml
 [pr_code_suggestions]
-suggestions_score_threshold = 0 # Filter out suggestions with a score below this threshold (0-10)
+suggestions_score_threshold = 0   # Drop suggestions below this score (0–10)
 ```
+
+Set this higher to enforce a stricter quality bar — only suggestions that clear the threshold make it to your PR.

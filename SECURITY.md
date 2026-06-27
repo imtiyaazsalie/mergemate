@@ -2,33 +2,25 @@
 
 ## Supported Versions
 
-MergeMate is under active development. Security updates are provided for the latest release.
-
-### Docker Deployment
-
-For the most recent updates, use the latest Docker image:
-
-```yaml
-uses: mergemate/mergemate@main
-```
-
-For a fixed version, pin to a specific release:
-
-```yaml
-steps:
-  - name: MergeMate action step
-    uses: docker://mergemate/mergemate:latest
-```
+| Version | Supported |
+|---|---|
+| latest | ✅ |
+| < 1.0.0 | ❌ |
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability, please report it to:
+**Do not open a public issue.** Email [hello@mergemate.dev](mailto:hello@mergemate.dev).
 
-Email: [your-email@example.com]
-
-Please include:
+Include:
 - Description of the vulnerability
 - Steps to reproduce
-- Affected MergeMate version
+- Affected version
 
-We take all security reports seriously and will respond promptly.
+You'll receive a response within 48 hours.
+
+## Best Practices
+
+- Never commit `.secrets.toml` — it's gitignored by default
+- Use environment variables for credentials in CI/CD
+- Pin Docker images to a specific digest for production
+- Rotate API keys regularly

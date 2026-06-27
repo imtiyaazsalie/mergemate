@@ -144,8 +144,9 @@ class PRReviewer(BaseTool):
         if not languages:
             return files
 
-        # Find the dominant language
-        main_lang = max(languages, key=languages.get) if languages else ""
+        # Find the dominant language (filter out non-numeric values like 'url')
+        lang_counts = {k: v for k, v in languages.items() if isinstance(v, (int, float))}
+        main_lang = max(lang_counts, key=lang_counts.get) if lang_counts else ""
 
         def _sort_key(f: FilePatch) -> tuple[int, int]:
             is_main = 0 if f.language == main_lang else 1

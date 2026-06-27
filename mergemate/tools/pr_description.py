@@ -287,9 +287,8 @@ class PRDescription(BaseTool):
         self._describe_cfg = describe_cfg
 
     async def _predict(self) -> dict[str, Any]:
-        """Call the AI model (with retry) and parse the prediction."""
-        # Run the prediction with fallback models
-        await retry_with_fallback_models(self._prepare_and_predict, ModelType.WEAK)
+        """Call the AI model and parse the prediction."""
+        await self._prepare_and_predict(self.config.model.model)
 
         if not self._prediction:
             get_logger().warning(f"Empty prediction, PR: {self._pr_id()}")
@@ -351,14 +350,14 @@ class PRDescription(BaseTool):
                 pr_body += (
                     "\n\n___\n\n> <details> <summary>  Need help?</summary><li>Type <code>/help how to ...</code> "
                     "in the comments thread for any questions about MergeMate usage.</li><li>Check out the "
-                    '<a href="https://mergemate-merge-docs.mergemate.ai/usage-guide/">documentation</a> '
+                    '<a href="https://imtiyaazsalie.github.io/mergemate/usage-guide/">documentation</a> '
                     "for more information.</li></details>"
                 )
             else:
                 pr_body += (
                     "\n\n___\n\n<details><summary>Need help?</summary>- Type <code>/help how to ...</code> in the comments "
                     "thread for any questions about MergeMate usage.<br>- Check out the "
-                    "<a href='https://mergemate-merge-docs.mergemate.ai/usage-guide/'>documentation</a> for more information.</details>"
+                    "<a href='https://imtiyaazsalie.github.io/mergemate/usage-guide/'>documentation</a> for more information.</details>"
                 )
 
         # Output relevant configurations if enabled
@@ -429,7 +428,14 @@ class PRDescription(BaseTool):
             return
 
         large_pr_handling = (
-            describe_cfg.get("enable_large_pr_handling") and "pr_description_only_files_prompts" in self._raw_all()
+            describe_cfg.get("enable_large_pr_handling", True)
+            and "pr_description_only_files_prompts" in self._raw_all()
+        )
+
+        # Auto-detect large PRs and split into chunks
+        large_pr_handling = (
+            describe_cfg.get("enable_large_pr_handling", True)
+            and "pr_description_only_files_prompts" in self._raw_all()
         )
 
         output = get_pr_diff(

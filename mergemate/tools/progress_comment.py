@@ -1,7 +1,7 @@
 from mergemate.config_loader import get_settings
 
 DEFAULT_PROGRESS_GIF_WIDTH = 48
-DEFAULT_PROGRESS_GIF_URL = "https://www.mergemate.ai/images/mergemate/dual_ball_loading-crop.gif"
+DEFAULT_PROGRESS_GIF_URL = "https://imtiyaazsalie.github.io/mergemate/images/mergemate/dual_ball_loading-crop.gif"
 
 
 def get_progress_gif_url() -> str:

@@ -19,6 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""\
 Commands:
+  init         AI-powered setup wizard — generates .mergemate.toml
   review       Comprehensive PR review with findings and suggestions
   describe     Generate or update PR title and description
   improve      Suggest code improvements as inline comments
@@ -55,6 +56,12 @@ def run(args: argparse.Namespace | None = None) -> int:
     if args is None:
         parser = build_parser()
         args = parser.parse_args()
+
+    # Handle init command separately (no PR URL needed)
+    if args.command == "init":
+        from mergemate.setup import run as setup_run
+
+        return setup_run()
 
     # Validate input
     if not args.pr_url and not args.issue_url:

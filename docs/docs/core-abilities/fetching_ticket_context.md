@@ -1,320 +1,214 @@
-# Fetching Ticket Context for PRs
+# Fetching Ticket Context
 
-`Supported Git Platforms: GitHub, GitLab, Bitbucket`
+`Supported on: GitHub, GitLab, Bitbucket`
 
-!!! note "Branch-name issue linking: GitHub only (for now)"
-    Extracting issue links from the **branch name** (and the optional `branch_issue_regex` setting) is currently implemented for **GitHub only**. Support for GitLab, Bitbucket, and other platforms is planned for a later release. The GitHub flow was the most relevant to implement first; other providers will follow.
+!!! note "Branch-name detection: GitHub only (for now)"
+    Extracting issue references from **branch names** (and the optional `branch_issue_regex` setting) is currently GitHub-only. GitLab, Bitbucket, and other platform support is on the roadmap. GitHub was the natural starting point; other providers will follow.
 
-## Overview
+## What It Does
 
-MergeMate streamlines code review workflows by seamlessly connecting with multiple ticket management systems.
-This integration enriches the review process by automatically surfacing relevant ticket information and context alongside code changes.
+MergeMate pulls relevant ticket information directly into the review, giving the model the full picture of *why* a PR exists — not just *what* changed.
 
-**Ticket systems supported**:
+**Ticket systems supported:**
 
-- [GitHub/Gitlab Issues](#githubgitlab-issues-integration)
-- [Jira](#jira-integration)
+- GitHub Issues / GitLab Issues
+- Jira (Cloud and Data Center/Server)
 
-**Ticket data fetched:**
+**What gets fetched:**
 
-1. Ticket Title
-2. Ticket Description
-3. Custom Fields (Acceptance criteria)
-4. Subtasks (linked tasks)
+1. Ticket title
+2. Description
+3. Custom fields (e.g. acceptance criteria)
+4. Subtasks
 5. Labels
-6. Attached Images/Screenshots
+6. Attached images and screenshots
 
-## Affected Tools
+## How Tools Use Ticket Data
 
-Ticket Recognition Requirements:
+For the system to recognise a ticket:
+- The PR description should link to the ticket, **or** the branch name should start with the ticket ID/number.
+- For Jira, you'll need to configure authentication (see below).
 
-- The PR description should contain a link to the ticket or if the branch name starts with the ticket id / number.
-- For Jira tickets, you should follow the instructions in [Jira Integration](#jira-integration) in order to authenticate with Jira.
+### `/describe`
 
-### Describe tool
+MergeMate uses the ticket title, description, and labels to enrich its understanding of the code changes. Knowing the intent behind a PR leads to more insightful analysis.
 
-MergeMate will recognize the ticket and use the ticket content (title, description, labels) to provide additional context for the code changes.
-By understanding the reasoning and intent behind modifications, the LLM can offer more insightful and relevant code analysis.
+### `/review`
 
-### Review tool
+The review tool uses ticket content the same way, and goes one step further — it evaluates how well the PR actually fulfils the ticket's stated purpose. Each PR gets a compliance label:
 
-Similarly to the `describe` tool, the `review` tool will use the ticket content to provide additional context for the code changes.
-
-In addition, this feature will evaluate how well a Pull Request (PR) adheres to its original purpose/intent as defined by the associated ticket or issue mentioned in the PR description.
-Each ticket will be assigned a label (Compliance/Alignment level), Indicates the degree to which the PR fulfills its original purpose:
-
-- Fully Compliant
-- Partially Compliant
-- Not Compliant
-- PR Code Verified
-
-![Ticket Compliance](https://www.mergemate.ai/images/mergemate/ticket_compliance_review.png){width=768}
-
-A `PR Code Verified` label indicates the PR code meets ticket requirements, but requires additional manual testing beyond the code scope. For example - validating UI display across different environments (Mac, Windows, mobile, etc.).
+- **Fully Compliant** — the PR covers everything the ticket asks for
+- **Partially Compliant** — some requirements are addressed, some aren't
+- **Not Compliant** — the PR doesn't match the ticket's intent
+- **PR Code Verified** — the code looks right, but needs manual QA (e.g. UI testing across platforms)
 
 
-#### Configuration options
+#### Configuration
 
--
-
-    By default, the `review` tool will automatically validate if the PR complies with the referenced ticket.
-    If you want to disable this feedback, add the following line to your configuration file:
+- Disable ticket compliance checking:
 
     ```toml
     [pr_reviewer]
-    require_ticket_analysis_review=false
+    require_ticket_analysis_review = false
     ```
 
--
+- Flag unrelated content in the PR:
 
-    If you set:
     ```toml
     [pr_reviewer]
-    check_pr_additional_content=true
+    check_pr_additional_content = true
     ```
-    (default: `false`)
 
-    the `review` tool will also validate that the PR code doesn't contain any additional content that is not related to the ticket. If it does, the PR will be labeled at best as `PR Code Verified`, and the `review` tool will provide a comment with the additional unrelated content found in the PR code.
+    When enabled (default: `false`), the review tool checks for code that doesn't relate to the ticket. If found, the PR caps at `PR Code Verified` and MergeMate surfaces the extraneous content in a comment.
 
-## GitHub/Gitlab Issues Integration
+---
 
-MergeMate will automatically recognize GitHub/Gitlab issues mentioned in the PR description and fetch the issue content.
-Examples of valid GitHub/Gitlab issue references:
+## GitHub / GitLab Issues
 
-- `https://github.com/<ORG_NAME>/<REPO_NAME>/issues/<ISSUE_NUMBER>` or `https://gitlab.com/<ORG_NAME>/<REPO_NAME>/-/issues/<ISSUE_NUMBER>`
-- `#<ISSUE_NUMBER>`
-- `<ORG_NAME>/<REPO_NAME>#<ISSUE_NUMBER>`
+MergeMate automatically detects issue references in PR descriptions. Valid formats:
 
-Branch names can also be used to link issues, for example:
+- `https://github.com/<ORG>/<REPO>/issues/<NUMBER>`
+- `https://gitlab.com/<ORG>/<REPO>/-/issues/<NUMBER>`
+- `#<NUMBER>`
+- `<ORG>/<REPO>#<NUMBER>`
+
+Branch names also work for issue linking on GitHub:
+
 - `123-fix-bug` (where `123` is the issue number)
 
-This branch-name detection applies **only when the git provider is GitHub**. Support for other platforms is planned for later.
+Because MergeMate is already authenticated with GitHub, no extra config is needed to fetch GitHub issues.
 
-Since MergeMate is integrated with GitHub, it doesn't require any additional configuration to fetch GitHub issues.
+---
 
 ## Jira Integration
 
-We support both Jira Cloud and Jira Server/Data Center.
+MergeMate supports Jira Cloud and Jira Server/Data Center.
 
-### Jira Cloud
+### Jira Cloud (Email/Token)
 
-#### Email/Token Authentication
+1. Head to [Atlassian API tokens](https://id.atlassian.com/manage-profile/security/api-tokens) and create one.
 
-You can create an API token from your Atlassian account:
+2. Add it to your config:
 
-1. Log in to https://id.atlassian.com/manage-profile/security/api-tokens.
+    ```toml
+    [jira]
+    jira_api_token = "YOUR_API_TOKEN"
+    jira_api_email = "YOUR_EMAIL"
+    ```
 
-2. Click Create API token.
+### Jira Data Center/Server (Basic Auth)
 
-3. From the dialog that appears, enter a name for your new token and click Create.
-
-4. Click Copy to clipboard.
-
-![Jira Cloud API Token](https://images.ctfassets.net/zsv3d0ugroxu/1RYvh9lqgeZjjNe5S3Hbfb/155e846a1cb38f30bf17512b6dfd2229/screenshot_NewAPIToken){width=384}
-
-5. In your [configuration file](../usage-guide/configuration_options.md) add the following lines:
-
-```toml
-[jira]
-jira_api_token = "YOUR_API_TOKEN"
-jira_api_email = "YOUR_EMAIL"
-```
-
-### Jira Data Center/Server
-
-#### Using Basic Authentication for Jira Data Center/Server
-
-You can use your Jira username and password to authenticate with Jira Data Center/Server.
-
-In your Configuration file/Environment variables/Secrets file, add the following lines:
+Use your Jira username and password:
 
 ```toml
 jira_api_email = "your_username"
 jira_api_token = "your_password"
 ```
 
-(Note that indeed the 'jira_api_email' field is used for the username, and the 'jira_api_token' field is used for the user password.)
+!!! note
+    The `jira_api_email` field holds your username; `jira_api_token` holds your password. The naming carries over from the Cloud flow.
 
-##### Validating Basic authentication via Python script
+#### Validating Basic Auth
 
-If you are facing issues retrieving tickets in MergeMate with Basic auth, you can validate the flow using a Python script.
-This following steps will help you check if the basic auth is working correctly, and if you can access the Jira ticket details:
+If tickets aren't coming through, test the connection directly:
 
-1. run `pip install jira==3.8.0`
+1. `pip install jira==3.8.0`
+2. Run this script (swap in your actual values):
 
-2. run the following Python script (after replacing the placeholders with your actual values):
+```python
+from jira import JIRA
 
-???- example "Script to validate basic auth"
+if __name__ == "__main__":
+    try:
+        server = "https://..."
+        username = "..."
+        password = "..."
+        ticket_id = "..."
 
-    ```python
-    from jira import JIRA
-    
-    
-    if __name__ == "__main__":
-        try:
-            # Jira server URL
-            server = "https://..."
-            # Basic auth
-            username = "..."
-            password = "..."
-            # Jira ticket code (e.g. "PROJ-123")
-            ticket_id = "..."
-    
-            print("Initializing JiraServerTicketProvider with JIRA server")
-            # Initialize JIRA client
-            jira = JIRA(
-                server=server,
-                basic_auth=(username, password),
-                timeout=30
-            )
-            if jira:
-                print(f"JIRA client initialized successfully")
-            else:
-                print("Error initializing JIRA client")
-    
-            # Fetch ticket details
-            ticket = jira.issue(ticket_id)
-            print(f"Ticket title: {ticket.fields.summary}")
-    
-        except Exception as e:
-            print(f"Error fetching JIRA ticket details: {e}")
-    ```
-
-#### Using a Personal Access Token (PAT) for Jira Data Center/Server
-
-1. Create a [Personal Access Token (PAT)](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html) in your Jira account
-2. In your Configuration file/Environment variables/Secrets file, add the following lines:
-
-```toml
-[jira]
-jira_base_url = "YOUR_JIRA_BASE_URL" # e.g. https://jira.example.com
-jira_api_token = "YOUR_API_TOKEN"
+        jira = JIRA(server=server, basic_auth=(username, password), timeout=30)
+        if jira:
+            print("JIRA client initialised successfully")
+        ticket = jira.issue(ticket_id)
+        print(f"Ticket title: {ticket.fields.summary}")
+    except Exception as e:
+        print(f"Error fetching JIRA ticket: {e}")
 ```
 
-##### Validating PAT token via Python script
+### Jira Data Center/Server (PAT)
 
-If you are facing issues retrieving tickets in MergeMate with PAT token, you can validate the flow using a Python script.
-This following steps will help you check if the token is working correctly, and if you can access the Jira ticket details:
+1. [Create a Personal Access Token](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html) in Jira.
+2. Configure:
 
-1. run `pip install jira==3.8.0`
-
-2. run the following Python script (after replacing the placeholders with your actual values):
-
-??? example- "Script to validate PAT token"
-
-    ```python
-    from jira import JIRA
-    
-    
-    if __name__ == "__main__":
-        try:
-            # Jira server URL
-            server = "https://..."
-            # Jira PAT token
-            token_auth = "..."
-            # Jira ticket code (e.g. "PROJ-123")
-            ticket_id = "..."
-    
-            print("Initializing JiraServerTicketProvider with JIRA server")
-            # Initialize JIRA client
-            jira = JIRA(
-                server=server,
-                token_auth=token_auth,
-                timeout=30
-            )
-            if jira:
-                print(f"JIRA client initialized successfully")
-            else:
-                print("Error initializing JIRA client")
-    
-            # Fetch ticket details
-            ticket = jira.issue(ticket_id)
-            print(f"Ticket title: {ticket.fields.summary}")
-    
-        except Exception as e:
-            print(f"Error fetching JIRA ticket details: {e}")
+    ```toml
+    [jira]
+    jira_base_url = "https://jira.example.com"
+    jira_api_token = "YOUR_API_TOKEN"
     ```
 
+#### Validating PAT Auth
 
-### Multi-JIRA Server Configuration
+```python
+from jira import JIRA
 
-MergeMate supports connecting to multiple JIRA servers using different authentication methods.
+if __name__ == "__main__":
+    try:
+        server = "https://..."
+        token_auth = "..."
+        ticket_id = "..."
+
+        jira = JIRA(server=server, token_auth=token_auth, timeout=30)
+        if jira:
+            print("JIRA client initialised successfully")
+        ticket = jira.issue(ticket_id)
+        print(f"Ticket title: {ticket.fields.summary}")
+    except Exception as e:
+        print(f"Error fetching JIRA ticket: {e}")
+```
+
+### Multi-Server Jira
+
+MergeMate can talk to multiple Jira instances with mixed auth types.
 
 === "Email/Token (Basic Auth)"
 
-    Configure multiple servers using Email/Token authentication:
-
-    - `jira_servers`: List of JIRA server URLs
-    - `jira_api_token`: List of API tokens (for Cloud) or passwords (for Data Center)
-    - `jira_api_email`: List of emails (for Cloud) or usernames (for Data Center)
-    - `jira_base_url`: Default server for ticket IDs like `PROJ-123`, Each repository can configure (local config file) its own `jira_base_url` to choose which server to use by default.
-
-    **Example Configuration:**
     ```toml
     [jira]
-    # Server URLs
     jira_servers = ["https://company.atlassian.net", "https://datacenter.jira.com"]
-
-    # API tokens/passwords
-    jira_api_token = ["cloud_api_token_here", "datacenter_password"]
-
-    # Emails/usernames (both required)
+    jira_api_token = ["cloud_api_token", "datacenter_password"]
     jira_api_email = ["user@company.com", "datacenter_username"]
-
-    # Default server for ticket IDs
     jira_base_url = "https://company.atlassian.net"
     ```
 
 === "PAT Auth"
 
-    Configure multiple servers using Personal Access Token authentication:
-
-    - `jira_servers`: List of JIRA server URLs
-    - `jira_api_token`: List of PAT tokens
-    - `jira_api_email`: Not needed (can be omitted or left empty)
-    - `jira_base_url`: Default server for ticket IDs like `PROJ-123`, Each repository can configure (local config file) its own `jira_base_url` to choose which server to use by default.
-
-    **Example Configuration:**
     ```toml
     [jira]
-    # Server URLs
     jira_servers = ["https://server1.jira.com", "https://server2.jira.com"]
-
-    # PAT tokens only
     jira_api_token = ["pat_token_1", "pat_token_2"]
-
-    # Default server for ticket IDs
     jira_base_url = "https://server1.jira.com"
     ```
 
-    **Mixed Authentication (Email/Token + PAT):**
+=== "Mixed Auth"
+
     ```toml
     [jira]
     jira_servers = ["https://company.atlassian.net", "https://server.jira.com"]
     jira_api_token = ["cloud_api_token", "server_pat_token"]
-    jira_api_email = ["user@company.com", ""]  # Empty for PAT
+    jira_api_email = ["user@company.com", ""]   # empty for PAT entries
     ```
 
+Each repository can set its own `jira_base_url` locally (in `.mergemate.toml`) to pick which server handles bare ticket IDs like `PROJ-123`.
 
+### Linking a PR to a Jira Ticket
 
+**Method 1 — PR description:** Include a full Jira URL (`https://<ORG>.atlassian.net/browse/ISSUE-123`) or just the ticket ID (`ISSUE-123`).
 
-### How to link a PR to a Jira ticket
+**Method 2 — Branch name:** Prefix your branch with the ticket ID: `ISSUE-123-fix-thing` or `ISSUE-123/fix-thing`.
 
-To integrate with Jira, you can link your PR to a ticket using either of these methods:
-
-**Method 1: Description Reference:**
-
-Include a ticket reference in your PR description, using either the complete URL format `https://<JIRA_ORG>.atlassian.net/browse/ISSUE-123` or the shortened ticket ID `ISSUE-123` (without prefix or suffix for the shortened ID).
-
-**Method 2: Branch Name Detection:**
-
-Name your branch with the ticket ID as a prefix (e.g., `ISSUE-123-feature-description` or `ISSUE-123/feature-description`).
-
-!!! note "Jira Base URL"
-    For shortened ticket IDs or branch detection (method 2 for JIRA cloud), you must configure the Jira base URL in your configuration file under the [jira] section:
-
+!!! note "Jira base URL required"
+    For bare ticket IDs or branch detection (Cloud), configure the base URL:
     ```toml
     [jira]
-    jira_base_url = "https://<JIRA_ORG>.atlassian.net"
+    jira_base_url = "https://<ORG>.atlassian.net"
     ```
-    Where `<JIRA_ORG>` is your Jira organization identifier (e.g., `mycompany` for `https://mycompany.atlassian.net`).
+    Where `<ORG>` is your Jira organisation identifier (the subdomain before `.atlassian.net`).

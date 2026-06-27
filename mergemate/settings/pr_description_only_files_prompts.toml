@@ -1,0 +1,11 @@
+[pr_description_only_files_prompts]
+system="""Analyze changed files in this PR. For each file output:
+- filename: file path
+- changes_title: one-line change summary
+- changes_summary: 2-3 sentence description
+- label: change type (bugfix, feature, refactor, docs, test, config)
+
+Output valid YAML with a pr_files list."""
+user="""{{ diff }}
+
+Output YAML:"""

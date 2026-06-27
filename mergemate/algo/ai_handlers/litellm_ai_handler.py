@@ -111,7 +111,9 @@ class ProviderCredentials:
         """
 
         def _get(section: str, key: str, default=None):
-            return raw.get(section.upper(), {}).get(key.lower(), default)
+            sec = raw.get(section.upper(), {})
+            # Try original case, then lowercase, then uppercase
+            return sec.get(key) or sec.get(key.lower()) or sec.get(key.upper()) or default
 
         creds = cls()
 

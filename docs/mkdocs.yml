@@ -1,100 +1,90 @@
 site_name: MergeMate
-repo_url: https://github.com/mergemate/mergemate
-repo_name: mergemate/mergemate
+site_url: https://imtiyaazsalie.github.io/mergemate/
+repo_url: https://github.com/imtiyaazsalie/mergemate
+repo_name: imtiyaazsalie/mergemate
 
 nav:
-  - Overview:
-      - "index.md"
-      - Data Privacy: "overview/data_privacy.md"
-  - Installation:
-      - "installation/index.md"
-      - MergeMate: "installation/mergemate.md"
-  - Usage Guide:
-      - "usage-guide/index.md"
-      - Introduction: "usage-guide/introduction.md"
-      - Configuration File: "usage-guide/configuration_options.md"
-      - Usage and Automation: "usage-guide/automations_and_usage.md"
-      - Managing Mail Notifications: "usage-guide/mail_notifications.md"
-      - Changing a Model: "usage-guide/changing_a_model.md"
-      - Additional Configurations: "usage-guide/additional_configurations.md"
-      - Frequently Asked Questions: "faq/index.md"
-  - Tools:
-      - "tools/index.md"
-      - Describe: "tools/describe.md"
-      - Review: "tools/review.md"
-      - Improve: "tools/improve.md"
-      - Ask: "tools/ask.md"
-      - Add Docs: "tools/add_docs.md"
-      - Generate Labels: "tools/generate_labels.md"
-      - Similar Issues: "tools/similar_issues.md"
-      - Help: "tools/help.md"
-      - Help Docs: "tools/help_docs.md"
-      - Update Changelog: "tools/update_changelog.md"
-  - Core Abilities:
-      - "core-abilities/index.md"
-      - Compression strategy: "core-abilities/compression_strategy.md"
-      - Dynamic context: "core-abilities/dynamic_context.md"
-      - Fetching ticket context: "core-abilities/fetching_ticket_context.md"
-      - Interactivity: "core-abilities/interactivity.md"
-      - Local and global metadata: "core-abilities/metadata.md"
-      - Self-reflection: "core-abilities/self_reflection.md"
-#  - Code Fine-tuning Benchmark: 'finetuning_benchmark/index.md'
+  - Home: index.md
+  - Get Started:
+      - Quick Setup: installation/mergemate.md
+      - Local CLI: installation/locally.md
+      - GitHub: installation/github.md
+      - GitLab: installation/gitlab.md
+      - Bitbucket: installation/bitbucket.md
+      - Azure DevOps: installation/azure.md
+      - Gitea: installation/gitea.md
+  - Commands:
+      - Overview: tools/index.md
+      - Review: tools/review.md
+      - Describe: tools/describe.md
+      - Improve: tools/improve.md
+      - Ask: tools/ask.md
+      - Labels: tools/generate_labels.md
+      - Docs: tools/add_docs.md
+      - Changelog: tools/update_changelog.md
+      - Similar: tools/similar_issues.md
+      - Help: tools/help.md
+      - Help Docs: tools/help_docs.md
+  - Configure:
+      - Config File: usage-guide/configuration_options.md
+      - Automation: usage-guide/automations_and_usage.md
+      - AI Models: usage-guide/changing_a_model.md
+      - Advanced: usage-guide/additional_configurations.md
+      - Email: usage-guide/mail_notifications.md
+  - How It Works:
+      - Compression: core-abilities/compression_strategy.md
+      - Context: core-abilities/dynamic_context.md
+      - Tickets: core-abilities/fetching_ticket_context.md
+      - Chat: core-abilities/interactivity.md
+      - Metadata: core-abilities/metadata.md
+      - Self-Review: core-abilities/self_reflection.md
+  - More:
+      - FAQ: faq/index.md
+      - Privacy: overview/data_privacy.md
 
 theme:
-  logo: assets/favicon.svg
-  favicon: assets/favicon.svg
   name: material
+  logo: assets/logo.png
+  favicon: assets/favicon.png
   icon:
     repo: fontawesome/brands/github
   features:
-    - navigation.tabs
-    - navigation.expand
-    - navigation.path
-    - navigation.top
+    - navigation.instant
     - navigation.tracking
-    - navigation.indexes
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
     - search.suggest
     - search.highlight
-    - content.tabs.link
-    - content.code.annotation
     - content.code.copy
-    - announce.dismiss
-  language: en
-  custom_dir: overrides
-
+    - content.code.annotate
   palette:
     - media: "(prefers-color-scheme)"
+      scheme: slate
+      primary: black
+      accent: lime
       toggle:
         icon: material/brightness-auto
-        name: Switch to light mode
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
+        name: System preference
+    - scheme: slate
+      primary: black
+      accent: lime
       toggle:
-        icon: material/toggle-switch-off-outline
-        name: Switch to dark mode
-      primary: custom
-      accent: custom
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
+        icon: material/weather-sunny
+        name: Light mode
+    - scheme: default
+      primary: deep purple
+      accent: purple
       toggle:
-        icon: material/toggle-switch
-        name: Switch to light mode
-      primary: custom
-      accent: custom
+        icon: material/weather-night
+        name: Dark mode
 
 plugins:
-  - social
   - search
   - glightbox
 
-extra:
-  generator: false
-  social:
-    - icon: fontawesome/brands/github
-      link: https://github.com/mergemate/mergemate
-
 extra_css:
-  - css/custom.css
+  - css/terminal.css
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -102,23 +92,19 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - admonition
-  - pymdownx.arithmatex:
-      generic: true
-  - footnotes
   - pymdownx.details
   - pymdownx.superfences
-  - pymdownx.mark
-  - md_in_html
-  - attr_list
-  - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.tabbed:
       alternate_style: true
+  - tables
   - toc:
-      title: On this page
-      toc_depth: 3
       permalink: true
+      title: On this page
 
-copyright: |
-  &copy; 2026 MergeMate Contributors
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/imtiyaazsalie/mergemate
+
+copyright: MergeMate

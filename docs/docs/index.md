@@ -1,83 +1,104 @@
-# Overview
+# MergeMate
 
-MergeMate is an AI-powered code review agent that automates pull request analysis. It integrates with GitHub, GitLab, Bitbucket, and Azure DevOps to provide automated reviews, descriptions, code suggestions, and more.
+**AI code review. Automatic. Free.**
 
-- See the [Installation Guide](./installation/index.md) for instructions on installing and running the tool on different git platforms.
+---
 
-- See the [Usage Guide](./usage-guide/index.md) for instructions on running commands via different interfaces, including _CLI_, _online usage_, or by _automatically triggering_ them when a new PR is opened.
+MergeMate reviews every pull request you open. It finds bugs, suggests improvements, writes descriptions — all automatically. You open a PR, it does the work.
 
-- See the [Tools Guide](./tools/index.md) for a detailed description of the different tools.
+## How it works
 
-## Docs Smart Search
+1. You open a pull request
+2. MergeMate reads your code
+3. It posts a review with what to fix
+4. You merge better code
 
-To search the documentation site using natural language:
+That's it.
 
-1) Comment `/help "your question"` in a pull request where MergeMate is installed
+## Get started
 
-2) The bot will respond with an [answer](https://github.com/mergemate/mergemate/pull/1241#issuecomment-2365259334) that includes relevant documentation links.
+### 1. Install
 
-## Features
+```bash
+pip install mergemate-review
+```
 
-MergeMate offers comprehensive pull request functionalities integrated with various git providers:
+### 2. Let AI set it up
 
-|       |                                                                                       | GitHub | GitLab | Bitbucket | Azure DevOps | Gitea |
-| ----- |---------------------------------------------------------------------------------------|:------:|:------:|:---------:|:------------:|:-----:|
-| [TOOLS](./tools/index.md) | [Describe](./tools/describe.md)                                     |   ✅   |   ✅   |    ✅     |      ✅       |  ✅   |
-|       | [Review](./tools/review.md)                                                           |   ✅   |   ✅   |    ✅     |      ✅       |  ✅   |
-|       | [Improve](./tools/improve.md)                                                         |   ✅   |   ✅   |    ✅     |      ✅       |  ✅   |
-|       | [Ask](./tools/ask.md)                                                                 |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | ⮑ [Ask on code lines](./tools/ask.md#ask-lines)                                       |   ✅   |   ✅   |           |              |       |
-|       | [Add Docs](./tools/add_docs.md)                                                       |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Generate Labels](./tools/generate_labels.md)                                         |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Similar Issues](./tools/similar_issues.md)                                           |   ✅   |        |           |              |       |
-|       | [Help](./tools/help.md)                                                               |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Help Docs](./tools/help_docs.md)                                                     |   ✅   |   ✅   |    ✅     |              |       |
-|       | [Update CHANGELOG](./tools/update_changelog.md)                                       |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       |                                                                                       |        |        |           |              |       |
-| [USAGE](./usage-guide/index.md) | [CLI](./usage-guide/automations_and_usage.md#local-repo-cli)      |   ✅   |   ✅   |    ✅     |      ✅       |  ✅   |
-|       | [App / webhook](./usage-guide/automations_and_usage.md#github-app)                    |   ✅   |   ✅   |    ✅     |      ✅       |  ✅   |
-|       | [Tagging bot](https://github.com/mergemate/mergemate#try-it-now)                       |   ✅   |        |           |              |       |
-|       | [Actions](./installation/github.md#run-as-a-github-action)                            |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       |                                                                                       |        |        |           |              |       |
-| [CORE](./core-abilities/index.md) | [Adaptive and token-aware file patch fitting](./core-abilities/compression_strategy.md) |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Chat on code suggestions](./core-abilities/interactivity.md)                         |   ✅   |  ✅   |           |              |       |
-|       | [Compression strategy](./core-abilities/compression_strategy.md)                      |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Dynamic context](./core-abilities/dynamic_context.md)                                |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Fetching ticket context](./core-abilities/fetching_ticket_context.md)                |   ✅   |  ✅   |    ✅     |              |       |
-|       | [Interactivity](./core-abilities/interactivity.md)                                    |   ✅   |  ✅   |           |              |       |
-|       | [Local and global metadata](./core-abilities/metadata.md)                             |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Multiple models support](./usage-guide/changing_a_model.md)                          |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Self reflection](./core-abilities/self_reflection.md)                                |   ✅   |   ✅   |    ✅     |      ✅       |       |
+```bash
+mergemate-review init
+```
 
-## Example Results
+This looks at your project and creates everything you need. Takes 30 seconds.
 
-<hr>
+### 3. Add your key
 
-#### [/describe](https://github.com/mergemate/mergemate/pull/530)
+Go to your repo → Settings → Secrets → Actions → New secret:
 
-<figure markdown="1">
-![/describe](https://www.mergemate.ai/images/mergemate/describe_new_short_main.png){width=512}
-</figure>
-<hr>
+- Name: `DEEPSEEK_API_KEY`
+- Value: your DeepSeek API key (get one at [platform.deepseek.com](https://platform.deepseek.com))
 
-#### [/review](https://github.com/mergemate/mergemate/pull/732#issuecomment-1975099151)
+### 4. Push
 
-<figure markdown="1">
-![/review](https://www.mergemate.ai/images/mergemate/review_new_short_main.png){width=512}
-</figure>
-<hr>
+```bash
+git add .mergemate.toml .github/
+git commit -m "Add MergeMate"
+git push
+```
 
-#### [/improve](https://github.com/mergemate/mergemate/pull/732#issuecomment-1975099159)
+Done. Your next PR gets reviewed automatically.
 
-<figure markdown="1">
-![/improve](https://www.mergemate.ai/images/mergemate/improve_new_short_main.png){width=512}
-</figure>
-<hr>
+---
 
-## How it Works
+## Prefer to do it manually?
 
-The following diagram illustrates MergeMate tools and their flow:
+Create `.github/workflows/mergemate.yml`:
 
-![MergeMate Tools](https://mergemate.ai/images/mergemate/diagram-v0.9.png)
+```yaml
+name: MergeMate
+on: [pull_request]
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: mergemate/mergemate@main
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
 
-Check out the [PR Compression strategy](core-abilities/index.md) page for more details on how we convert a code diff to a manageable LLM prompt
+Add your `DEEPSEEK_API_KEY` secret, push, done.
+
+---
+
+## What you get
+
+| Command | Result |
+|---|---|
+| `review` | A full code review in the PR comments |
+| `describe` | Auto-generated PR title and description |
+| `improve` | Inline suggestions on specific lines |
+| `ask "question"` | Answers about the PR |
+| `labels` | Auto-labels based on changes |
+| `changelog` | Updates CHANGELOG.md |
+| `docs` | Writes docs for new code |
+
+---
+
+## Use any AI model
+
+| If you use | Set your key |
+|---|---|
+| DeepSeek | `DEEPSEEK_API_KEY` |
+| OpenAI | `OPENAI_KEY` |
+| Anthropic | `ANTHROPIC_KEY` |
+| Google Gemini | `GEMINI_API_KEY` |
+
+---
+
+## Your code stays yours
+
+MergeMate runs on your machine or GitHub Actions. Your code goes straight to your AI provider. Nothing passes through us.

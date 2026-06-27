@@ -1,49 +1,44 @@
-# MergeMate Installation Guide
+# MergeMate Deployment Options
 
-MergeMate can be deployed in various environments and platforms. Choose the installation method that best suits your needs:
+MergeMate runs wherever your code lives. Here's a quick map to help you choose the right setup.
 
-## 🖥️ Local Installation
+## ⚡ AI-Powered Setup
 
-Learn how to run MergeMate locally using:
+Let MergeMate figure it out for you:
 
-- Docker image
-- pip package
-- CLI from source code
+```bash
+pip install mergemate-review
+mergemate-review init
+```
 
-[View Local Installation Guide →](./locally.md)
+It auto-detects your project and generates `.mergemate.toml` + GitHub Actions workflow using AI. Takes 30 seconds. [See the local guide →](./locally.md)
 
-## 🐙 GitHub Integration
+## 🖥️ Run Locally
 
-Set up MergeMate with GitHub as:
+Spin it up on your own machine with Docker, pip, or a direct source checkout.
 
-- GitHub Action
-- Local GitHub App
+[See the local guide →](./locally.md)
 
-[View GitHub Integration Guide →](./github.md)
+## 🐙 GitHub
 
-## 🦊 GitLab Integration
+Drop a workflow file into your repo and let Actions handle the rest — or run a dedicated GitHub App for tighter control.
 
-Deploy MergeMate on GitLab as:
+[See the GitHub guide →](./github.md)
 
-- GitLab pipeline job
-- Local GitLab webhook server
+## 🦊 GitLab
 
-[View GitLab Integration Guide →](./gitlab.md)
+Trigger reviews from your CI pipeline, or stand up a webhook server that listens for merge request events.
 
-## 🟦 BitBucket Integration
+[See the GitLab guide →](./gitlab.md)
 
-Implement MergeMate in BitBucket as:
+## 🟦 Bitbucket
 
-- BitBucket pipeline job
-- Local BitBucket server
+Hook into Bitbucket Pipelines for PR-triggered reviews, or deploy a webhook for on-prem Bitbucket Server.
 
-[View BitBucket Integration Guide →](./bitbucket.md)
+[See the Bitbucket guide →](./bitbucket.md)
 
-## 🔷  Azure DevOps Integration
+## 🔷 Azure DevOps
 
-Configure MergeMate with Azure DevOps as:
+Add MergeMate to your Azure Pipelines workflow, drive it from the CLI, or configure a webhook endpoint.
 
-- Azure DevOps pipeline job
-- Local Azure DevOps webhook
-
-[View Azure DevOps Integration Guide →](./azure.md)
+[See the Azure DevOps guide →](./azure.md)

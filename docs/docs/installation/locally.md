@@ -1,171 +1,199 @@
-To run MergeMate locally, you first need to acquire two keys:
+# Running MergeMate on Your Machine
 
-1. An OpenAI key from [here](https://platform.openai.com/api-keys){:target="_blank"}, with access to GPT-5.5 and gpt-5.4-mini (or a key for other [language models](../usage-guide/changing_a_model.md), if you prefer).
-2. A personal access token from your Git platform (GitHub, GitLab, BitBucket, Gitea) with repo scope. GitHub token, for example, can be issued from [here](https://github.com/settings/tokens){:target="_blank"}
+## AI-Powered Setup
 
-## Using Docker image
+The fastest way to get started — MergeMate auto-detects your project and generates everything:
 
-A list of the relevant tools can be found in the [tools guide](../tools/).
+```bash
+pip install mergemate-review
+mergemate-review init
+```
 
-To invoke a tool (for example `review`), you can run MergeMate directly from the Docker image. Here's how:
+It detects your language, git provider, and project type, then uses AI to generate the optimal `.mergemate.toml` and GitHub Actions workflow. You get a production-ready setup in under 30 seconds.
 
-- For GitHub:
+```bash
+# Point it at an existing repo
+mergemate-review init --output /path/to/repo
+
+# Specify your preferences
+mergemate-review init --model deepseek/deepseek-v4-flash --language python --project-type web
+```
+
+---
+
+## Manual Setup
+
+Before you start, you'll need two things:
+
+1. **A model provider key** — grab one from [OpenAI](https://platform.openai.com/api-keys){:target="_blank"} (GPT-4o or later), or configure MergeMate to use any of the [supported models](../usage-guide/changing_a_model.md).
+2. **A git platform token** — generate a personal access token with repo scope from your provider. For GitHub, head to [developer settings](https://github.com/settings/tokens){:target="_blank"}. GitLab, Bitbucket, and Gitea all have equivalent token flows.
+
+## Quick Start with Docker
+
+The fastest way to try MergeMate. Pick your git provider and run:
+
+=== "GitHub"
 
     ```bash
-    docker run --rm -it -e OPENAI__KEY=<your_openai_key> -e GITHUB__USER_TOKEN=<your_github_token> mergemate/mergemate:latest --pr_url <pr_url> review
+    docker run --rm -it \
+      -e OPENAI__KEY=<your_key> \
+      -e GITHUB__USER_TOKEN=<your_github_token> \
+      imtiyaazsalie/mergemate-review:latest \
+      --pr_url <pr_url> review
     ```
 
-    If you are using GitHub enterprise server, you need to specify the custom url as variable.
-    For example, if your GitHub server is at `https://github.mycompany.com`, add the following to the command:
+    If you're on GitHub Enterprise Server, point MergeMate at your instance:
 
     ```bash
     -e GITHUB__BASE_URL=https://github.mycompany.com/api/v3
     ```
 
-- For GitLab:
+=== "GitLab"
 
     ```bash
-    docker run --rm -it -e OPENAI__KEY=<your key> -e CONFIG__GIT_PROVIDER=gitlab -e GITLAB__PERSONAL_ACCESS_TOKEN=<your token> mergemate/mergemate:latest --pr_url <pr_url> review
+    docker run --rm -it \
+      -e OPENAI__KEY=<your_key> \
+      -e CONFIG__GIT_PROVIDER=gitlab \
+      -e GITLAB__PERSONAL_ACCESS_TOKEN=<your_token> \
+      imtiyaazsalie/mergemate-review:latest \
+      --pr_url <pr_url> review
     ```
 
-    If you have a dedicated GitLab instance, you need to specify the custom url as variable:
+    Self-hosted GitLab? Add your instance URL:
 
     ```bash
-    -e GITLAB__URL=<your gitlab instance url>
+    -e GITLAB__URL=https://gitlab.mycompany.com
     ```
 
-- For BitBucket:
+=== "Bitbucket"
 
     ```bash
-    docker run --rm -it -e CONFIG__GIT_PROVIDER=bitbucket -e OPENAI__KEY=$OPENAI_API_KEY -e BITBUCKET__BEARER_TOKEN=$BITBUCKET_BEARER_TOKEN mergemate/mergemate:latest --pr_url=<pr_url> review
+    docker run --rm -it \
+      -e CONFIG__GIT_PROVIDER=bitbucket \
+      -e OPENAI__KEY=$OPENAI_API_KEY \
+      -e BITBUCKET__BEARER_TOKEN=$BITBUCKET_BEARER_TOKEN \
+      imtiyaazsalie/mergemate-review:latest \
+      --pr_url=<pr_url> review
     ```
 
-- For Gitea:
+=== "Gitea"
 
     ```bash
-    docker run --rm -it -e OPENAI__KEY=<your key> -e CONFIG__GIT_PROVIDER=gitea -e GITEA__PERSONAL_ACCESS_TOKEN=<your token> mergemate/mergemate:latest --pr_url <pr_url> review
+    docker run --rm -it \
+      -e OPENAI__KEY=<your_key> \
+      -e CONFIG__GIT_PROVIDER=gitea \
+      -e GITEA__PERSONAL_ACCESS_TOKEN=<your_token> \
+      imtiyaazsalie/mergemate-review:latest \
+      --pr_url <pr_url> review
     ```
 
-    If you have a dedicated Gitea instance, you need to specify the custom url as variable:
+    For a self-hosted Gitea instance:
 
     ```bash
-    -e GITEA__URL=<your gitea instance url>
+    -e GITEA__URL=https://gitea.mycompany.com
     ```
 
+For any other git platform, adjust `CONFIG__GIT_PROVIDER` and check the [secrets template](https://github.com/imtiyaazsalie/mergemate/blob/main/mergemate/settings/.secrets_template.toml) for the correct environment variable names.
 
-For other git providers, update `CONFIG__GIT_PROVIDER` accordingly and check the [`mergemate/settings/.secrets_template.toml`](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/.secrets_template.toml) file for environment variables expected names and values.
+### Driving Configuration Through Environment Variables
 
-### Utilizing environment variables
+Every setting in MergeMate can be overridden with an environment variable. The convention is simple: `<SECTION>__<KEY>=<VALUE>`. In other words, a dot or double-underscore separates the config section from the key.
 
-It is also possible to provide or override the configuration by setting the corresponding environment variables.
-You can define the corresponding environment variables by following this convention: `<TABLE>__<KEY>=<VALUE>` or `<TABLE>.<KEY>=<VALUE>`.
-The `<TABLE>` refers to a table/section in a configuration file and `<KEY>=<VALUE>` refers to the key/value pair of a setting in the configuration file.
-
-For example, suppose you want to run `mergemate` that connects to a self-hosted GitLab instance similar to an example above.
-You can define the environment variables in a plain text file named `.env` with the following content:
+Say you're connecting to a self-hosted GitLab instance. Drop these into a `.env` file:
 
 ```bash
 CONFIG__GIT_PROVIDER="gitlab"
-GITLAB__URL="<your url>"
+GITLAB__URL="https://gitlab.mycompany.com"
 GITLAB__PERSONAL_ACCESS_TOKEN="<your token>"
 OPENAI__KEY="<your key>"
 ```
 
-Then, you can run `mergemate` using Docker with the following command:
+Then fire it up:
 
 ```shell
-docker run --rm -it --env-file .env mergemate/mergemate:latest <tool> <tool parameter>
+docker run --rm -it --env-file .env imtiyaazsalie/mergemate-review:latest review <pr_url>
 ```
 
 ---
 
-### I get an error when running the Docker image. What should I do?
+### Troubles? Check Your Keys
 
-If you encounter an error when running the Docker image, it is almost always due to a misconfiguration of api keys or tokens.
+Docker errors almost always come down to a misconfigured API key or access token. LiteLLM (the model gateway MergeMate uses under the hood) sometimes surfaces opaque messages like `APIError: OpenAIException - Connection error.` — don't trust the surface-level error; double-check your credentials first.
 
-Note that litellm, which is used by mergemate, sometimes returns non-informative error messages such as `APIError: OpenAIException - Connection error.`
-Carefully check the api keys and tokens you provided and make sure they are correct.
-Adjustments may be needed depending on your llm provider.
+If you're using Azure OpenAI, there are extra fields you need to set. Same goes for Anthropic, Gemini, or any other provider. Flip over to the [model configuration guide](../usage-guide/changing_a_model.md) for the exact keys each provider expects.
 
-For example, for Azure OpenAI, additional keys are [needed](../usage-guide/changing_a_model.md#azure).
-Same goes for other providers, make sure to check the [documentation](../usage-guide/changing_a_model.md#changing-a-model)
-
-## Using pip package
-
-Install the package:
+## Installing with pip
 
 ```bash
-pip install mergemate
+pip install mergemate-review
 ```
 
-Then run the relevant tool with the script below.
-<br>
-Make sure to fill in the required parameters (`user_token`, `openai_key`, `pr_url`, `command`):
+Then drive it from Python:
 
 ```python
 from mergemate import cli
 from mergemate.config_loader import get_settings
 
 def main():
-    # Fill in the following values
-    provider = "github" # github/gitlab/bitbucket/azure_devops
-    user_token = "..."  #  user token
-    openai_key = "..."  # OpenAI key
-    pr_url = "..."      # PR URL, for example 'https://github.com/mergemate/mergemate/pull/809'
-    command = "/review" # Command to run (e.g. '/review', '/describe', '/ask="What is the purpose of this PR?"', ...)
+    # Fill these in
+    provider = "github"  # github | gitlab | bitbucket | azure_devops
+    user_token = "..."   # your git platform token
+    openai_key = "..."   # your model provider key
+    pr_url = "..."       # e.g. https://github.com/imtiyaazsalie/mergemate/pull/809
+    command = "/review"  # /review, /describe, /ask="...", /improve, etc.
 
-    # Setting the configurations
+    # Wire up config
     get_settings().set("CONFIG.git_provider", provider)
     get_settings().set("openai.key", openai_key)
     get_settings().set("github.user_token", user_token)
 
-    # Run the command. Feedback will appear in GitHub PR comments
+    # Go
     cli.run_command(pr_url, command)
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 ```
 
-## Run from source
+Results land directly as comments on the PR.
 
-1. Clone this repository:
+## Running from Source
 
-```bash
-git clone https://github.com/mergemate/mergemate.git
-```
+1. Grab the repo:
 
-2. Navigate to the `/mergemate` folder and install the requirements in your favorite virtual environment:
+    ```bash
+    git clone https://github.com/imtiyaazsalie/mergemate.git
+    ```
 
-```bash
-pip install -e .
-```
+2. Hop into the `mergemate` directory and install (a virtual environment is strongly recommended):
 
-*Note: If you get an error related to Rust in the dependency installation then make sure Rust is installed and in your `PATH`, instructions: https://rustup.rs*
+    ```bash
+    pip install -e .
+    ```
 
-3. Copy the secrets template file and fill in your OpenAI key and your GitHub user token:
+    *Hit a Rust-related error? Make sure Rust is installed and on your `PATH`: [https://rustup.rs](https://rustup.rs)*
 
-```bash
-cp mergemate/settings/.secrets_template.toml mergemate/settings/.secrets.toml
-chmod 600 mergemate/settings/.secrets.toml
-# Edit .secrets.toml file
-```
+3. Copy the secrets template and populate it with your keys:
 
-4. Run the cli.py script:
+    ```bash
+    cp mergemate/settings/.secrets_template.toml mergemate/settings/.secrets.toml
+    chmod 600 mergemate/settings/.secrets.toml
+    # Open .secrets.toml in your editor and fill in the values
+    ```
 
-```bash
-python3 -m mergemate.cli --pr_url <pr_url> review
-python3 -m mergemate.cli --pr_url <pr_url> ask <your question>
-python3 -m mergemate.cli --pr_url <pr_url> describe
-python3 -m mergemate.cli --pr_url <pr_url> improve
-python3 -m mergemate.cli --pr_url <pr_url> add_docs
-python3 -m mergemate.cli --pr_url <pr_url> generate_labels
-python3 -m mergemate.cli --issue_url <issue_url> similar_issue
-...
-```
+4. Start using the CLI:
 
-[Optional] Add the mergemate folder to your PYTHONPATH
+    ```bash
+    python3 -m mergemate.cli --pr_url <pr_url> review
+    python3 -m mergemate.cli --pr_url <pr_url> describe
+    python3 -m mergemate.cli --pr_url <pr_url> improve
+    python3 -m mergemate.cli --pr_url <pr_url> ask "what does this PR do?"
+    python3 -m mergemate.cli --pr_url <pr_url> add_docs
+    python3 -m mergemate.cli --pr_url <pr_url> generate_labels
+    python3 -m mergemate.cli --issue_url <issue_url> similar_issue
+    ```
 
-```bash
-export PYTHONPATH=$PYTHONPATH:<PATH to mergemate folder>
-```
+    Optionally toss MergeMate onto your `PYTHONPATH`:
+
+    ```bash
+    export PYTHONPATH=$PYTHONPATH:<path to mergemate directory>
+    ```

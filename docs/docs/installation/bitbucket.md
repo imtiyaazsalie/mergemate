@@ -1,77 +1,76 @@
+# Bitbucket Integration
+
 ## Run as a Bitbucket Pipeline
 
-You can use the Bitbucket Pipeline system to run MergeMate on every pull request open or update.
+1. Drop this into your repo's `bitbucket-pipelines.yml`:
 
-1. Add the following file in your repository bitbucket-pipelines.yml
+    ```yaml
+    pipelines:
+      pull-requests:
+        '**':
+          - step:
+              name: MergeMate Review
+              image: imtiyaazsalie/mergemate-review:latest
+              script:
+                - mergemate-review --pr_url=https://bitbucket.org/$BITBUCKET_WORKSPACE/$BITBUCKET_REPO_SLUG/pull-requests/$BITBUCKET_PR_ID review
+    ```
 
-```yaml
-pipelines:
-    pull-requests:
-      '**':
-        - step:
-            name: MergeMate Review
-            image: mergemate/mergemate:latest
-            script:
-              - mergemate --pr_url=https://bitbucket.org/$BITBUCKET_WORKSPACE/$BITBUCKET_REPO_SLUG/pull-requests/$BITBUCKET_PR_ID review
-```
+2. Under **Repository settings > Pipelines > Repository variables**, add these secured variables:
 
-2. Add the following secure variables to your repository under Repository settings > Pipelines > Repository variables.
+    - `CONFIG__GIT_PROVIDER` = `bitbucket`
+    - `OPENAI__KEY` = `<your key>`
+    - `BITBUCKET__AUTH_TYPE` = `bearer` (or `basic`)
+    - `BITBUCKET__BEARER_TOKEN` = `<your token>` (required for bearer auth)
+    - `BITBUCKET__BASIC_TOKEN` = `<your token>` (required for basic auth)
 
-   - CONFIG__GIT_PROVIDER: `bitbucket`
-   - OPENAI__KEY: `<your key>`
-   - BITBUCKET__AUTH_TYPE: `basic` or `bearer` (default is `bearer`)
-   - BITBUCKET__BEARER_TOKEN: `<your token>` (required when auth_type is bearer)
-   - BITBUCKET__BASIC_TOKEN: `<your token>` (required when auth_type is basic)
+    Generate a token from **Repository Settings > Security > Access Tokens**. For basic auth, base64-encode your `username:password` pair.
 
-You can get a Bitbucket token for your repository by following Repository Settings -> Security -> Access Tokens.
-For basic auth, you can generate a base64 encoded token from your username:password combination.
+    !!! note
+        Bitbucket Pipelines don't support triggering from PR comments.
 
-Note that comments on a PR are not supported in Bitbucket Pipeline.
+---
 
 ## Bitbucket Server and Data Center
 
-Login into your on-prem instance of Bitbucket with your service account username and password.
-Navigate to `Manage account`, `HTTP Access tokens`, `Create Token`.
-Generate the token and add it to .secret.toml under `bitbucket_server` section
+For on-prem deployments, start by generating an HTTP access token from your service account: navigate to **Manage account > HTTP Access tokens > Create Token**.
+
+Add the token to your secrets file:
 
 ```toml
 [bitbucket_server]
-bearer_token = "<your key>"
+bearer_token = "<your token>"
 ```
 
-Don't forget to also set the URL of your Bitbucket Server instance (either in `.secret.toml` or in `configuration.toml`):
+Don't forget to point MergeMate at your instance:
 
 ```toml
 [bitbucket_server]
-url = "<full URL to your Bitbucket instance, e.g.: https://git.bitbucket.com>"
+url = "https://git.bitbucket.mycompany.com"
 ```
 
-### Run it as CLI
+### CLI Mode
 
-Modify `configuration.toml`:
+Set the git provider in your config:
 
 ```toml
-git_provider="bitbucket_server"
+git_provider = "bitbucket_server"
 ```
 
-
-
-and pass the Pull request URL:
+Then run:
 
 ```shell
-python cli.py --pr_url https://git.on-prem-instance-of-bitbucket.com/projects/PROJECT/repos/REPO/pull-requests/1 review
+mergemate-review --pr_url https://git.bitbucket.mycompany.com/projects/PROJECT/repos/REPO/pull-requests/1 review
 ```
 
-### Run it as service
+### Webhook Mode
 
-To run MergeMate as webhook, build the docker image:
+Build and push the image:
 
 ```bash
-docker build . -t mergemate/mergemate:bitbucket_server_webhook --target bitbucket_server_webhook -f docker/Dockerfile
-docker push mergemate/mergemate:bitbucket_server_webhook  # Push to your Docker repository
+docker build . -t mergemate/mergemate:bitbucket_server_webhook \
+  --target bitbucket_server_webhook \
+  -f docker/Dockerfile
+docker push mergemate/mergemate:bitbucket_server_webhook
 ```
 
-Navigate to `Projects` or `Repositories`, `Settings`, `Webhooks`, `Create Webhook`.
-Fill in the name and URL. For Authentication, select 'None'. Select the 'Pull Request Opened' checkbox to receive that event as a webhook.
-
-The URL should end with `/webhook`, for example: https://domain.com/webhook
+Then head to **Projects/Repositories > Settings > Webhooks > Create Webhook**. Fill in the name and URL (ending in `/webhook`, e.g. `https://your-domain.com/webhook`), set authentication to **None**, and tick **Pull Request Opened** as the trigger event.

@@ -1,1 +1,1 @@
-# [MergeMate Documentation](https://docs.mergemate.dev/)
+# [MergeMate Documentation](https://imtiyaazsalie.github.io/mergemate/)

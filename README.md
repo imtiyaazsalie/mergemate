@@ -1,5 +1,9 @@
 # MergeMate
 
+[![Tests](https://github.com/imtiyaazsalie/mergemate/actions/workflows/build-and-test.yaml/badge.svg)](https://github.com/imtiyaazsalie/mergemate/actions/workflows/build-and-test.yaml)
+[![Docs](https://img.shields.io/badge/docs-mergemate-80ff40?style=flat&logo=github)](https://imtiyaazsalie.github.io/mergemate/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+
 AI-powered pull request review and automation.
 
 ---
@@ -17,7 +21,17 @@ MergeMate automates code review workflows by providing AI-generated feedback, su
 
 ## Quick Start
 
-### GitHub Action
+```bash
+# AI-powered setup — auto-detects your project
+mergemate-review init
+
+# Or specify details
+mergemate-review init --model deepseek/deepseek-v4-flash --language python --project-type web
+```
+
+This generates `.mergemate.toml` + GitHub Actions workflow. Add your API key as a repo secret, done.
+
+### Manual
 
 ```yaml
 # .github/workflows/mergemate.yml
@@ -38,9 +52,9 @@ jobs:
 ### CLI
 
 ```bash
-pip install mergemate
+pip install mergemate-review
 export OPENAI_KEY=your_key_here
-mergemate --pr_url https://github.com/owner/repo/pull/123 review
+mergemate-review --pr_url https://github.com/owner/repo/pull/123 review
 ```
 
 ### Docker

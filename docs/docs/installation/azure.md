@@ -1,113 +1,115 @@
-## Azure DevOps Pipeline
+# Azure DevOps Integration
 
-You can use a pre-built Action Docker image to run MergeMate as an Azure DevOps pipeline.
-Add the following file to your repository under `azure-pipelines.yml`:
+## Run in an Azure Pipeline
+
+Add this `azure-pipelines.yml` to your repository:
 
 ```yaml
-# Opt out of CI triggers
+# Disable CI triggers
 trigger: none
-
-# Configure PR trigger
-# pr:
-#   branches:
-#     include:
-#     - '*'
-#   autoCancel: true
-#   drafts: false
-
-# NOTE for Azure Repos Git:
-# Azure Repos does not honor YAML pr: triggers. Configure Build Validation
-# via Branch Policies instead (see note below). You can safely omit pr:.
 
 stages:
 - stage: mergemate
-  displayName: 'MergeMate Stage'
+  displayName: 'MergeMate'
   jobs:
   - job: mergemate_job
     displayName: 'MergeMate Job'
     pool:
       vmImage: 'ubuntu-latest'
     container:
-      image: mergemate/mergemate:latest
+      image: imtiyaazsalie/mergemate-review:latest
       options: --entrypoint ""
     variables:
       - group: mergemate
     steps:
     - script: |
-        echo "Running MergeMate action step"
+        echo "Running MergeMate"
 
-        # Construct PR_URL
+        # Build the PR URL
         PR_URL="${SYSTEM_COLLECTIONURI}${SYSTEM_TEAMPROJECT}/_git/${BUILD_REPOSITORY_NAME}/pullrequest/${SYSTEM_PULLREQUEST_PULLREQUESTID}"
         echo "PR_URL=$PR_URL"
 
-        # Extract organization URL from System.CollectionUri
-        ORG_URL=$(echo "$(System.CollectionUri)" | sed 's/\/$//') # Remove trailing slash if present
+        # Extract org URL
+        ORG_URL=$(echo "$(System.CollectionUri)" | sed 's/\/$//')
         echo "Organization URL: $ORG_URL"
 
         export azure_devops__org="$ORG_URL"
         export config__git_provider="azure"
 
-        mergemate --pr_url="$PR_URL" describe
-        mergemate --pr_url="$PR_URL" review
-        mergemate --pr_url="$PR_URL" improve
+        mergemate-review --pr_url="$PR_URL" describe
+        mergemate-review --pr_url="$PR_URL" review
+        mergemate-review --pr_url="$PR_URL" improve
       env:
         azure_devops__pat: $(azure_devops_pat)
         openai__key: $(OPENAI_KEY)
       displayName: 'Run MergeMate'
 ```
 
-This script will run MergeMate on every new merge request, with the `improve`, `review`, and `describe` commands.
-Note that you need to export the `azure_devops__pat` and `OPENAI_KEY` variables in the Azure DevOps pipeline settings (Pipelines -> Library -> + Variable group):
+This fires `describe`, `review`, and `improve` on every merge request. You'll need to export the variables in your Azure DevOps pipeline settings — go to **Pipelines > Library > + Variable group**, create a group called `mergemate`, and add:
 
-![MergeMate](https://mergemate.ai/images/mergemate/azure_devops_pipeline_secrets.png){width=468}
+- `azure_devops_pat` — your Azure DevOps PAT
+- `OPENAI_KEY` — your model provider key
 
-Make sure to give pipeline permissions to the `mergemate` variable group.
 
-> Note that Azure Pipelines lacks support for triggering workflows from PR comments. If you find a viable solution, please contribute it to our [issue tracker](https://github.com/mergemate/mergemate/issues)
+Make sure the pipeline has permission to access the `mergemate` variable group.
 
-### Azure Repos Git PR triggers and Build Validation
+!!! note "PR comment triggers"
+    Azure Pipelines doesn't support triggering workflows from PR comments. If you find a workable solution, we'd love to see it — drop it in the [issue tracker](https://github.com/imtiyaazsalie/mergemate/issues).
 
-Azure Repos Git does not use YAML `pr:` triggers for pipelines. Instead, configure Build Validation on the target branch to run the MergeMate pipeline for pull requests:
+### Build Validation for Azure Repos Git
 
-1. Go to Project Settings → Repositories → Branches.
-2. Select the target branch and open Branch Policies.
-3. Under Build Validation, add a policy:
-   - Select the MergeMate pipeline (the `azure-pipelines.yml` above).
-   - Set it as Required.
-4. Remove the `pr:` section from your YAML (not needed for Azure Repos Git).
+Azure Repos Git ignores YAML `pr:` triggers. Instead, configure Build Validation on the target branch:
 
-This distinction applies specifically to Azure Repos Git. Other providers like GitHub and Bitbucket Cloud can use YAML-based PR triggers.
+1. Navigate to **Project Settings > Repositories > Branches**.
+2. Select the target branch and open **Branch Policies**.
+3. Under **Build Validation**, add a policy pointing at the MergeMate pipeline and mark it as Required.
+4. You can safely omit the `pr:` section from the YAML.
 
-## Azure DevOps from CLI
+This only applies to Azure Repos Git. Other providers like GitHub and Bitbucket Cloud use YAML-based PR triggers as expected.
 
-To use Azure DevOps provider use the following settings in configuration.toml:
+---
+
+## Running from the CLI
+
+Set your git provider in the configuration:
 
 ```toml
 [config]
-git_provider="azure"
+git_provider = "azure"
 ```
 
-Azure DevOps provider supports [PAT token](https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows) or [DefaultAzureCredential](https://learn.microsoft.com/en-us/azure/developer/python/sdk/authentication-overview#authentication-in-server-environments) authentication.
-PAT is faster to create, but has built-in expiration date, and will use the user identity for API calls.
-Using DefaultAzureCredential you can use managed identity or Service principle, which are more secure and will create separate ADO user identity (via AAD) to the agent.
+Azure DevOps supports two authentication methods:
 
-If PAT was chosen, you can assign the value in .secrets.toml.
-If DefaultAzureCredential was chosen, you can assigned the additional env vars like AZURE_CLIENT_SECRET directly,
-or use managed identity/az cli (for local development) without any additional configuration.
-in any case, 'org' value must be assigned in .secrets.toml:
+- **PAT token** — quick to create but has a built-in expiration. Uses your user identity for API calls.
+- **DefaultAzureCredential** — leverages managed identity or a service principal through Azure AD. More secure and creates a distinct identity for the agent.
+
+### PAT Authentication
+
+Add this to your secrets file:
 
 ```toml
 [azure_devops]
 org = "https://dev.azure.com/YOUR_ORGANIZATION/"
-# pat = "YOUR_PAT_TOKEN" needed only if using PAT for authentication
+pat = "YOUR_PAT_TOKEN"
 ```
+
+### DefaultAzureCredential
+
+Set `AZURE_CLIENT_SECRET` and related env vars directly, or lean on managed identity / `az login` for local dev. The `org` value is always required:
+
+```toml
+[azure_devops]
+org = "https://dev.azure.com/YOUR_ORGANIZATION/"
+# pat is not needed — DefaultAzureCredential handles auth
+```
+
+---
 
 ## Azure DevOps Webhook
 
-To trigger from an Azure webhook, you need to manually [add a webhook](https://learn.microsoft.com/en-us/azure/devops/service-hooks/services/webhooks?view=azure-devops).
-Use the "Pull request created" type to trigger a review, or "Pull request commented on" to trigger any supported comment with /<command> <args> comment on the relevant PR. Note that for the "Pull request commented on" trigger, only API v2.0 is supported.
+To trigger MergeMate from Azure events, [create a webhook](https://learn.microsoft.com/en-us/azure/devops/service-hooks/services/webhooks?view=azure-devops) manually. Use **Pull request created** to fire a review, or **Pull request commented on** to respond to slash commands (`/<command> <args>`) in PR comments. Note that "Pull request commented on" only supports API v2.0.
 
-For webhook security, create a sporadic username/password pair and configure the webhook username and password on both the server and Azure DevOps webhook. These will be sent as basic Auth data by the webhook with each request:
+Secure the webhook with basic auth — generate a username/password pair and configure them on both the MergeMate server and the Azure DevOps webhook:
 
 ```toml
 [azure_devops_server]
@@ -115,4 +117,5 @@ webhook_username = "<basic auth user>"
 webhook_password = "<basic auth password>"
 ```
 
-> :warning: **Ensure that the webhook endpoint is only accessible over HTTPS** to mitigate the risk of credential interception when using basic authentication.
+!!! warning
+    Always serve the webhook endpoint over **HTTPS** to protect the basic auth credentials in transit.

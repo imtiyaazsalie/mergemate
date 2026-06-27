@@ -1,31 +1,25 @@
 # Interactivity
 
-`Supported Git Platforms: GitHub, GitLab`
+`Supported on: GitHub, GitLab`
 
-## Overview
+MergeMate turns static code review into a conversation. Instead of copying suggestions into your editor and manually tracking what's been addressed, you drive the review directly from PR comments with simple checkboxes.
 
-MergeMate transforms static code reviews into interactive experiences by enabling direct actions from pull request (PR) comments.
-Developers can immediately trigger actions and apply changes with simple checkbox clicks.
+## How It Works
 
-This focused workflow maintains context while dramatically reducing the time between PR creation and final merge.
-The approach eliminates manual steps, provides clear visual indicators, and creates immediate feedback loops all within the same interface.
+Every interactive action lives inside the PR — no context switching, no separate dashboards. Click a checkbox and MergeMate responds in-place.
 
-## Key Interactive Features
+### `/improve` — Interactive Suggestions
 
-### 1\. Interactive `/improve` Tool
+The [`/improve`](../tools/improve.md) command delivers a fully interactive experience:
 
-The [`/improve`](../tools/improve.md) command delivers a comprehensive interactive experience:
+- **Apply this suggestion** — one click turns a recommendation into a committable code change. Once committed, the suggestion is marked with a check so you can see what's been done at a glance.
 
-- _**Apply this suggestion**_: Clicking this checkbox instantly converts a suggestion into a committable code change. When committed to the PR, changes made to code that was flagged for improvement will be marked with a check mark, allowing developers to easily track and review implemented recommendations.
+- **More** — asks MergeMate to generate additional suggestions beyond the initial batch, keeping each one as focused as the originals.
 
-- _**More**_: Triggers additional suggestions generation while keeping each suggestion focused and relevant as the original set
+- **Update** — triggers a fresh analysis against the latest code, giving you updated suggestions after you've made changes.
 
-- _**Update**_: Triggers a re-analysis of the code, providing updated suggestions based on the latest changes
+- **Author self-review** — developers can acknowledge they've reviewed collapsed suggestions, giving the team visibility into what's been seen.
 
-- _**Author self-review**_: Interactive acknowledgment that developers have opened and reviewed collapsed suggestions
+### `/help` — An Interactive Command Palette
 
-### 2\. Interactive `/help` Tool
-
-The [`/help`](../tools/help.md) command not only lists available tools and their descriptions but also enables immediate tool invocation through interactive checkboxes.
-When a user checks a tool's checkbox, MergeMate instantly triggers that tool without requiring additional commands.
-This transforms the standard help menu into an interactive launch pad for all MergeMate capabilities, eliminating context switching by keeping developers within their PR workflow.
+The [`/help`](../tools/help.md) command lists every available tool — but it's more than a reference page. Each tool has a checkbox next to it. Tick one and MergeMate fires that tool immediately, right in the PR thread. It's a help menu that doubles as a launcher, keeping your entire workflow inside the pull request.

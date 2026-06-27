@@ -1,71 +1,64 @@
-## Overview
+# Similar Issues
 
-The similar issue tool retrieves the most similar issues to the current issue.
-It can be invoked manually by commenting on any PR:
+**Surfaces related issues from your repository using vector search across issue titles and bodies.**
 
 ```
 /similar_issue
 ```
 
-## Example usage
+MergeMate indexes all past issues once, then retrieves the closest matches whenever you call the tool — handy for spotting duplicates or finding earlier discussions.
 
-![similar_issue_original_issue](https://mergemate.ai/images/mergemate/similar_issue_original_issue.png){width=768}
 
-![similar_issue_comment](https://mergemate.ai/images/mergemate/similar_issue_comment.png){width=768}
-
-![similar_issue](https://mergemate.ai/images/mergemate/similar_issue.png){width=768}
-
-Note that to perform retrieval, the `similar_issue` tool indexes all the repo previous issues (once).
-
-### Selecting a Vector Database
-
-Configure your preferred database by changing the `pr_similar_issue` parameter in `configuration.toml` file.
-
-#### Available Options
-
-Choose from the following Vector Databases:
-
-1. LanceDB
-2. Pinecone
-3. Qdrant
-
-#### Pinecone Configuration
-
-To use Pinecone with the `similar issue` tool, add these credentials to `.secrets.toml` (or set as environment variables):
+Trigger it from the CLI:
 
 ```
+python -m mergemate.cli --issue_url https://github.com/owner/repo/issues/42 similar_issue
+```
+
+## Vector database options
+
+Choose your backend in the config:
+
+| Database | Best for |
+|---|---|
+| **LanceDB** (default) | Zero-config, embedded — works out of the box. |
+| **Pinecone** | Managed, scales well for large repos. |
+| **Qdrant** | Self-hosted or cloud, open-source. |
+
+### Pinecone
+
+```toml
+# .secrets.toml
 [pinecone]
 api_key = "..."
 environment = "..."
+
+# configuration.toml
+[pr_similar_issue]
+vectordb = "pinecone"
 ```
 
-These parameters can be obtained by registering to [Pinecone](https://app.pinecone.io/?sessionType=signup/).
+### Qdrant
 
-#### Qdrant Configuration
-
-To use Qdrant with the `similar issue` tool, add these credentials to `.secrets.toml` (or set as environment variables):
-
-```
+```toml
+# .secrets.toml
 [qdrant]
-url = "https://YOUR-QDRANT-URL" # e.g., https://xxxxxxxx-xxxxxxxx.eu-central-1-0.aws.cloud.qdrant.io
+url = "https://your-instance.qdrant.io"
 api_key = "..."
-```
 
-Then select Qdrant in `configuration.toml`:
-
-```
+# configuration.toml
 [pr_similar_issue]
 vectordb = "qdrant"
 ```
 
-You can get a free managed Qdrant instance from [Qdrant Cloud](https://cloud.qdrant.io/).
+Get a free Qdrant instance at [cloud.qdrant.io](https://cloud.qdrant.io/).
 
-## How to use
+## Automation
 
-- To invoke the 'similar issue' tool from **CLI**, run:
-`python3 cli.py --issue_url=... similar_issue`
+Add `/similar_issue` to the `pr_commands` list to run it automatically when a new issue is opened.
 
-- To invoke the 'similar' issue tool via online usage, [comment](https://github.com/mergemate/mergemate/issues/178#issuecomment-1716934893) on a PR:
-`/similar_issue`
+## Tips
 
-- You can also enable the 'similar issue' tool to run automatically when a new issue is opened, by adding it to the [pr_commands list in the github_app section](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/configuration.toml#L229)
+- **Index happens once.** The first call builds the vector index from all existing issues. Subsequent calls are fast.
+- **Use it for triage.** If a similar issue is already in progress, link them and save duplicate work.
+- **Qdrant or Pinecone** make sense for repos with thousands of issues; for smaller repos, LanceDB is the simplest path.
