@@ -44,8 +44,8 @@ nav:
 
 theme:
   name: material
-  logo: assets/favicon.svg
-  favicon: assets/favicon.svg
+  logo: assets/logo.png
+  favicon: assets/favicon.png
   icon:
     repo: fontawesome/brands/github
   features:
