@@ -29,14 +29,15 @@ The simplest path. MergeMate ships as a pre-built action that slots right into y
             id: mergemate
             uses: mergemate/mergemate@main
             env:
-              OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
+              DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              config.model: "deepseek/deepseek-chat"
     ```
 
-2. Add your OpenAI key as a repo secret (`Settings > Secrets and variables > Actions > New repository secret`):
+2. Add your DeepSeek key as a repo secret (`Settings > Secrets and variables > Actions > New repository secret`):
 
     ```
-    Name  = OPENAI_KEY
+    Name  = DEEPSEEK_API_KEY
     Value = <your key>
     ```
 
@@ -71,6 +72,20 @@ Dive deeper in the [usage guide](../usage-guide/automations_and_usage.md#github-
             github_action_config.auto_describe: "true"
             github_action_config.auto_improve: "true"
     ```
+
+=== "DeepSeek"
+
+    ```yaml
+          env:
+            DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            config.model: "deepseek/deepseek-chat"
+            github_action_config.auto_review: "true"
+            github_action_config.auto_describe: "true"
+            github_action_config.auto_improve: "true"
+    ```
+
+    Then add `DEEPSEEK_API_KEY` as a repo secret.
 
 === "Gemini (Google AI Studio)"
 
