@@ -1,0 +1,42 @@
+# MergeMate MOSAICO solution-agent overlay (canonical source; versioned with the agent).
+# Copy into the demonstrator's `compose/` dir, next to `base-definitions.yml`, so the
+# `extends:` refs resolve; see ./README.md for the full wiring steps.
+#
+# Mirrors the demonstrator's `ip-solution-agent` pair: in-process A2A server on container
+# port 9000 + ENDPOINT registration, so MergeMate is treated like any other task agent.
+services:
+  mergemate-solution-agent:
+    extends:
+      file: base-definitions.yml
+      service: agent
+    # Build: docker build --target mosaico_agent -t mergemate-solution-agent:local -f docker/Dockerfile .
+    image: mergemate-solution-agent:local
+    ports:
+      - ${MERGEMATE_PORT:-22000}:9000
+    environment:
+      AGENT_CARD_HOST: ${MERGEMATE_HOST:-${DEFAULT_TASK_AGENT_HOST}}
+      AGENT_CARD_PORT: ${MERGEMATE_PORT:-22000}
+      MODEL_NAME: ${MERGEMATE_MODEL}
+    # Gate registration on card/HTTP readiness, not /health (a live LLM probe).
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'python -c "import urllib.request; urllib.request.urlopen(''http://localhost:9000/.well-known/agent-card.json'')"',
+        ]
+
+  mergemate-solution-agent-registration:
+    extends:
+      file: base-definitions.yml
+      service: agent-registration
+    environment:
+      AGENT_NAME: MergeMate Solution Agent
+      AGENT_JSON: /app/mergemate-solution-agent.json
+      # Fetched container-to-container: use the service name and in-container port 9000.
+      AGENT_CARD_URL: http://mergemate-solution-agent:9000/.well-known/agent-card.json
+    depends_on:
+      mergemate-solution-agent:
+        condition: service_healthy
+
+networks:
+  agents_net:

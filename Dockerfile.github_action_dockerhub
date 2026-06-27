@@ -1,0 +1,1 @@
+FROM mergemate/mergemate:github_action

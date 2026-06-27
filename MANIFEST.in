@@ -1,0 +1,2 @@
+recursive-include mergemate *.toml
+recursive-exclude mergemate *.secrets.toml

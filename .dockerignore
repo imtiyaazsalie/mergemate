@@ -1,0 +1,13 @@
+.venv/
+venv/
+.git/
+__pycache__/
+**/__pycache__/
+**/.secrets.toml
+settings/settings/.secrets.toml
+pics/
+settings.egg-info/
+build/
+tests/
+*.pyc
+.DS_Store

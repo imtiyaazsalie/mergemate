@@ -1,0 +1,32 @@
+services:
+  mergemate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mergemate:latest
+    container_name: mergemate
+    ports:
+      - "8080:8080"
+    environment:
+      - OPENAI_KEY=${OPENAI_KEY:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - PYTHONPATH=/app
+    command:
+      - python
+      - -m
+      - uvicorn
+      - mergemate.server.health:app
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8080"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -f http://localhost:8080/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped

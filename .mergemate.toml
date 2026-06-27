@@ -1,0 +1,31 @@
+# MergeMate configuration file
+
+[config]
+model = "deepseek/deepseek-chat"
+max_model_tokens = 100000
+
+[pr_code_suggestions]
+commitable_code_suggestions = true
+
+[pr_reviewer]
+enable_review_labels_effort = true
+enable_auto_approval = true
+
+[github_app]
+pr_commands = [
+    "/describe --pr_description.publish_description_as_comment=true",
+    "/improve",
+    "/agentic_review"
+]
+
+handle_push_trigger = true
+push_commands = [
+    "/improve",
+    "/agentic_review"
+]
+
+[review_agent]
+enabled = true
+publish_output = true
+demand_self_review = true
+approve_pr_on_self_review = true

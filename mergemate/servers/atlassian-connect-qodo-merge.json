@@ -1,0 +1,31 @@
+{
+  "name": "MergeMate",
+  "description": "MergeMate — AI-powered PR review",
+  "key": "app_key",
+  "vendor": {
+    "name": "MergeMate",
+    "url": "https://github.com/mergemate/mergemate"
+  },
+  "authentication": {
+    "type": "jwt"
+  },
+  "baseUrl": "base_url",
+  "lifecycle": {
+    "installed": "/installed",
+    "uninstalled": "/uninstalled"
+  },
+  "scopes": ["account", "repository:write", "pullrequest:write", "wiki"],
+  "contexts": ["account"],
+  "modules": {
+    "webhooks": [
+      {
+        "event": "*",
+        "url": "/webhook"
+      }
+    ]
+  },
+  "links": {
+    "privacy": "https://github.com/mergemate/mergemate",
+    "terms": "https://github.com/mergemate/mergemate"
+  }
+}
