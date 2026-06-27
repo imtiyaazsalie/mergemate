@@ -10,6 +10,7 @@ services:
     environment:
       - DEEPSEEK__KEY=${DEEPSEEK__KEY:-}
       - GITHUB__USER_TOKEN=${GITHUB__USER_TOKEN:-}
+      - MERGEMATE_HEALTH_TOKEN=${MERGEMATE_HEALTH_TOKEN:-}
       - PYTHONPATH=/app
     command:
       - python

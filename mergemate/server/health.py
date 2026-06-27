@@ -3,15 +3,35 @@ MergeMate health-check server.
 
 Provides liveness (``GET /health``) and readiness (``GET /ready``) endpoints
 suitable for container orchestrators.
+
+Security: when ``MERGEMATE_HEALTH_TOKEN`` is set, requests must include an
+``X-MergeMate-Token`` header matching that value.
 """
 
 from __future__ import annotations
 
-from fastapi import FastAPI
+import os
+
+from fastapi import Depends, FastAPI, Header, HTTPException
 
 APP_VERSION = "1.0.0"
 
-app = FastAPI(title="MergeMate Health", version=APP_VERSION)
+HEALTH_TOKEN = os.environ.get("MERGEMATE_HEALTH_TOKEN", "")
+
+
+async def _verify_health_token(
+    x_mergemate_token: str | None = Header(default=None, alias="X-MergeMate-Token"),
+) -> None:
+    """Raise 401 if a health token is configured and the request doesn't match."""
+    if HEALTH_TOKEN and x_mergemate_token != HEALTH_TOKEN:
+        raise HTTPException(status_code=401, detail="Unauthorized: invalid or missing health token")
+
+
+app = FastAPI(
+    title="MergeMate Health",
+    version=APP_VERSION,
+    dependencies=[Depends(_verify_health_token)] if HEALTH_TOKEN else [],
+)
 
 
 @app.get("/health")
