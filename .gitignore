@@ -12,5 +12,7 @@ build/
 .DS_Store
 docs/.cache/
 docs/site/
+coverage.xml
+.coverage
 poetry.lock
 .log
