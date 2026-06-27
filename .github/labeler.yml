@@ -1,0 +1,46 @@
+# MergeMate PR Auto-Labeler
+# Matches changed files to labels
+
+feature:
+  - changed-files:
+      - any-glob-to-any-file:
+          - mergemate/tools/**/*.py
+          - mergemate/agent/**/*.py
+          - mergemate/cli.py
+
+fix:
+  - changed-files:
+      - any-glob-to-any-file:
+          - mergemate/git_providers/**/*.py
+          - mergemate/algo/**/*.py
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - docs/**/*
+          - '*.md'
+          - '**/*.md'
+
+test:
+  - changed-files:
+      - any-glob-to-any-file:
+          - tests/**/*.py
+
+deps:
+  - changed-files:
+      - any-glob-to-any-file:
+          - requirements.txt
+          - requirements-dev.txt
+          - pyproject.toml
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/**/*
+
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - mergemate/core/security.py
+          - mergemate/core/rate_limiter.py
+          - mergemate/custom_merge_loader.py

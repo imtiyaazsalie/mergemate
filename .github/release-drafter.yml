@@ -3,4 +3,117 @@ template: |
 
   $CHANGES
 
+  ## 🚀 Installation
+
+  ```bash
+  pip install mergemate-review==v$RESOLVED_VERSION
+  ```
+
+  ```bash
+  docker pull imtiyaazsalie/mergemate-review:v$RESOLVED_VERSION
+  ```
+
   **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
+categories:
+  - title: 🚀 Features
+    labels:
+      - feature
+      - enhancement
+      - feat
+  - title: 🐛 Fixes
+    labels:
+      - fix
+      - bugfix
+      - bug
+      - hotfix
+  - title: 📚 Documentation
+    labels:
+      - docs
+      - documentation
+  - title: 🧪 Testing
+    labels:
+      - test
+      - tests
+      - testing
+  - title: 🔧 Maintenance
+    labels:
+      - chore
+      - refactor
+      - deps
+      - dependencies
+      - ci
+      - build
+  - title: ⚡ Performance
+    labels:
+      - performance
+      - perf
+  - title: 🔒 Security
+    labels:
+      - security
+
+version-resolver:
+  major:
+    labels:
+      - breaking
+      - major
+  minor:
+    labels:
+      - feature
+      - enhancement
+      - feat
+  patch:
+    labels:
+      - fix
+      - bugfix
+      - bug
+      - hotfix
+      - docs
+      - chore
+      - refactor
+      - deps
+      - test
+      - ci
+      - build
+      - performance
+      - perf
+      - security
+  default: patch
+
+autolabeler:
+  - label: feature
+    branch:
+      - "/^feat(ure)?[/-]/"
+      - "/^feature[/-]/"
+    title:
+      - "/^feat(ure)?[:(]/"
+      - "/^feature[:(]/"
+  - label: fix
+    branch:
+      - "/^fix[/-]/"
+      - "/^bugfix[/-]/"
+      - "/^hotfix[/-]/"
+    title:
+      - "/^fix[:(]/"
+      - "/^bugfix[:(]/"
+      - "/^hotfix[:(]/"
+  - label: docs
+    branch:
+      - "/^docs?[/-]/"
+    title:
+      - "/^docs?[:(]/"
+  - label: chore
+    branch:
+      - "/^chore[/-]/"
+    title:
+      - "/^chore[:(]/"
+  - label: refactor
+    branch:
+      - "/^refactor[/-]/"
+    title:
+      - "/^refactor[:(]/"
+  - label: test
+    branch:
+      - "/^test(s)?[/-]/"
+    title:
+      - "/^test(s)?[:(]/"
