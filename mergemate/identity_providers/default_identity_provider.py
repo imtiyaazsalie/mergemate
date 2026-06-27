@@ -1,5 +1,4 @@
-from mergemate.identity_providers.identity_provider import (Eligibility,
-                                                           IdentityProvider)
+from mergemate.identity_providers.identity_provider import Eligibility, IdentityProvider
 
 
 class DefaultIdentityProvider(IdentityProvider):

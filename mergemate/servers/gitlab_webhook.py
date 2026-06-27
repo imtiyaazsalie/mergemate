@@ -16,10 +16,10 @@ from starlette_context.middleware import RawContextMiddleware
 from mergemate.agent.mergemate import MergeMateAgent
 from mergemate.algo.utils import update_settings_from_args
 from mergemate.config_loader import get_settings, global_settings
+from mergemate.git_providers import get_git_provider_with_context
 from mergemate.git_providers.utils import apply_repo_settings
 from mergemate.log import LoggingFormat, get_logger, setup_logger
 from mergemate.secret_providers import get_secret_provider
-from mergemate.git_providers import get_git_provider_with_context
 
 setup_logger(fmt=LoggingFormat.JSON, level=get_settings().get("CONFIG.LOG_LEVEL", "DEBUG"))
 router = APIRouter()

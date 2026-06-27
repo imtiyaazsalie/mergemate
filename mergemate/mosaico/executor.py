@@ -27,9 +27,7 @@ from starlette_context import context as sctx
 from mergemate.config_loader import get_settings, global_settings
 from mergemate.log import get_logger
 from mergemate.mosaico.dispatch import route_and_run_result
-from mergemate.mosaico.observability import (langfuse_span,
-                                            mosaico_log_context,
-                                            parse_observability_metadata)
+from mergemate.mosaico.observability import langfuse_span, mosaico_log_context, parse_observability_metadata
 
 
 class MergeMateAgentExecutor(AgentExecutor):
@@ -95,8 +93,7 @@ async def health_check() -> str:
         # Construct the handler purely for its side effect of applying mergemate's LLM
         # config (api_base/key/callbacks/etc.) onto the litellm module — do NOT call its
         # retry-wrapped chat_completion.
-        from mergemate.algo.ai_handlers.litellm_ai_handler import \
-            LiteLLMAIHandler
+        from mergemate.algo.ai_handlers.litellm_ai_handler import LiteLLMAIHandler
         handler = LiteLLMAIHandler()
 
         model = get_settings().get("CONFIG.MODEL", None)

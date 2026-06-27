@@ -2,8 +2,7 @@ import re
 import traceback
 
 from mergemate.config_loader import get_settings
-from mergemate.git_providers import GithubProvider
-from mergemate.git_providers import AzureDevopsProvider
+from mergemate.git_providers import AzureDevopsProvider, GithubProvider
 from mergemate.log import get_logger
 
 # Compile the regex pattern once, outside the function

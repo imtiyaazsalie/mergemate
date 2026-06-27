@@ -11,9 +11,7 @@ import types
 
 import pytest
 
-from mergemate.mosaico.observability import (langfuse_span,
-                                            mosaico_log_context,
-                                            parse_observability_metadata)
+from mergemate.mosaico.observability import langfuse_span, mosaico_log_context, parse_observability_metadata
 
 
 class TestParseObservabilityMetadata:

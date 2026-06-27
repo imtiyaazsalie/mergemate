@@ -7,8 +7,10 @@ from github import RateLimitExceededException
 
 from mergemate.algo.file_filter import filter_ignored
 from mergemate.algo.git_patch_processing import (
-    extend_patch, handle_patch_deletions,
-    decouple_and_convert_to_hunks_with_lines_numbers)
+    decouple_and_convert_to_hunks_with_lines_numbers,
+    extend_patch,
+    handle_patch_deletions,
+)
 from mergemate.algo.language_handler import sort_files_by_main_languages
 from mergemate.algo.token_handler import TokenHandler
 from mergemate.algo.types import EDIT_TYPE, FilePatchInfo

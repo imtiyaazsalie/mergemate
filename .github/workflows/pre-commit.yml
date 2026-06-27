@@ -15,4 +15,3 @@ jobs:
           python-version: "3.12"
       - run: pip install pre-commit
       - run: pre-commit run --all-files
-        continue-on-error: true

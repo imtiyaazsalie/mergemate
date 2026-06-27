@@ -1,18 +1,18 @@
 import copy
-from functools import partial
-
-from jinja2 import Environment, StrictUndefined
 import math
 import os
 import re
+from functools import partial
 from tempfile import TemporaryDirectory
+
+from jinja2 import Environment, StrictUndefined
 
 from mergemate.algo import MAX_TOKENS
 from mergemate.algo.ai_handlers.base_ai_handler import BaseAiHandler
 from mergemate.algo.ai_handlers.litellm_ai_handler import LiteLLMAIHandler
 from mergemate.algo.pr_processing import retry_with_fallback_models
 from mergemate.algo.token_handler import TokenHandler
-from mergemate.algo.utils import clip_tokens, get_max_tokens, load_yaml, ModelType
+from mergemate.algo.utils import ModelType, clip_tokens, get_max_tokens, load_yaml
 from mergemate.config_loader import get_settings
 from mergemate.git_providers import get_git_provider_with_context
 from mergemate.log import get_logger

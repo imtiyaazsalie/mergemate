@@ -8,9 +8,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - OPENAI_KEY=${OPENAI_KEY:-}
-      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
-      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - DEEPSEEK__KEY=${DEEPSEEK__KEY:-}
+      - GITHUB__USER_TOKEN=${GITHUB__USER_TOKEN:-}
       - PYTHONPATH=/app
     command:
       - python
