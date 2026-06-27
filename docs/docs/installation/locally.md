@@ -5,18 +5,18 @@
 The fastest way to get started — MergeMate auto-detects your project and generates everything:
 
 ```bash
-pip install mergemate
-mergemate init
+pip install mergemate-review
+mergemate-review init
 ```
 
 It detects your language, git provider, and project type, then uses AI to generate the optimal `.mergemate.toml` and GitHub Actions workflow. You get a production-ready setup in under 30 seconds.
 
 ```bash
 # Point it at an existing repo
-mergemate init --output /path/to/repo
+mergemate-review init --output /path/to/repo
 
 # Specify your preferences
-mergemate init --model deepseek/deepseek-chat --language python --project-type web
+mergemate-review init --model deepseek/deepseek-chat --language python --project-type web
 ```
 
 ---
@@ -125,7 +125,7 @@ If you're using Azure OpenAI, there are extra fields you need to set. Same goes 
 ## Installing with pip
 
 ```bash
-pip install mergemate
+pip install mergemate-review
 ```
 
 Then drive it from Python:

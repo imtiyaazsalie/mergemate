@@ -7,8 +7,8 @@ MergeMate runs wherever your code lives. Here's a quick map to help you choose t
 Let MergeMate figure it out for you:
 
 ```bash
-pip install mergemate
-mergemate init
+pip install mergemate-review
+mergemate-review init
 ```
 
 It auto-detects your project and generates `.mergemate.toml` + GitHub Actions workflow using AI. Takes 30 seconds. [See the local guide →](./locally.md)

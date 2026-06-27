@@ -12,7 +12,7 @@
               name: MergeMate Review
               image: mergemate/mergemate:latest
               script:
-                - mergemate --pr_url=https://bitbucket.org/$BITBUCKET_WORKSPACE/$BITBUCKET_REPO_SLUG/pull-requests/$BITBUCKET_PR_ID review
+                - mergemate-review --pr_url=https://bitbucket.org/$BITBUCKET_WORKSPACE/$BITBUCKET_REPO_SLUG/pull-requests/$BITBUCKET_PR_ID review
     ```
 
 2. Under **Repository settings > Pipelines > Repository variables**, add these secured variables:
@@ -59,7 +59,7 @@ git_provider = "bitbucket_server"
 Then run:
 
 ```shell
-mergemate --pr_url https://git.bitbucket.mycompany.com/projects/PROJECT/repos/REPO/pull-requests/1 review
+mergemate-review --pr_url https://git.bitbucket.mycompany.com/projects/PROJECT/repos/REPO/pull-requests/1 review
 ```
 
 ### Webhook Mode

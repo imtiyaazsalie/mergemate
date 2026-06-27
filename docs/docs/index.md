@@ -20,13 +20,13 @@ That's it.
 ### 1. Install
 
 ```bash
-pip install mergemate
+pip install mergemate-review
 ```
 
 ### 2. Let AI set it up
 
 ```bash
-mergemate init
+mergemate-review init
 ```
 
 This looks at your project and creates everything you need. Takes 30 seconds.

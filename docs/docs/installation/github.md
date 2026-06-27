@@ -3,8 +3,8 @@
 ## Quickest way
 
 ```bash
-pip install mergemate
-mergemate init
+pip install mergemate-review
+mergemate-review init
 ```
 
 This auto-creates `.mergemate.toml` and `.github/workflows/mergemate.yml`. Just add your API key secret and push.

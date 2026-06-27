@@ -5,7 +5,7 @@
 Trigger it from the command line or by commenting on a PR.
 
 ```
-mergemate --pr_url https://github.com/owner/repo/pull/42 review
+mergemate-review --pr_url https://github.com/owner/repo/pull/42 review
 ```
 
 When you're already in a PR thread, just drop:

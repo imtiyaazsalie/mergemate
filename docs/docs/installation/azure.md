@@ -36,9 +36,9 @@ stages:
         export azure_devops__org="$ORG_URL"
         export config__git_provider="azure"
 
-        mergemate --pr_url="$PR_URL" describe
-        mergemate --pr_url="$PR_URL" review
-        mergemate --pr_url="$PR_URL" improve
+        mergemate-review --pr_url="$PR_URL" describe
+        mergemate-review --pr_url="$PR_URL" review
+        mergemate-review --pr_url="$PR_URL" improve
       env:
         azure_devops__pat: $(azure_devops_pat)
         openai__key: $(OPENAI_KEY)

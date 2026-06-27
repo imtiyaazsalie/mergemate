@@ -23,10 +23,10 @@ MergeMate automates code review workflows by providing AI-generated feedback, su
 
 ```bash
 # AI-powered setup — auto-detects your project
-mergemate init
+mergemate-review init
 
 # Or specify details
-mergemate init --model deepseek/deepseek-chat --language python --project-type web
+mergemate-review init --model deepseek/deepseek-chat --language python --project-type web
 ```
 
 This generates `.mergemate.toml` + GitHub Actions workflow. Add your API key as a repo secret, done.
@@ -52,9 +52,9 @@ jobs:
 ### CLI
 
 ```bash
-pip install mergemate
+pip install mergemate-review
 export OPENAI_KEY=your_key_here
-mergemate --pr_url https://github.com/owner/repo/pull/123 review
+mergemate-review --pr_url https://github.com/owner/repo/pull/123 review
 ```
 
 ### Docker

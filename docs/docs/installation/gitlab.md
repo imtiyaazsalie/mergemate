@@ -24,9 +24,9 @@ The simplest route — MergeMate runs inside your existing GitLab CI without any
         - export gitlab__PERSONAL_ACCESS_TOKEN=$GITLAB_PERSONAL_ACCESS_TOKEN
         - export config__git_provider="gitlab"
         - export openai__key=$OPENAI_KEY
-        - mergemate --pr_url="$MR_URL" describe
-        - mergemate --pr_url="$MR_URL" review
-        - mergemate --pr_url="$MR_URL" improve
+        - mergemate-review --pr_url="$MR_URL" describe
+        - mergemate-review --pr_url="$MR_URL" review
+        - mergemate-review --pr_url="$MR_URL" improve
       rules:
         - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     ```

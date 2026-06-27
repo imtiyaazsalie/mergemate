@@ -5,7 +5,7 @@
 Run it from the CLI:
 
 ```
-mergemate --pr_url https://github.com/owner/repo/pull/42 describe
+mergemate-review --pr_url https://github.com/owner/repo/pull/42 describe
 ```
 
 Or comment on the PR:
