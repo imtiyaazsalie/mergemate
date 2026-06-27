@@ -77,8 +77,10 @@ class TestProviderRegistration:
         import mergemate.mosaico.provider_registration  # noqa: F401 (triggers setdefault)
         from mergemate.git_providers import _GIT_PROVIDERS
 
-        assert _GIT_PROVIDERS.get("mosaico_diff") is DiffInputProvider
-        # original keys intact (setdefault did not clobber)
+        # Registry now contains factory functions, not classes directly
+        factory = _GIT_PROVIDERS.get("mosaico_diff")
+        assert callable(factory), f"mosaico_diff must be a factory function, got {type(factory)}"
+        assert isinstance(factory(), DiffInputProvider)
         for key in ("github", "gitlab", "bitbucket", "azure", "local", "gerrit", "gitea"):
             assert key in _GIT_PROVIDERS
 
@@ -89,7 +91,7 @@ class TestProviderRegistration:
         original = _GIT_PROVIDERS.get("mosaico_diff")
         try:
             _GIT_PROVIDERS["mosaico_diff"] = sentinel
-            _GIT_PROVIDERS.setdefault("mosaico_diff", DiffInputProvider)
+            _GIT_PROVIDERS.setdefault("mosaico_diff", lambda: DiffInputProvider)
             assert _GIT_PROVIDERS["mosaico_diff"] is sentinel
         finally:
             if original is not None:
@@ -266,7 +268,7 @@ async def _run_tool_via_spy(monkeypatch, isolated_settings, verb, canned_yaml, s
 
     incremental_access = []
     _SpyProvider.incremental_access = incremental_access
-    monkeypatch.setitem(_GIT_PROVIDERS, "mosaico_diff", _SpyProvider)
+    monkeypatch.setitem(_GIT_PROVIDERS, "mosaico_diff", lambda: _SpyProvider)
 
     # The first LLM call is the tool's main prediction (return the canned YAML).
     # Subsequent calls (e.g. /improve's self-reflection scoring) get an empty string,
