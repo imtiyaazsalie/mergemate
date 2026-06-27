@@ -10,7 +10,7 @@
         '**':
           - step:
               name: MergeMate Review
-              image: mergemate/mergemate:latest
+              image: imtiyaazsalie/mergemate-review:latest
               script:
                 - mergemate-review --pr_url=https://bitbucket.org/$BITBUCKET_WORKSPACE/$BITBUCKET_REPO_SLUG/pull-requests/$BITBUCKET_PR_ID review
     ```

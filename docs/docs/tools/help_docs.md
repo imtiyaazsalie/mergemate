@@ -58,7 +58,7 @@ jobs:
       issues: write
     steps:
       - name: Answer from docs
-        uses: docker://mergemate/mergemate:latest
+        uses: docker://imtiyaazsalie/mergemate-review:latest
         with:
           entrypoint: /bin/bash
           args: |

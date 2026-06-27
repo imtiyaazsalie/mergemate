@@ -13,7 +13,7 @@ The simplest route — MergeMate runs inside your existing GitLab CI without any
     mergemate_job:
       stage: mergemate
       image:
-        name: mergemate/mergemate:latest
+        name: imtiyaazsalie/mergemate-review:latest
         entrypoint: [""]
       script:
         - cd /app

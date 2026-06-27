@@ -38,7 +38,7 @@ The fastest way to try MergeMate. Pick your git provider and run:
     docker run --rm -it \
       -e OPENAI__KEY=<your_key> \
       -e GITHUB__USER_TOKEN=<your_github_token> \
-      mergemate/mergemate:latest \
+      imtiyaazsalie/mergemate-review:latest \
       --pr_url <pr_url> review
     ```
 
@@ -55,7 +55,7 @@ The fastest way to try MergeMate. Pick your git provider and run:
       -e OPENAI__KEY=<your_key> \
       -e CONFIG__GIT_PROVIDER=gitlab \
       -e GITLAB__PERSONAL_ACCESS_TOKEN=<your_token> \
-      mergemate/mergemate:latest \
+      imtiyaazsalie/mergemate-review:latest \
       --pr_url <pr_url> review
     ```
 
@@ -72,7 +72,7 @@ The fastest way to try MergeMate. Pick your git provider and run:
       -e CONFIG__GIT_PROVIDER=bitbucket \
       -e OPENAI__KEY=$OPENAI_API_KEY \
       -e BITBUCKET__BEARER_TOKEN=$BITBUCKET_BEARER_TOKEN \
-      mergemate/mergemate:latest \
+      imtiyaazsalie/mergemate-review:latest \
       --pr_url=<pr_url> review
     ```
 
@@ -83,7 +83,7 @@ The fastest way to try MergeMate. Pick your git provider and run:
       -e OPENAI__KEY=<your_key> \
       -e CONFIG__GIT_PROVIDER=gitea \
       -e GITEA__PERSONAL_ACCESS_TOKEN=<your_token> \
-      mergemate/mergemate:latest \
+      imtiyaazsalie/mergemate-review:latest \
       --pr_url <pr_url> review
     ```
 
@@ -111,7 +111,7 @@ OPENAI__KEY="<your key>"
 Then fire it up:
 
 ```shell
-docker run --rm -it --env-file .env mergemate/mergemate:latest review <pr_url>
+docker run --rm -it --env-file .env imtiyaazsalie/mergemate-review:latest review <pr_url>
 ```
 
 ---

@@ -17,7 +17,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     container:
-      image: mergemate/mergemate:latest
+      image: imtiyaazsalie/mergemate-review:latest
       options: --entrypoint ""
     variables:
       - group: mergemate
