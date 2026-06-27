@@ -3,15 +3,15 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mergemate"
-version = "0.36.1"
+name = "mergemate-review"
+version = "1.0.0"
 
 authors = [
-  { name = "[Your Name]", email = "[your-email@example.com]" },
+  { name = "MergeMate", email = "hello@mergemate.dev" },
 ]
 
 maintainers = [
-  { name = "[Your Name]", email = "[your-email@example.com]" },
+  { name = "MergeMate", email = "hello@mergemate.dev" },
 ]
 
 description = "MergeMate — AI-powered pull request review and automation"
@@ -45,7 +45,7 @@ include = [
 ] # include mergemate and any sub-packages it finds under it.
 
 [project.scripts]
-mergemate = "mergemate.cli:run"
+mergemate-review = "mergemate.cli:run"
 
 [tool.ruff]
 line-length = 120
