@@ -1,21 +1,13 @@
-## Overview
+# Help
 
-The `help` tool provides a list of all the available tools and their descriptions.
-For MergeMate users, it also enables to trigger each tool by checking the relevant box.
-
-It can be invoked manually by commenting on any PR:
+**Lists every available MergeMate tool with a one-click checkbox to trigger it.**
 
 ```
 /help
 ```
 
-## Example usage
-
-Invoke the `help` tool by commenting on a PR with:
-
-![Help tool input](https://mergemate.ai/images/mergemate/help1.png){width=750}
-
-
-Response will include a list of available tools:
+The response is a clean menu of tools — descriptions, command examples, and checkboxes. Tick one and MergeMate runs it.
 
 ![Help tool output](https://mergemate.ai/images/mergemate/help2.png){width=750}
+
+No configuration needed. It reads the tool registry directly, so the list is always accurate for your installed version.

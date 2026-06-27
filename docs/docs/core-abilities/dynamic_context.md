@@ -1,75 +1,57 @@
+# Dynamic Context
 
-`Supported Git Platforms: GitHub, GitLab, Bitbucket`
+`Supported on: GitHub, GitLab, Bitbucket`
 
-MergeMate uses an **asymmetric and dynamic context strategy** to improve AI analysis of code changes in pull requests.
-It provides more context before changes than after, and dynamically adjusts the context based on code structure (e.g., enclosing functions or classes).
-This approach balances providing sufficient context for accurate analysis, while avoiding needle-in-the-haystack information overload that could degrade AI performance or exceed token limits.
+MergeMate uses an **asymmetric, dynamic context strategy** to help models understand code changes without drowning them in irrelevant lines. The idea is simple: more context *before* a change than after it, and expand up to the enclosing code structure when it helps.
 
-## Introduction
+## The Problem with Unified Diffs
 
-Pull request code changes are retrieved in a unified diff format, showing three lines of context before and after each modified section, with additions marked by '+' and deletions by '-'.
+Pull request diffs come in a standard unified format — three lines of context above and below each change, with `+` marking additions and `-` marking deletions:
 
 ```diff
 @@ -12,5 +12,5 @@ def func1():
- code line that already existed in the file...
- code line that already existed in the file...
- code line that already existed in the file....
+ code line that already existed...
+ code line that already existed...
+ code line that already existed...
 -code line that was removed in the PR
 +new code line added in the PR
- code line that already existed in the file...
- code line that already existed in the file...
- code line that already existed in the file...
-
-@@ -26,2 +26,4 @@ def func2():
-...
+ code line that already existed...
+ code line that already existed...
+ code line that already existed...
 ```
 
-This unified diff format can be challenging for AI models to interpret accurately, as it provides limited context for understanding the full scope of code changes.
-The presentation of code using '+', '-', and ' ' symbols to indicate additions, deletions, and unchanged lines respectively also differs from the standard code formatting typically used to train AI models.
+This format is tough for AI models. The `+`/`-`/` ` prefix convention doesn't match the plain code formatting models were trained on, and three lines of surrounding context is often not enough to understand *why* a change was made.
 
-## Challenges of expanding the context window
+## The Context Trade-off
 
-While expanding the context window is technically feasible, it presents a more fundamental trade-off:
+Expanding the context window sounds like an obvious win, but it's not free:
 
-Pros:
+**Upsides:**
+- More context means the model can better localise changes and produce sharper analysis.
 
-- Enhanced context allows the model to better comprehend and localize the code changes, results (potentially) in more precise analysis and suggestions. Without enough context, the model may struggle to understand the code changes and provide relevant feedback.
+**Downsides:**
+- Too much context creates a "needle in a haystack" problem — the model struggles to focus on what actually changed. LLM output quality is known to degrade as context windows grow.
+- More tokens equals more latency and higher cost. Large PRs can easily exceed single-pass limits.
 
-Cons:
-
-- Excessive context may overwhelm the model with extraneous information, creating a "needle in a haystack" scenario where focusing on the relevant details (the code that actually changed) becomes challenging.
-LLM quality is known to degrade when the context gets larger.
-Pull requests often encompass multiple changes across many files, potentially spanning hundreds of lines of modified code. This complexity presents a genuine risk of overwhelming the model with excessive context.
-
-- Increased context expands the token count, increasing processing time and cost, and may prevent the model from processing the entire pull request in a single pass.
-
-## Asymmetric and dynamic context
-
-To address these challenges, MergeMate employs an **asymmetric** and **dynamic** context strategy, providing the model with more focused and relevant context information for each code change.
+## The Solution: Asymmetric + Dynamic
 
 **Asymmetric:**
 
-We start by recognizing that the context preceding a code change is typically more crucial for understanding the modification than the context following it.
-Consequently, MergeMate implements an asymmetric context policy, decoupling the context window into two distinct segments: one for the code before the change and another for the code after.
-
-By independently adjusting each context window, MergeMate can supply the model with a more tailored and pertinent context for individual code changes.
+Context *before* a change is usually more valuable than context *after* it. MergeMate splits the context window into two independently adjustable segments — one for code that precedes the change, one for what follows. This lets MergeMate allocate more tokens where they'll actually help.
 
 **Dynamic:**
 
-We also employ a "dynamic" context strategy.
-We start by recognizing that the optimal context for a code change often corresponds to its enclosing code component (e.g., function, class), rather than a fixed number of lines.
-Consequently, we dynamically adjust the context window based on the code's structure, ensuring the model receives the most pertinent information for each modification.
+Fixed line counts are a blunt instrument. The optimal context for a change is often its enclosing code component — the function, method, or class that contains it. MergeMate dynamically expands the context window until it hits an enclosing structure, rather than stopping at an arbitrary line count.
 
-To prevent overwhelming the model with excessive context, we impose a limit on the number of lines searched when identifying the enclosing component.
-This balance allows for comprehensive understanding while maintaining efficiency and limiting context token usage.
+To keep things bounded, there's a hard limit on how many lines are searched when looking for the enclosing component. This keeps the strategy efficient without letting context balloon.
 
-## Appendix - relevant configuration options
+## Relevant Config
 
 ```toml
 [config]
-patch_extension_skip_types =[".md",".txt"]  # Skip files with these extensions when trying to extend the context
-allow_dynamic_context=true                  # Allow dynamic context extension
-max_extra_lines_before_dynamic_context = 8  # will try to include up to X extra lines before the hunk in the patch, until we reach an enclosing function or class
-patch_extra_lines_before = 3                # Number of extra lines (+3 default ones) to include before each hunk in the patch
-patch_extra_lines_after = 1                 # Number of extra lines (+3 default ones) to include after each hunk in the patch
+patch_extension_skip_types = [".md", ".txt"]   # Skip these extensions when expanding context
+allow_dynamic_context = true                     # Enable dynamic context extension
+max_extra_lines_before_dynamic_context = 8      # Max lines to search backwards for an enclosing function/class
+patch_extra_lines_before = 3                     # Extra lines (on top of the default 3) before each hunk
+patch_extra_lines_after = 1                      # Extra lines (on top of the default 3) after each hunk
 ```

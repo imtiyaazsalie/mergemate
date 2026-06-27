@@ -1,62 +1,46 @@
-## Overview
+# Ask
 
-The `ask` tool answers questions about the PR, based on the PR code changes. Make sure to be specific and clear in your questions.
-It can be invoked manually by commenting on any PR:
+**Answers free-text questions about the PR diff — about the whole PR, specific lines, or even screenshots.**
 
 ```
-/ask "..."
+/ask "Why was the retry logic moved out of the transaction block?"
 ```
 
-## Example usage
-
-![Ask Comment](https://mergemate.ai/images/mergemate/ask_comment.png){width=512}
+MergeMate reads the code changes and responds inline. Each question is stateless — it doesn't remember earlier queries.
 
 ![Ask](https://mergemate.ai/images/mergemate/ask.png){width=512}
 
-## Ask lines
+## Asking about specific lines
 
-You can run `/ask` on specific lines of code in the PR from the PR's diff view. The tool will answer questions based on the code changes in the selected lines.
+From the PR diff view, select one or more lines (click the `+` next to the line number, then drag), type your question, and post:
 
-- Click on the '+' sign next to the line number to select the line.
-- To select multiple lines, click on the '+' sign of the first line and then hold and drag to select the rest of the lines.
-- write `/ask "..."` in the comment box and press `Add single comment` button.
+```
+/ask "Is this null check redundant given the guard above?"
+```
 
 ![Ask Line](https://mergemate.ai/images/mergemate/Ask_line.png){width=512}
 
-Note that the tool does not have "memory" of previous questions, and answers each question independently.
+The tool sees only the selected lines plus surrounding file context.
 
-## Ask on images
+## Asking about images
 
-You can also ask questions about images that appear in the comment, where the entire PR code will be used as context.
-<br>
-The basic syntax is:
+Attach an image and the full PR diff acts as context:
 
 ```
-/ask "..."
+/ask "Does this wireframe match the API contract in the changes?"
 
-[Image](https://real_link_to_image)
+[Image](https://example.com/wireframe.png)
 ```
 
-where `https://real_link_to_image` is the direct link to the image.
+To get a direct image URL on GitHub:
 
-Note that GitHub has a built-in mechanism of pasting images in comments. However, pasted image does not provide a direct link.
-To get a direct link to an image, we recommend using the following scheme:
+1. Post a comment containing **only** the pasted image.
+2. Quote-reply to that comment.
+3. Type your `/ask` question above or below the image link.
+4. Post — MergeMate uses both the image and the diff.
 
-1\. First, post a comment that contains **only** the image:
+## Tips
 
-![Ask image1](https://mergemate.ai/images/mergemate/ask_images1.png){width=512}
-
-2\. Quote reply to that comment:
-
-![Ask image2](https://mergemate.ai/images/mergemate/ask_images2.png){width=512}
-
-3\. In the screen opened, type the question below the image:
-
-![Ask image3](https://mergemate.ai/images/mergemate/ask_images3.png){width=512}
-![Ask image4](https://mergemate.ai/images/mergemate/ask_images4.png){width=512}
-
-4\. Post the comment, and receive the answer:
-
-![Ask image5](https://mergemate.ai/images/mergemate/ask_images5.png){width=512}
-
-See a full video tutorial [here](https://mergemate.ai/images/mergemate/ask_image_video.mov)
+- **Be specific.** "Why is the cache TTL set to 300?" works better than "Is this okay?"
+- **Ask per-file or per-function** to keep responses focused.
+- **Images work best with concrete questions** — architectural feedback may need the full codebase beyond the diff.

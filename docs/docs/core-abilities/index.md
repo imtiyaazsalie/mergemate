@@ -1,30 +1,29 @@
-# Core Abilities
+# How MergeMate Works
 
-MergeMate utilizes a variety of core abilities to provide a comprehensive and efficient code review experience. These abilities include:
+MergeMate combines several key capabilities to produce reviews that actually understand your code. Here's what's under the hood:
 
-- [Compression strategy](./compression_strategy.md)
-- [Dynamic context](./dynamic_context.md)
-- [Fetching ticket context](./fetching_ticket_context.md)
-- [Interactivity](./interactivity.md)
-- [Local and global metadata](./metadata.md)
-- [Self-reflection](./self_reflection.md)
+- [Compression strategy](./compression_strategy.md) — packing large PRs into model context windows without losing signal
+- [Dynamic context](./dynamic_context.md) — asymmetric, code-aware context expansion around each change
+- [Fetching ticket context](./fetching_ticket_context.md) — pulling issue and Jira details into the review
+- [Interactivity](./interactivity.md) — checkbox-driven actions directly in PR comments
+- [Local and global metadata](./metadata.md) — multi-stage analysis from hunk-level to org-level
+- [Self-reflection](./self_reflection.md) — scoring and re-ranking suggestions before you see them
 
-## Blogs
+## From the Blog
 
-Here are some additional technical blogs from MergeMate, that delve deeper into the core capabilities and features of Large Language Models (LLMs) when applied to coding tasks.
-These resources provide more comprehensive insights into leveraging LLMs for software development.
+Deeper dives into how LLMs perform on real-world coding tasks:
 
-### Code Generation and LLMs
+### Code Generation & LLMs
 
 - [Effective AI code suggestions: less is more](https://www.mergemate.ai/blog/effective-code-suggestions-llms-less-is-more/)
-- [State-of-the-art Code Generation with AlphaMergeMate – From Prompt Engineering to Flow Engineering](https://www.mergemate.ai/blog/mergemateflow-state-of-the-art-code-generation-for-code-contests/)
+- [State-of-the-art Code Generation with AlphaMergeMate — From Prompt Engineering to Flow Engineering](https://www.mergemate.ai/blog/mergemateflow-state-of-the-art-code-generation-for-code-contests/)
 - [RAG for a Codebase with 10k Repos](https://www.mergemate.ai/blog/rag-for-large-scale-code-repos/)
 
-### Development Processes
+### Development Workflows
 
 - [Understanding the Challenges and Pain Points of the Pull Request Cycle](https://www.mergemate.ai/blog/understanding-the-challenges-and-pain-points-of-the-pull-request-cycle/)
 - [Introduction to Code Coverage Testing](https://www.mergemate.ai/blog/introduction-to-code-coverage-testing/)
 
-### Cost Optimization
+### Cost Optimisation
 
 - [Reduce Your Costs by 30% When Using GPT for Python Code](https://www.mergemate.ai/blog/reduce-your-costs-by-30-when-using-gpt-3-for-python-code/)

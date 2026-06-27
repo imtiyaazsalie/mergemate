@@ -1,10 +1,11 @@
-After [installation](../installation/index.md), there are three basic ways to invoke MergeMate:
+# Getting started
 
-1. Locally running a CLI command
-2. Online usage - by [commenting](https://github.com/mergemate/mergemate/pull/229#issuecomment-1695021901){:target="_blank"} on a PR
-3. Enabling MergeMate tools to run automatically when a new PR is opened
+Once you've [installed MergeMate](../installation/index.md), there are three ways to run it:
 
-Specifically, CLI commands can be issued by invoking a pre-built [docker image](../installation/locally.md#using-docker-image), or by invoking a [locally cloned repo](../installation/locally.md#run-from-source).
+1. **CLI** — run commands directly from your terminal
+2. **Online** — trigger commands with [PR comments](https://github.com/mergemate/mergemate/pull/229#issuecomment-1695021901){:target="_blank"}
+3. **Auto-pilot** — let MergeMate fire on every new PR
 
-For online usage, you will need to setup either a [GitHub App](../installation/github.md#run-as-a-github-app) or a [GitHub Action](../installation/github.md#run-as-a-github-action) (GitHub), a [GitLab webhook](../installation/gitlab.md#run-a-gitlab-webhook-server) (GitLab), or a [BitBucket App](../installation/bitbucket.md#run-using-mergemate-bitbucket-app) (BitBucket).
-These platforms also enable to run MergeMate specific tools automatically when a new PR is opened, or on each push to a branch.
+For the CLI, you can use our [Docker image](../installation/locally.md#using-docker-image) or [run from source](../installation/locally.md#run-from-source).
+
+For online and automatic modes, you'll need to hook up a platform integration: [GitHub App](../installation/github.md#run-as-a-github-app), [GitHub Action](../installation/github.md#run-as-a-github-action), [GitLab webhook](../installation/gitlab.md#run-a-gitlab-webhook-server), or [Bitbucket App](../installation/bitbucket.md#run-using-mergemate-bitbucket-app). Once connected, MergeMate can respond to comments and auto-run on PR events.

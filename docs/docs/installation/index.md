@@ -1,10 +1,10 @@
-# Installation
+# Getting MergeMate Running
 
-There are several ways to use MergeMate:
+Pick the path that fits your workflow — MergeMate slots into wherever you already work.
 
-- [Locally](./locally.md)
-- [GitHub integration](./github.md)
-- [GitLab integration](./gitlab.md)
-- [BitBucket integration](./bitbucket.md)
-- [Azure DevOps integration](./azure.md)
-- [Gitea integration](./gitea.md)
+- [Run it locally](./locally.md) — Docker, pip, or straight from source
+- [GitHub](./github.md) — Actions or a self-hosted App
+- [GitLab](./gitlab.md) — CI pipeline or webhook server
+- [Bitbucket](./bitbucket.md) — Pipeline integration or on-prem server
+- [Azure DevOps](./azure.md) — Pipeline, CLI, or webhook
+- [Gitea](./gitea.md) — Self-hosted webhook deployment

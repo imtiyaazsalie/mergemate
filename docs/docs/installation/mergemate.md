@@ -1,49 +1,33 @@
-# MergeMate Installation Guide
+# MergeMate Deployment Options
 
-MergeMate can be deployed in various environments and platforms. Choose the installation method that best suits your needs:
+MergeMate runs wherever your code lives. Here's a quick map to help you choose the right setup.
 
-## 🖥️ Local Installation
+## 🖥️ Run Locally
 
-Learn how to run MergeMate locally using:
+Spin it up on your own machine with Docker, pip, or a direct source checkout.
 
-- Docker image
-- pip package
-- CLI from source code
+[See the local guide →](./locally.md)
 
-[View Local Installation Guide →](./locally.md)
+## 🐙 GitHub
 
-## 🐙 GitHub Integration
+Drop a workflow file into your repo and let Actions handle the rest — or run a dedicated GitHub App for tighter control.
 
-Set up MergeMate with GitHub as:
+[See the GitHub guide →](./github.md)
 
-- GitHub Action
-- Local GitHub App
+## 🦊 GitLab
 
-[View GitHub Integration Guide →](./github.md)
+Trigger reviews from your CI pipeline, or stand up a webhook server that listens for merge request events.
 
-## 🦊 GitLab Integration
+[See the GitLab guide →](./gitlab.md)
 
-Deploy MergeMate on GitLab as:
+## 🟦 Bitbucket
 
-- GitLab pipeline job
-- Local GitLab webhook server
+Hook into Bitbucket Pipelines for PR-triggered reviews, or deploy a webhook for on-prem Bitbucket Server.
 
-[View GitLab Integration Guide →](./gitlab.md)
+[See the Bitbucket guide →](./bitbucket.md)
 
-## 🟦 BitBucket Integration
+## 🔷 Azure DevOps
 
-Implement MergeMate in BitBucket as:
+Add MergeMate to your Azure Pipelines workflow, drive it from the CLI, or configure a webhook endpoint.
 
-- BitBucket pipeline job
-- Local BitBucket server
-
-[View BitBucket Integration Guide →](./bitbucket.md)
-
-## 🔷  Azure DevOps Integration
-
-Configure MergeMate with Azure DevOps as:
-
-- Azure DevOps pipeline job
-- Local Azure DevOps webhook
-
-[View Azure DevOps Integration Guide →](./azure.md)
+[See the Azure DevOps guide →](./azure.md)

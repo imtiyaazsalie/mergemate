@@ -1,156 +1,162 @@
-## Run as a GitLab Pipeline
+# GitLab Integration
 
-You can use a pre-built Action Docker image to run MergeMate as a GitLab pipeline. This is a simple way to get started with MergeMate without setting up your own server.
+## Run as a GitLab CI Pipeline
 
-(1) Add the following file to your repository under `.gitlab-ci.yml`:
+The simplest route — MergeMate runs inside your existing GitLab CI without any extra infrastructure.
 
-```yaml
-stages:
-  - mergemate
+1. Add this to your repo's `.gitlab-ci.yml`:
 
-mergemate_job:
-  stage: mergemate
-  image:
-    name: mergemate/mergemate:latest
-    entrypoint: [""]
-  script:
-    - cd /app
-    - echo "Running MergeMate action step"
-    - export MR_URL="$CI_MERGE_REQUEST_PROJECT_URL/merge_requests/$CI_MERGE_REQUEST_IID"
-    - echo "MR_URL=$MR_URL"
-    - export gitlab__url=$CI_SERVER_PROTOCOL://$CI_SERVER_FQDN
-    - export gitlab__PERSONAL_ACCESS_TOKEN=$GITLAB_PERSONAL_ACCESS_TOKEN
-    - export config__git_provider="gitlab"
-    - export openai__key=$OPENAI_KEY
-    - python -m mergemate.cli --pr_url="$MR_URL" describe
-    - python -m mergemate.cli --pr_url="$MR_URL" review
-    - python -m mergemate.cli --pr_url="$MR_URL" improve
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-```
+    ```yaml
+    stages:
+      - mergemate
 
-This script will run MergeMate on every new merge request. You can modify the `rules` section to run MergeMate on different events.
-You can also modify the `script` section to run different MergeMate commands, or with different parameters by exporting different environment variables.
+    mergemate_job:
+      stage: mergemate
+      image:
+        name: mergemate/mergemate:latest
+        entrypoint: [""]
+      script:
+        - cd /app
+        - echo "Running MergeMate"
+        - export MR_URL="$CI_MERGE_REQUEST_PROJECT_URL/merge_requests/$CI_MERGE_REQUEST_IID"
+        - echo "MR_URL=$MR_URL"
+        - export gitlab__url=$CI_SERVER_PROTOCOL://$CI_SERVER_FQDN
+        - export gitlab__PERSONAL_ACCESS_TOKEN=$GITLAB_PERSONAL_ACCESS_TOKEN
+        - export config__git_provider="gitlab"
+        - export openai__key=$OPENAI_KEY
+        - mergemate --pr_url="$MR_URL" describe
+        - mergemate --pr_url="$MR_URL" review
+        - mergemate --pr_url="$MR_URL" improve
+      rules:
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    ```
 
-(2) Add the following masked variables to your GitLab repository (CI/CD -> Variables):
+    This fires on every new merge request. Tweak the `rules` block to target different events, and adjust the `script` section to run a different set of commands or pass custom env vars.
 
-- `GITLAB_PERSONAL_ACCESS_TOKEN`: Your GitLab personal access token.
+2. In your GitLab repo, go to **Settings > CI/CD > Variables** and add these masked variables:
 
-- `OPENAI_KEY`: Your OpenAI key.
+    - `GITLAB_PERSONAL_ACCESS_TOKEN` — a token with API access
+    - `OPENAI_KEY` — your model provider key
 
-Note that if your base branches are not protected, don't set the variables as `protected`, since the pipeline will not have access to them.
+    If your base branches aren't protected, don't mark the variables as protected — otherwise the pipeline won't be able to read them.
 
-> **Note**: The `$CI_SERVER_FQDN` variable is available starting from GitLab version 16.10. If you're using an earlier version, this variable will not be available. However, you can combine `$CI_SERVER_HOST` and `$CI_SERVER_PORT` to achieve the same result. Please ensure you're using a compatible version or adjust your configuration.
+    !!! note "`$CI_SERVER_FQDN` availability"
+        The `$CI_SERVER_FQDN` variable was introduced in GitLab 16.10. On older versions, combine `$CI_SERVER_HOST` and `$CI_SERVER_PORT` to build the equivalent URL.
 
-> **Note**: The `gitlab__SSL_VERIFY` environment variable can be used to specify the path to a custom CA certificate bundle for SSL verification. GitLab exposes the `$CI_SERVER_TLS_CA_FILE` variable, which points to the custom CA certificate file configured in your GitLab instance.
-> Alternatively, SSL verification can be disabled entirely by setting `gitlab__SSL_VERIFY=false`, although this is not recommended.
+    !!! note "SSL verification"
+        Use `gitlab__SSL_VERIFY` to point at a custom CA bundle. GitLab exposes `$CI_SERVER_TLS_CA_FILE` for this purpose. You can also disable verification entirely with `gitlab__SSL_VERIFY=false`, though that's not recommended in production.
 
-## Run a GitLab webhook server
+---
 
-1. In GitLab create a new user and give it "Reporter" role for the intended group or project.
+## Run as a Webhook Server
 
-2. For the user from step 1, generate a `personal_access_token` with `api` access.
+For a self-hosted setup that responds to webhook events:
 
-3. Generate a random secret for your app, and save it for later (`shared_secret`). For example, you can use:
+1. In GitLab, create a dedicated user and assign it the **Reporter** role on the target group or project.
 
-```bash
-SHARED_SECRET=$(python -c "import secrets; print(secrets.token_hex(10))")
-```
+2. Generate a `personal_access_token` with `api` scope for that user.
 
-4. Clone this repository:
+3. Create a random shared secret:
 
-```bash
-git clone https://github.com/mergemate/mergemate.git
-```
+    ```bash
+    SHARED_SECRET=$(python -c "import secrets; print(secrets.token_hex(10))")
+    ```
 
-5. Prepare variables and secrets. Skip this step if you plan on setting these as environment variables when running the agent:
-    1. In the configuration file/variables:
-        - Set `config.git_provider` to "gitlab"
+4. Clone the repo:
 
-    2. In the secrets file/variables:
-        - Set your AI model key in the respective section
-        - In the [gitlab] section, set `personal_access_token` (with token from step 2) and `shared_secret` (with secret from step 3)
-        - **Authentication type**: Set `auth_type` to `"private_token"` for older GitLab versions (e.g., 11.x) or private deployments. Default is `"oauth_token"` for gitlab.com and newer versions.
+    ```bash
+    git clone https://github.com/mergemate/mergemate.git
+    ```
 
-6. Build a Docker image for the app and optionally push it to a Docker repository. We'll use Dockerhub as an example:
+5. Wire up your config. If you're not setting these as environment variables at runtime:
 
-```bash
-docker build . -t gitlab_mergemate --target gitlab_webhook -f docker/Dockerfile
-docker push mergemate/mergemate:gitlab_webhook  # Push to your Docker repository
-```
+    - In your configuration: set `config.git_provider = "gitlab"`
+    - In your secrets: set your model provider key, then under `[gitlab]` fill in `personal_access_token` (from step 2) and `shared_secret` (from step 3)
+    - **Authentication type:** set `auth_type = "oauth_token"` for gitlab.com or modern instances. Use `"private_token"` for older versions (e.g. GitLab 11.x) or private deployments.
 
-7. Set the environmental variables, the method depends on your docker runtime. Skip this step if you included your secrets/configuration directly in the Docker image.
+6. Build and push the Docker image:
 
-```bash
-CONFIG__GIT_PROVIDER=gitlab
-GITLAB__PERSONAL_ACCESS_TOKEN=<personal_access_token>
-GITLAB__SHARED_SECRET=<shared_secret>
-GITLAB__URL=https://gitlab.com
-GITLAB__AUTH_TYPE=oauth_token  # Use "private_token" for older GitLab versions
-OPENAI__KEY=<your_openai_api_key>
-PORT=3000  # Optional: override the webhook server port
-```
+    ```bash
+    docker build . -t gitlab_mergemate --target gitlab_webhook -f docker/Dockerfile
+    docker push mergemate/mergemate:gitlab_webhook
+    ```
 
-8. Create a webhook in your GitLab project. Set the URL to `http[s]://<MERGEMATE_HOSTNAME>/webhook`, the secret token to the generated secret from step 3, and enable the triggers `push`, `comments` and `merge request events`.
+7. Provide the environment variables (exact method depends on your container runtime):
 
-9. Test your installation by opening a merge request or commenting on a merge request using one of MergeMate's commands.
+    ```bash
+    CONFIG__GIT_PROVIDER=gitlab
+    GITLAB__PERSONAL_ACCESS_TOKEN=<personal_access_token>
+    GITLAB__SHARED_SECRET=<shared_secret>
+    GITLAB__URL=https://gitlab.com
+    GITLAB__AUTH_TYPE=oauth_token   # or "private_token" for older instances
+    OPENAI__KEY=<your_openai_api_key>
+    PORT=3000   # optional — override the webhook server port
+    ```
+
+8. Create a webhook in your GitLab project. Point the URL at `http[s]://<YOUR_HOST>/webhook`, set the secret token to the value from step 3, and enable **Push events**, **Comments**, and **Merge request events**.
+
+9. Test by opening a merge request or dropping a MergeMate command into a PR comment.
+
+---
 
 ## Deploy as a Lambda Function
 
-Note that since AWS Lambda env vars cannot have "." in the name, you can replace each "." in an env variable with "__".<br>
-For example: `GITLAB.PERSONAL_ACCESS_TOKEN` --> `GITLAB__PERSONAL_ACCESS_TOKEN`
+AWS Lambda env vars can't contain dots — replace each `.` with `__`. For example, `GITLAB.PERSONAL_ACCESS_TOKEN` becomes `GITLAB__PERSONAL_ACCESS_TOKEN`.
 
-1. Follow steps 1-5 from [Run a GitLab webhook server](#run-a-gitlab-webhook-server).
-2. Build a docker image that can be used as a lambda function
-
-    ```shell
-    docker buildx build --platform=linux/amd64 . -t mergemate/mergemate:gitlab_lambda --target gitlab_lambda -f docker/Dockerfile.lambda
-   ```
-
-3. Push image to ECR
+1. Follow steps 1–5 from [Run as a Webhook Server](#run-as-a-webhook-server) above.
+2. Build a Lambda-compatible image:
 
     ```shell
-    docker tag mergemate/mergemate:gitlab_lambda <AWS_ACCOUNT>.dkr.ecr.<AWS_REGION>.amazonaws.com/mergemate/mergemate:gitlab_lambda
+    docker buildx build --platform=linux/amd64 . \
+      -t mergemate/mergemate:gitlab_lambda \
+      --target gitlab_lambda \
+      -f docker/Dockerfile.lambda
+    ```
+
+3. Push to ECR:
+
+    ```shell
+    docker tag mergemate/mergemate:gitlab_lambda \
+      <AWS_ACCOUNT>.dkr.ecr.<AWS_REGION>.amazonaws.com/mergemate/mergemate:gitlab_lambda
     docker push <AWS_ACCOUNT>.dkr.ecr.<AWS_REGION>.amazonaws.com/mergemate/mergemate:gitlab_lambda
     ```
 
-4. Create a lambda function that uses the uploaded image. Set the lambda timeout to be at least 3m.
-5. Configure the lambda function to have a Function URL.
-6. In the environment variables of the Lambda function, specify `AZURE_DEVOPS_CACHE_DIR` to a writable location such as /tmp. (see [link](https://github.com/mergemate/mergemate/pull/450#issuecomment-1840242269))
-7. Go back to steps 8-9 of [Run a GitLab webhook server](#run-a-gitlab-webhook-server) with the function URL as your Webhook URL.
-    The Webhook URL would look like `https://<LAMBDA_FUNCTION_URL>/webhook`
+4. Create a Lambda function from the image. Set timeout to at least 3 minutes.
+5. Give the Lambda a Function URL.
+6. Set `AZURE_DEVOPS_CACHE_DIR` to `/tmp` (or another writable path) in the Lambda's environment variables.
+7. Use the Function URL as your webhook URL (steps 8–9 of the webhook server setup). It'll be `https://<LAMBDA_FUNCTION_URL>/webhook`.
 
 ### Using AWS Secrets Manager
 
-For production Lambda deployments, use AWS Secrets Manager instead of environment variables:
+For production Lambda deployments, use Secrets Manager instead of plain environment variables:
 
-1. Create individual secrets for each GitLab webhook with this JSON format (e.g., secret name: `project-webhook-secret-001`)
+1. Create individual secrets for each GitLab webhook. Format:
 
-```json
-{
-  "gitlab_token": "glpat-xxxxxxxxxxxxxxxxxxxxxxxx",
-  "token_name": "project-webhook-001"
-}
-```
+    ```json
+    {
+      "gitlab_token": "glpat-xxxxxxxxxxxxxxxxxxxxxxxx",
+      "token_name": "project-webhook-001"
+    }
+    ```
 
-2. Create a main configuration secret for common settings (e.g., secret name: `mergemate-main-config`)
+2. Create a main config secret for shared settings:
 
-```json
-{
-  "openai.key": "sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-}
-```
+    ```json
+    {
+      "openai.key": "sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+    ```
 
-3. Set these environment variables in your Lambda:
+3. Set these env vars on your Lambda:
 
-```bash
-CONFIG__SECRET_PROVIDER=aws_secrets_manager
-AWS_SECRETS_MANAGER__SECRET_ARN=arn:aws:secretsmanager:us-east-1:123456789012:secret:mergemate-main-config-AbCdEf
-```
+    ```bash
+    CONFIG__SECRET_PROVIDER=aws_secrets_manager
+    AWS_SECRETS_MANAGER__SECRET_ARN=arn:aws:secretsmanager:us-east-1:123456789012:secret:mergemate-main-config-AbCdEf
+    ```
 
-4. In your GitLab webhook configuration, set the **Secret Token** to the **Secret name** created in step 1:
-   - Example: `project-webhook-secret-001`
+4. In your GitLab webhook config, set the **Secret Token** to match the Secrets Manager secret name from step 1 (e.g. `project-webhook-secret-001`).
 
-**Important**: When using Secrets Manager, GitLab's webhook secret must be the Secrets Manager secret name.
+    !!! important
+        When using Secrets Manager, the GitLab webhook secret **must** equal the Secrets Manager secret name.
 
-5. Add IAM permission `secretsmanager:GetSecretValue` to your Lambda execution role
+5. Add `secretsmanager:GetSecretValue` to your Lambda execution role's IAM policy.

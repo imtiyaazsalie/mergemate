@@ -1,36 +1,39 @@
-# Local and global metadata injection with multi-stage analysis
+# Metadata Injection & Multi-Stage Analysis
 
-`Supported Git Platforms: GitHub, GitLab, Bitbucket`
+`Supported on: GitHub, GitLab, Bitbucket`
 
-1\.
-MergeMate initially retrieves for each PR the following data:
+MergeMate builds up a rich picture of each PR through progressive layers of analysis — from individual hunks to organisation-wide preferences — feeding each stage's output into the next.
+
+## Layer 1: Raw PR Data
+
+When a review kicks off, MergeMate pulls:
 
 - PR title and branch name
-- PR original description
-- Commit messages history
-- PR diff patches, in [hunk diff](https://loicpefferkorn.net/2014/02/diff-files-what-are-hunks-and-how-to-extract-them/) format
-- The entire content of the files that were modified in the PR
+- Original PR description
+- Commit message history
+- Diff patches in [hunk format](https://loicpefferkorn.net/2014/02/diff-files-what-are-hunks-and-how-to-extract-them/)
+- The full content of every modified file
 
-!!! tip "Tip: Organization-level metadata"
-    In addition to the inputs above, MergeMate can incorporate supplementary preferences provided by the user, like [`extra_instructions` and `organization best practices`](../tools/improve.md#extra-instructions-and-best-practices). This information can be used to enhance the PR analysis.
+!!! tip "Organisation-level metadata"
+    On top of these inputs, MergeMate can fold in user-supplied preferences like [`extra_instructions` and org best practices](../tools/improve.md#extra-instructions-and-best-practices) to sharpen the analysis.
 
-2\.
-By default, the first command that MergeMate executes is [`describe`](../tools/describe.md), which generates three types of outputs:
+## Layer 2: AI-Generated Metadata
 
-- PR Type (e.g. bug fix, feature, refactor, etc)
-- PR Description - a bullet point summary of the PR
-- Changes walkthrough - for each modified file, provide a one-line summary followed by a detailed bullet point list of the changes.
+By default, the first command MergeMate runs is [`describe`](../tools/describe.md). This produces three outputs:
 
-These AI-generated outputs are now considered as part of the PR metadata, and can be used in subsequent commands like `review` and `improve`.
-This effectively enables multi-stage chain-of-thought analysis, without doing any additional API calls which will cost time and money.
+- **PR type** — bug fix, feature, refactor, etc.
+- **PR description** — a bullet-point summary of what the PR does
+- **Changes walkthrough** — per-file, a one-line summary plus a detailed bullet list of changes
 
-For example, when generating code suggestions for different files, MergeMate can inject the AI-generated ["Changes walkthrough"](https://github.com/mergemate/mergemate/pull/1202#issue-2511546839) file summary in the prompt:
+These AI-generated outputs become permanent PR metadata, available to every subsequent command (`review`, `improve`, etc.). This effectively creates a multi-stage chain-of-thought analysis without extra API calls — no added cost or latency.
+
+For example, when generating code suggestions for a file, MergeMate injects the AI-generated file summary right into the prompt:
 
 ```diff
 ## File: 'src/file1.py'
 ### AI-generated file summary:
 - edited function `func1` that does X
-- Removed function `func2` that was not used
+- Removed function `func2` that was unused
 - ....
 
 @@ ... @@ def func1():
@@ -52,7 +55,10 @@ __old hunk__
 ...
 ```
 
-3\. The entire PR files that were retrieved are also used to expand and enhance the PR context (see [Dynamic Context](./dynamic_context.md)).
+## Layer 3: Extended File Context
 
-4\. All the metadata described above represents several level of cumulative analysis - ranging from hunk level, to file level, to PR level, to organization level.
-This comprehensive approach enables MergeMate AI models to generate more precise and contextually relevant suggestions and feedback.
+The full file contents pulled in Layer 1 are used to expand the context around each change — see [Dynamic Context](./dynamic_context.md) for how that works.
+
+## The Full Stack
+
+These layers span the entire spectrum — from individual hunks, to files, to the full PR, to organisation-wide conventions. Each layer feeds the next, giving the model progressively richer input without redundant API calls. The result: suggestions and feedback that are grounded in the actual shape of your codebase and the intent behind the changes.

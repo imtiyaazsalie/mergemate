@@ -1,111 +1,80 @@
-## Overview
+# Help Docs
 
-The `help_docs` tool can answer a free-text question based on a git documentation folder.
-
-It can be invoked manually by commenting on any PR or Issue:
+**Answers questions by searching your project's documentation folder — READMEs, guides, API docs, whatever lives under `/docs`.**
 
 ```
-/help_docs "..."
+/help_docs "How do I configure the retry policy for the HTTP client?"
 ```
 
-Or configured to be triggered automatically when a [new issue is opened](#run-as-a-github-action).
-
-The tool assumes by default that the documentation is located in the root of the repository, at `/docs` folder.
-However, this can be customized by setting the `docs_path` configuration option:
-
-```toml
-[pr_help_docs]
-repo_url = ""                 # The repository to use as context
-docs_path = "docs"            # The documentation folder
-repo_default_branch = "main"  # The branch to use in case repo_url overwritten
-
-```
-
-See more configuration options in the [Configuration options](#configuration-options) section.
-
-## Example usage
-
-[//]: # (#### Asking a question about this repository:)
-
-[//]: # (![help_docs on the documentation of this repository]&#40;https://mergemate.ai/images/mergemate/help_docs_comment.png&#41;{width=512})
-
-**Asking a question about another repository**
-
-![help_docs on the documentation of another repository](https://mergemate.ai/images/mergemate/help_docs_comment_explicit_git.png){width=512}
-
-**Response**:
+MergeMate pulls files from the docs directory, feeds them to the model as context, and replies with a direct answer.
 
 ![help_docs response](https://mergemate.ai/images/mergemate/help_docs_response.png){width=512}
 
-## Run automatically when a new issue is opened
+## Pointing at a different repo
 
-You can configure MergeMate to run `help_docs` automatically on any newly created issue.
-This can be useful, for example, for providing immediate feedback to users who open issues with questions on open-source projects with extensive documentation.
+By default the tool reads docs from the repo that triggered the command. Override it to answer questions about another project:
 
-Here's how:
+```
+/help_docs "What's the auth setup for the billing service?" --pr_help_docs.repo_url="https://github.com/owner/billing-service" --pr_help_docs.docs_path="docs"
+```
 
-1) Follow the steps depicted under [Run as a Github Action](../installation/github.md#run-as-a-github-action) to create a new workflow, such as:`.github/workflows/help_docs.yml`:
+## Configuration
 
-2) Edit your yaml file to the following:
+(`[pr_help_docs]` section)
+
+| Option | Default | Notes |
+|---|---|---|
+| `repo_url` | `""` | Override to read docs from a different repository. |
+| `docs_path` | `"docs"` | Relative path to the documentation folder. |
+| `repo_default_branch` | `"main"` | Branch to use when `repo_url` is overridden. |
+| `exclude_root_readme` | `false` | Skip the repo root README when building context. |
+| `supported_doc_exts` | `[".md", ".rst", ".txt"]` | File extensions included in the search. |
+
+## Auto-respond to new issues
+
+Run `/help_docs` automatically when someone opens an issue — ideal for OSS projects with extensive docs:
+
+1. Set up MergeMate as a [GitHub Action](../installation/github.md#run-as-a-github-action).
+2. Create `.github/workflows/help_docs.yml`:
 
 ```yaml
-name: Run settings on every opened issue, respond to user comments on an issue
-
-#When the action is triggered
+name: Auto-respond from docs
 on:
   issues:
-    types: [opened] #New issue
+    types: [opened]
 
-# Read env. variables
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GITHUB_API_URL: ${{ github.api_url }}
-  GIT_REPO_URL: ${{ github.event.repository.clone_url }}
-  ISSUE_URL: ${{ github.event.issue.html_url || github.event.comment.html_url }}
-  ISSUE_BODY: ${{ github.event.issue.body || github.event.comment.body }}
+  ISSUE_URL: ${{ github.event.issue.html_url }}
+  ISSUE_BODY: ${{ github.event.issue.body }}
   OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
 
-# The actual set of actions
 jobs:
-  issue_agent:
+  help_docs:
     runs-on: ubuntu-latest
-    if: ${{ github.event.sender.type != 'Bot' }} #Do not respond to bots
-
-    # Set required permissions
+    if: ${{ github.event.sender.type != 'Bot' }}
     permissions:
-      contents: read    # For reading repository contents
-      issues: write     # For commenting on issues
-
+      contents: read
+      issues: write
     steps:
-      - name: Run MergeMate on Issues
-        if: ${{ env.ISSUE_URL != '' }}
+      - name: Answer from docs
         uses: docker://mergemate/mergemate:latest
         with:
-          entrypoint: /bin/bash #Replace invoking cli.py directly with a shell
+          entrypoint: /bin/bash
           args: |
             -c "cd /app && \
-            echo 'Running Issue Agent action step on ISSUE_URL=$ISSUE_URL' && \
             export config__git_provider='github' && \
-                        export github__user_token=$GITHUB_TOKEN && \
+            export github__user_token=$GITHUB_TOKEN && \
             export github__base_url=$GITHUB_API_URL && \
             export openai__key=$OPENAI_KEY && \
-            python -m mergemate.cli --issue_url=$ISSUE_URL --pr_help_docs.repo_url="..." --pr_help_docs.docs_path="..." --pr_help_docs.openai_key=$OPENAI_KEY && \
-            help_docs "$ISSUE_BODY"
+            python -m mergemate.cli --issue_url=$ISSUE_URL help_docs \"$ISSUE_BODY\""
 ```
 
-3) Following completion of the remaining steps (such as adding secrets and relevant configurations, such as `repo_url` and `docs_path`) merge this change to your main branch.
-When a new issue is opened, you should see a comment from `github-actions` bot with an auto response, assuming the question is related to the documentation of the repository.
+3. Commit and push to your default branch.
 
----
+## Tips
 
-## Configuration options
-
-Under the section `pr_help_docs`, the [configuration file](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/configuration.toml#L199) contains options to customize the 'help docs' tool:
-
-- `repo_url`: If not overwritten, will use the repo from where the context came from (issue or PR), otherwise - use the given repo as context.
-- `repo_default_branch`: The branch to use in case repo_url overwritten, otherwise - has no effect.
-- `docs_path`: Relative path from root of repository (either the one this PR has been issued for, or above repo url).
-- `exclude_root_readme`:  Whether or not to exclude the root README file for querying the model.
-- `supported_doc_exts` : Which file extensions should be included for the purpose of querying the model.
-
----
+- **Set `repo_url`** if your docs live in a central wiki repo separate from the code.
+- **Exclude files** with `supported_doc_exts` if you have large non-text files in the docs folder.
+- **Auto-respond mode** is a force multiplier for projects that get repetitive questions — point users at the right docs before a maintainer even sees the issue.

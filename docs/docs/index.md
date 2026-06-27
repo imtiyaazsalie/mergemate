@@ -1,83 +1,68 @@
-# Overview
+# MergeMate
 
-MergeMate is an AI-powered code review agent that automates pull request analysis. It integrates with GitHub, GitLab, Bitbucket, and Azure DevOps to provide automated reviews, descriptions, code suggestions, and more.
+Your pull requests, supercharged with AI.
 
-- See the [Installation Guide](./installation/index.md) for instructions on installing and running the tool on different git platforms.
+MergeMate plugs into your workflow — GitHub, GitLab, Bitbucket, Azure DevOps — and handles the grind: reviews, descriptions, code suggestions, changelogs, and more. One tool, every platform.
 
-- See the [Usage Guide](./usage-guide/index.md) for instructions on running commands via different interfaces, including _CLI_, _online usage_, or by _automatically triggering_ them when a new PR is opened.
+---
 
-- See the [Tools Guide](./tools/index.md) for a detailed description of the different tools.
+**Start here:**
 
-## Docs Smart Search
+- [Set it up →](installation/index.md)
+- [Run your first command →](usage-guide/index.md)
+- [Explore all tools →](tools/index.md)
 
-To search the documentation site using natural language:
+---
 
-1) Comment `/help "your question"` in a pull request where MergeMate is installed
+## Ask the docs
 
-2) The bot will respond with an [answer](https://github.com/mergemate/mergemate/pull/1241#issuecomment-2365259334) that includes relevant documentation links.
+Stuck on something? Tag MergeMate in a PR comment:
 
-## Features
+```
+/help "How do I ignore generated files?"
+```
 
-MergeMate offers comprehensive pull request functionalities integrated with various git providers:
+The bot replies with a [direct answer](https://github.com/mergemate/mergemate/pull/1241#issuecomment-2365259334) and links to the right docs page.
 
-|       |                                                                                       | GitHub | GitLab | Bitbucket | Azure DevOps | Gitea |
-| ----- |---------------------------------------------------------------------------------------|:------:|:------:|:---------:|:------------:|:-----:|
-| [TOOLS](./tools/index.md) | [Describe](./tools/describe.md)                                     |   ✅   |   ✅   |    ✅     |      ✅       |  ✅   |
-|       | [Review](./tools/review.md)                                                           |   ✅   |   ✅   |    ✅     |      ✅       |  ✅   |
-|       | [Improve](./tools/improve.md)                                                         |   ✅   |   ✅   |    ✅     |      ✅       |  ✅   |
-|       | [Ask](./tools/ask.md)                                                                 |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | ⮑ [Ask on code lines](./tools/ask.md#ask-lines)                                       |   ✅   |   ✅   |           |              |       |
-|       | [Add Docs](./tools/add_docs.md)                                                       |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Generate Labels](./tools/generate_labels.md)                                         |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Similar Issues](./tools/similar_issues.md)                                           |   ✅   |        |           |              |       |
-|       | [Help](./tools/help.md)                                                               |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Help Docs](./tools/help_docs.md)                                                     |   ✅   |   ✅   |    ✅     |              |       |
-|       | [Update CHANGELOG](./tools/update_changelog.md)                                       |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       |                                                                                       |        |        |           |              |       |
-| [USAGE](./usage-guide/index.md) | [CLI](./usage-guide/automations_and_usage.md#local-repo-cli)      |   ✅   |   ✅   |    ✅     |      ✅       |  ✅   |
-|       | [App / webhook](./usage-guide/automations_and_usage.md#github-app)                    |   ✅   |   ✅   |    ✅     |      ✅       |  ✅   |
-|       | [Tagging bot](https://github.com/mergemate/mergemate#try-it-now)                       |   ✅   |        |           |              |       |
-|       | [Actions](./installation/github.md#run-as-a-github-action)                            |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       |                                                                                       |        |        |           |              |       |
-| [CORE](./core-abilities/index.md) | [Adaptive and token-aware file patch fitting](./core-abilities/compression_strategy.md) |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Chat on code suggestions](./core-abilities/interactivity.md)                         |   ✅   |  ✅   |           |              |       |
-|       | [Compression strategy](./core-abilities/compression_strategy.md)                      |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Dynamic context](./core-abilities/dynamic_context.md)                                |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Fetching ticket context](./core-abilities/fetching_ticket_context.md)                |   ✅   |  ✅   |    ✅     |              |       |
-|       | [Interactivity](./core-abilities/interactivity.md)                                    |   ✅   |  ✅   |           |              |       |
-|       | [Local and global metadata](./core-abilities/metadata.md)                             |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Multiple models support](./usage-guide/changing_a_model.md)                          |   ✅   |   ✅   |    ✅     |      ✅       |       |
-|       | [Self reflection](./core-abilities/self_reflection.md)                                |   ✅   |   ✅   |    ✅     |      ✅       |       |
+---
 
-## Example Results
+## What it does
 
-<hr>
+| Capability | GitHub | GitLab | Bitbucket | Azure DevOps | Gitea |
+|---|---|---|---|---|---|
+| **Describe** — summarize the PR | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Review** — catch issues before merge | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Improve** — suggest code changes | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Ask** — query the PR directly | ✅ | ✅ | ✅ | | |
+| **Add Docs** — generate documentation | ✅ | ✅ | ✅ | ✅ | |
+| **Generate Labels** — auto-label PRs | ✅ | ✅ | ✅ | ✅ | |
+| **Update Changelog** — keep history clean | ✅ | ✅ | ✅ | ✅ | |
+| **Help** — in-PR assistance | ✅ | ✅ | ✅ | ✅ | |
+| **CLI** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **App / Webhook** | ✅ | ✅ | ✅ | ✅ | ✅ |
 
-#### [/describe](https://github.com/mergemate/mergemate/pull/530)
+---
 
-<figure markdown="1">
-![/describe](https://www.mergemate.ai/images/mergemate/describe_new_short_main.png){width=512}
-</figure>
-<hr>
+## See it in action
 
-#### [/review](https://github.com/mergemate/mergemate/pull/732#issuecomment-1975099151)
+### Describe
 
-<figure markdown="1">
-![/review](https://www.mergemate.ai/images/mergemate/review_new_short_main.png){width=512}
-</figure>
-<hr>
+![Describe output](https://www.mergemate.ai/images/mergemate/describe_new_short_main.png){width=512}
 
-#### [/improve](https://github.com/mergemate/mergemate/pull/732#issuecomment-1975099159)
+### Review
 
-<figure markdown="1">
-![/improve](https://www.mergemate.ai/images/mergemate/improve_new_short_main.png){width=512}
-</figure>
-<hr>
+![Review output](https://www.mergemate.ai/images/mergemate/review_new_short_main.png){width=512}
 
-## How it Works
+### Improve
 
-The following diagram illustrates MergeMate tools and their flow:
+![Improve output](https://www.mergemate.ai/images/mergemate/improve_new_short_main.png){width=512}
 
-![MergeMate Tools](https://mergemate.ai/images/mergemate/diagram-v0.9.png)
+---
 
-Check out the [PR Compression strategy](core-abilities/index.md) page for more details on how we convert a code diff to a manageable LLM prompt
+## How it works under the hood
+
+MergeMate grabs your PR diff, filters out the noise, and builds a compact, context-rich prompt for the LLM. You get meaningful feedback — fast.
+
+![MergeMate pipeline](https://mergemate.ai/images/mergemate/diagram-v0.9.png)
+
+Curious about the compression? [Read the deep dive →](core-abilities/index.md)

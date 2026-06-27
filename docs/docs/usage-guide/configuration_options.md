@@ -1,192 +1,151 @@
-The different tools and sub-tools used by MergeMate are adjustable via a Git configuration file.
-There are four main ways to set persistent configurations:
+# Configuration
 
-1. [Wiki](./configuration_options.md#wiki-configuration-file) configuration page
-2. [Local](./configuration_options.md#local-configuration-file) configuration file
-3. [Global](./configuration_options.md#global-configuration-file) configuration file
-4. [External configuration URL](./configuration_options.md#external-configuration-url) (CLI flag)
+MergeMate reads its settings from a TOML file. You can place it in four locations, ranked by priority:
 
-In terms of precedence, wiki configurations will override local configurations, local configurations will override global configurations, and global configurations will override an external configuration URL.
+| Layer | Scope | Overrides |
+|---|---|---|
+| 1. **Wiki** | Single repo (GitHub, GitLab, Bitbucket) | Everything below |
+| 2. **Local** (`.mergemate.toml` in repo root) | Single repo | Global + external |
+| 3. **Global** (`mergemate-settings` repo) | Entire org / project / group | External URL |
+| 4. **External URL** (CLI flag) | Any | Nothing (applied first) |
 
+---
 
-For a list of all possible configurations, see the [configuration options](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/configuration.toml) page.
-In addition to general configuration options, each tool has its own configurations. For example, the `review` tool will use parameters from the [pr_reviewer](https://github.com/mergemate/mergemate/blob/main/mergemate/settings/configuration.toml#L76) section in the configuration file.
+!!! tip "Keep it minimal"
+    Only set the values you need to change. Copying the full defaults file creates maintenance headaches later.
 
-!!! tip "Tip1: Edit only what you need"
-    Your configuration file should be minimal, and edit only the relevant values. Don't copy the entire configuration options, since it can lead to legacy problems when something changes.
-!!! tip "Tip2: Show relevant configurations"
-    If you set `config.output_relevant_configurations` to True, each tool will also output in a collapsible section its relevant configurations. This can be useful for debugging, or getting to know the configurations better.
+!!! tip "Debug your config"
+    Set `config.output_relevant_configurations = true` to see exactly which settings each tool is using — printed in a collapsible section in the output.
 
+---
 
+## Wiki config
 
-## Wiki configuration file
+Create a wiki page called `.mergemate.toml` in your repo. No commits needed — just edit and save.
 
-`Platforms supported: GitHub, GitLab, Bitbucket`
+Wrap your config in triple backticks for clean rendering:
 
-With MergeMate, you can set configurations by creating a page called `.mergemate.toml` in the [wiki](https://github.com/mergemate/mergemate/wiki/mergemate.toml) of the repo.
-The advantage of this method is that it allows to set configurations without needing to commit new content to the repo - just edit the wiki page and **save**.
-
-![wiki_configuration](https://mergemate.ai/images/mergemate/wiki_configuration.png){width=512}
-
-Click [here](https://mergemate.ai/images/mergemate/wiki_configuration_mergemate.mp4) to see a short instructional video. We recommend surrounding the configuration content with triple-quotes (or \`\`\`toml), to allow better presentation when displayed in the wiki as markdown.
-An example content:
-
+~~~toml
 ```toml
 [pr_description]
-generate_ai_title=true
+generate_ai_title = true
 ```
+~~~
 
-MergeMate will know to remove the surrounding quotes when reading the configuration content.
+MergeMate strips the markdown wrapper automatically.
 
-## Local configuration file
+![Wiki config example](https://mergemate.ai/images/mergemate/wiki_configuration.png){width=512}
 
-`Platforms supported: GitHub, GitLab, Bitbucket, Azure DevOps`
+---
 
-By uploading a local `.mergemate.toml` file to the root of the repo's default branch, you can edit and customize any configuration parameter. Note that you need to upload or update `.mergemate.toml` before using the MergeMate tools (either at PR creation or via manual trigger) for the configuration to take effect.
+## Local config
 
-For example, if you set in `.mergemate.toml`:
+Drop a `.mergemate.toml` file in the root of your repo's default branch. Upload it *before* running tools for the config to take effect.
 
-```
+```toml
 [pr_reviewer]
-extra_instructions="""\
-- instruction a
-- instruction b
-...
+extra_instructions = """\
+- Check for SQL injection
+- Verify error handling
 """
 ```
 
-Then you can give a list of extra instructions to the `review` tool.
+### Loading from a non-default branch
 
-### Loading the local configuration from a non-default branch
+`Platform: GitHub`
 
-`Platforms supported: GitHub`
-
-By default, the local `.mergemate.toml` is read from the repo's **default branch**. When running MergeMate from the CLI (or any wrapper that exposes its arguments), you can point it at a different branch — for example to test configuration changes from a feature branch before merging them:
+By default, MergeMate reads `.mergemate.toml` from the default branch. Point it elsewhere with:
 
 ```bash
 python -m mergemate.cli \
-  --pr_url=<PR URL> \
-  --config-branch=<branch name> \
+  --pr_url=<URL> \
+  --config-branch=<branch-name> \
   review
 ```
 
-Equivalently, set the `MERGEMATE_CONFIG_BRANCH` environment variable. The CLI flag takes precedence over the environment variable, and whitespace-only values are ignored.
+Or set `MERGEMATE_CONFIG_BRANCH`. The CLI flag wins. If the file isn't found on the requested branch, MergeMate logs a warning and falls back to default.
 
-If `.mergemate.toml` cannot be loaded from the requested branch (e.g. the branch or file does not exist), MergeMate logs a warning and falls back to the default branch.
+!!! danger "Security: config branch is a trust boundary"
+    By default, only people who can merge to the default branch control MergeMate's behavior. `--config-branch` moves that trust boundary.
 
-!!! danger "Security: treat the config branch as privileged"
-    By default, configuration is read from the **default branch**, so only users who can merge to it can change how MergeMate behaves. `--config-branch` / `MERGEMATE_CONFIG_BRANCH` move that trust boundary to whatever branch you name.
-
-    **Never set the config branch from untrusted or PR-derived input** (e.g. `--config-branch=$GITHUB_HEAD_REF` / `${{ github.head_ref }}` in CI). Doing so lets anyone who can push a branch to the repository supply their own `.mergemate.toml` and control the review — for example pointing `model`/the API base at an attacker endpoint to exfiltrate the diff, injecting `extra_instructions`, or enabling auto-approval of their own PR. Always pin the config branch to a fixed, maintainer-controlled branch.
+    **Never** set it from untrusted input like `$GITHUB_HEAD_REF`. An attacker could supply their own `.mergemate.toml` and redirect model calls, inject instructions, or enable auto-approval. Always pin it to a maintainer-controlled branch.
 
 !!! note "GitHub only"
-    Branch selection is currently implemented for GitHub. On all other platforms the `--config-branch` flag and `MERGEMATE_CONFIG_BRANCH` variable are ignored, and the local `.mergemate.toml` is always read from the default branch.
+    Branch selection is currently GitHub-only. Other platforms ignore the flag and always read from the default branch.
 
-## Global configuration file
+---
 
-`Platforms supported: GitHub, GitLab (cloud), Bitbucket (cloud)`
+## Global config
 
-If you create a repo called `mergemate-settings` in your **organization**, its configuration file `.mergemate.toml` will be used as a global configuration file for any other repo that belongs to the same organization.
-Parameters from a local `.mergemate.toml` file, in a specific repo, will override the global configuration parameters.
+Create a repo called `mergemate-settings` in your org. Every repo in that org inherits its `.mergemate.toml`.
 
-For example, in the GitHub organization `mergemate-ai`:
+Local `.mergemate.toml` files override it per-repo.
 
-- The file [`https://github.com/mergemate/mergemate-settings/.mergemate.toml`](https://github.com/mergemate/mergemate-settings/blob/main/.mergemate.toml)  serves as a global configuration file for all the repos in the GitHub organization `mergemate-ai`.
+**Example:** `https://github.com/mergemate-ai/mergemate-settings` serves as the global config for all repos under the `mergemate-ai` org.
 
-- The repo [`https://github.com/mergemate/mergemate`](https://github.com/mergemate/mergemate/blob/main/.mergemate.toml) inherits the global configuration file from `mergemate-settings`.
+---
 
-## Project/Group level configuration file
+## Project / Group config
 
-`Platforms supported: GitLab, Bitbucket Data Center`
+`Platforms: GitLab, Bitbucket Data Center`
 
-Create a repository named `mergemate-settings` within a specific project (Bitbucket) or a group/subgroup (Gitlab). 
-The configuration file in this repository will apply to all repositories directly under the same project/group/subgroup.
+Create a `mergemate-settings` repo inside a GitLab group/subgroup or Bitbucket project. It applies to all repos directly under that group/project.
 
-!!! note "Note"
-    For Gitlab, in case of a repository nested in several sub groups, the lookup for a mergemate-settings repo will be only on one level above such repository.
+!!! note ""
+    For GitLab, if a repo is nested under multiple subgroups, MergeMate only looks one level up.
 
+---
 
-## Organization level configuration file
+## Organization-level config
 
-`Relevant platforms: Bitbucket Data Center`
+`Platform: Bitbucket Data Center`
 
-Create a dedicated project to hold a global configuration file that affects all repositories across all projects in your organization.
+Create a project named `MERGEMATE_SETTINGS` (key: `MERGEMATE_SETTINGS`), add a `mergemate-settings` repo, and put your `.mergemate.toml` inside. Every repo across every project inherits it.
 
-**Setting up organization-level global configuration:**
+Project-level settings override organization-level. Repo-local `.mergemate.toml` beats both.
 
-1. Create a new project with both the name and key: MERGEMATE_SETTINGS.
-2. Inside the MERGEMATE_SETTINGS project, create a repository named mergemate-settings.
-3. In this repository, add a `.mergemate.toml` configuration file—structured similarly to the global configuration file described above.
-4. Optionally, you can add organizational-level [global best practices](../tools/improve.md#global-hierarchical-best-practices).
+---
 
-Repositories across your entire Bitbucket organization will inherit the configuration from this file.
+## External config URL
 
-!!! note "Note"
-    If both organization-level and project-level global settings are defined, the project-level settings will take precedence over the organization-level configuration. Additionally, parameters from a repository’s local .mergemate.toml file will always override both global settings.
+`Platforms: all`
 
-## External configuration URL
-
-`Platforms supported: GitHub, GitLab, Bitbucket, Azure DevOps`
-
-When running MergeMate from the CLI (or any wrapper that exposes its arguments), you can merge an additional `.mergemate.toml` from any URL or local path before the repo-local and global configurations are applied. This is useful when:
-
-- You want a single shared configuration that applies to repositories nested deep inside subgroups, where the [project/group-level lookup](./configuration_options.md#projectgroup-level-configuration-file) only walks one level up.
-- The shared configuration is published outside of a Git host (a static site, an internal artifact server, an S3 bucket, etc.).
-- You want CI-time control over which defaults are layered in, without committing a file to the target repository.
-
-### Usage
-
-Pass `--extra_config_url` to the CLI, or set the `MERGEMATE_EXTRA_CONFIG_URL` environment variable:
+Pass an additional config file from any URL or local path. Applied *before* all other layers — it acts as a base default.
 
 ```bash
 python -m mergemate.cli \
-  --pr_url=<MR/PR URL> \
-  --extra_config_url=https://config.example.com/mergemate/shared.toml \
+  --pr_url=<URL> \
+  --extra_config_url=https://config.example.com/shared.toml \
   review
 ```
 
-Accepted values:
+Accepted schemes: `https://`, `http://`, `file://`, or a bare path.
 
-- `https://…` or `http://…` — fetched at runtime
-- `file:///path/to/shared.toml` — read from the local filesystem
-- A bare filesystem path — same as `file://`
+### Private endpoints
 
-### Authentication for private endpoints
-
-For private endpoints (e.g. a GitLab API URL pointing at a private `mergemate-settings` file), provide a single header via the `MERGEMATE_EXTRA_CONFIG_AUTH_HEADER` environment variable, formatted as `<HeaderName>: <value>`:
+Supply an auth header:
 
 ```bash
-# GitLab Personal Access Token
-export MERGEMATE_EXTRA_CONFIG_AUTH_HEADER="PRIVATE-TOKEN: <your-personal-access-token>"
-
-# GitLab CI job token
-export MERGEMATE_EXTRA_CONFIG_AUTH_HEADER="JOB-TOKEN: $CI_JOB_TOKEN"
-
-# Generic bearer token
+export MERGEMATE_EXTRA_CONFIG_AUTH_HEADER="PRIVATE-TOKEN: <your-token>"
 export MERGEMATE_EXTRA_CONFIG_AUTH_HEADER="Authorization: Bearer <your-token>"
 ```
 
-### Precedence
-
-External-URL settings are applied **first**, so every other layer overrides them:
+### Full precedence chain
 
 ```
 built-in defaults
-  < --extra_config_url
-    < global mergemate-settings
-      < local .mergemate.toml (repo default branch)
-        < wiki .mergemate.toml
-          < environment variables (MERGEMATE__SECTION__KEY)
+  ← --extra_config_url
+    ← global mergemate-settings
+      ← local .mergemate.toml (repo default branch)
+        ← wiki .mergemate.toml
+          ← environment variables (MERGEMATE__SECTION__KEY)
 ```
 
-This means an external URL acts as an organization-wide *default* that any team can still override with their own `mergemate-settings` or repo-local `.mergemate.toml`.
+### Security limits
 
-### Security and limits
+- Max response size: **1 MB**
+- Request timeout: **10 seconds**
+- Only `http`, `https`, `file` schemes accepted
+- No executable directives (includes, custom loaders)
 
-The external file is loaded through the same secure loader as the repo-local `.mergemate.toml`: includes, preloads, custom loaders, and other directives that could execute code or read arbitrary files are rejected. The fetcher additionally:
-
-- Limits the response size to **1 MB**
-- Uses a **10-second** request timeout
-- Only accepts `http`, `https`, `file` schemes (or a bare local path)
-
-If the fetch fails, the request is logged and MergeMate continues with the remaining configuration layers.
+If the fetch fails, MergeMate logs it and moves on.
