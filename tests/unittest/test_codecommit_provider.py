@@ -8,7 +8,7 @@ from mergemate.git_providers.codecommit_provider import CodeCommitFile, CodeComm
 
 class TestCodeCommitFile:
     # Test that a CodeCommitFile object is created successfully with valid parameters.
-    
+
     def test_valid_parameters(self):
         a_path = "path/to/file_a"
         a_blob_id = "12345"
@@ -86,7 +86,7 @@ class TestCodeCommitProvider:
         assert not CodeCommitProvider._is_valid_codecommit_hostname("console.aws.amazon.com")
 
     # Test that an error is raised when an invalid CodeCommit URL is provided to the set_pr() method of the CodeCommitProvider class.
-    
+
     def test_invalid_codecommit_url(self):
         provider = CodeCommitProvider()
         with pytest.raises(ValueError):

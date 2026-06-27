@@ -56,4 +56,3 @@ Using [tiktoken](https://github.com/openai/tiktoken), MergeMate tokenizes the re
 5. If there's still room, the `deleted files` list is appended until the cap, with the remainder dropped.
 
 #### Visual Summary
-
