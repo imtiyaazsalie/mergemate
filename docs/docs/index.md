@@ -1,68 +1,74 @@
 # MergeMate
 
-Your pull requests, supercharged with AI.
-
-MergeMate plugs into your workflow — GitHub, GitLab, Bitbucket, Azure DevOps — and handles the grind: reviews, descriptions, code suggestions, changelogs, and more. One tool, every platform.
+**AI code review that lives in your pull requests.**
 
 ---
 
-**Start here:**
-
-- [Set it up →](installation/index.md)
-- [Run your first command →](usage-guide/index.md)
-- [Explore all tools →](tools/index.md)
-
----
-
-## Ask the docs
-
-Stuck on something? Tag MergeMate in a PR comment:
-
-```
-/help "How do I ignore generated files?"
-```
-
-The bot replies with a [direct answer](https://github.com/mergemate/mergemate/pull/1241#issuecomment-2365259334) and links to the right docs page.
-
----
+MergeMate watches your pull requests and gives you honest, actionable feedback. It reads the diff, thinks about what changed, and tells you what matters — bugs, improvements, missing tests, confusing patterns.
 
 ## What it does
 
-| Capability | GitHub | GitLab | Bitbucket | Azure DevOps | Gitea |
-|---|---|---|---|---|---|
-| **Describe** — summarize the PR | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Review** — catch issues before merge | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Improve** — suggest code changes | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Ask** — query the PR directly | ✅ | ✅ | ✅ | | |
-| **Add Docs** — generate documentation | ✅ | ✅ | ✅ | ✅ | |
-| **Generate Labels** — auto-label PRs | ✅ | ✅ | ✅ | ✅ | |
-| **Update Changelog** — keep history clean | ✅ | ✅ | ✅ | ✅ | |
-| **Help** — in-PR assistance | ✅ | ✅ | ✅ | ✅ | |
-| **CLI** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **App / Webhook** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Command | One-line |
+|---|---|
+| `review` | Full code review posted as a PR comment |
+| `describe` | Generates a PR title and description from the diff |
+| `improve` | Inline suggestions on specific lines of code |
+| `ask` | Answer any question about the PR in context |
+| `labels` | Auto-label PRs based on what changed |
+| `docs` | Write documentation for new or changed code |
+| `changelog` | Update your CHANGELOG from PR contents |
+| `similar` | Find issues related to this PR |
 
----
+## Start in 60 seconds
 
-## See it in action
+```bash
+pip install mergemate
+export DEEPSEEK_API_KEY="sk-..."
+export GITHUB_TOKEN="ghp_..."
 
-### Describe
+mergemate --pr_url https://github.com/you/repo/pull/42 review
+```
 
-![Describe output](https://www.mergemate.ai/images/mergemate/describe_new_short_main.png){width=512}
+That's it. The review appears as a comment on your PR.
 
-### Review
+## Or run it on every PR
 
-![Review output](https://www.mergemate.ai/images/mergemate/review_new_short_main.png){width=512}
+Drop this in `.github/workflows/mergemate.yml`:
 
-### Improve
+```yaml
+name: MergeMate
+on: [pull_request]
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: mergemate/mergemate@main
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
 
-![Improve output](https://www.mergemate.ai/images/mergemate/improve_new_short_main.png){width=512}
+Now every PR gets reviewed automatically.
 
----
+## Works with
 
-## How it works under the hood
+- **GitHub** — Action, App, or CLI
+- **GitLab** — Webhook, CI pipeline, or CLI
+- **Bitbucket** — Pipeline or CLI
+- **Azure DevOps** — Pipeline or CLI
+- **Gitea** — Webhook or CLI
 
-MergeMate grabs your PR diff, filters out the noise, and builds a compact, context-rich prompt for the LLM. You get meaningful feedback — fast.
+## Pick your model
 
-![MergeMate pipeline](https://mergemate.ai/images/mergemate/diagram-v0.9.png)
+| Provider | Model |
+|---|---|
+| DeepSeek | `deepseek/deepseek-chat` |
+| OpenAI | `gpt-4o` |
+| Anthropic | `claude-sonnet-4-20250514` |
+| Google | `gemini/gemini-2.5-flash` |
+| Local | `ollama/llama3` |
 
-Curious about the compression? [Read the deep dive →](core-abilities/index.md)
+## Self-hosted, always
+
+MergeMate runs on your machine or your CI. Your code never leaves your infrastructure.
+API calls go directly from you to your AI provider. No middleman, no telemetry, no accounts.
