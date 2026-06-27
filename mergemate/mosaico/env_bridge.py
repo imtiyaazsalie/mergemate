@@ -2,6 +2,7 @@
 the Langfuse litellm callback. Every function is a no-op unless the corresponding
 MOSAICO env var is set: importing or calling apply_mosaico_env() with no MOSAICO env
 present changes nothing."""
+
 import os
 
 from mergemate.config_loader import get_settings
@@ -21,7 +22,9 @@ LEGACY_LANGFUSE_CALLBACK = "langfuse"
 
 
 def langfuse_env_present() -> bool:
-    return bool(os.getenv(ENV_LANGFUSE_HOST) and os.getenv(ENV_LANGFUSE_PUBLIC_KEY) and os.getenv(ENV_LANGFUSE_SECRET_KEY))
+    return bool(
+        os.getenv(ENV_LANGFUSE_HOST) and os.getenv(ENV_LANGFUSE_PUBLIC_KEY) and os.getenv(ENV_LANGFUSE_SECRET_KEY)
+    )
 
 
 def apply_mosaico_env() -> None:

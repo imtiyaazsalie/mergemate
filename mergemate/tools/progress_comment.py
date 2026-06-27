@@ -29,5 +29,5 @@ def build_progress_comment() -> str:
     return (
         "## Generating PR code suggestions\n\n"
         "\nWork in progress ...<br>\n"
-        f"<img src=\"{gif_url}\" alt=\"Work in progress\" width=\"{gif_width}\">"
+        f'<img src="{gif_url}" alt="Work in progress" width="{gif_width}">'
     )

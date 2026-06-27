@@ -63,6 +63,7 @@ class FakeDynaconf:
 # validate_file_security: forbidden directives at varying positions
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("directive", FORBIDDEN_DIRECTIVES)
 def test_forbidden_directive_at_top_level_raises(directive):
     data = {directive: "anything"}
@@ -108,6 +109,7 @@ def test_forbidden_directive_mixed_case_raises(directive):
 # validate_file_security: max depth guard
 # ---------------------------------------------------------------------------
 
+
 def test_excessive_nesting_raises_security_error():
     # Build a dict deeper than MAX_DEPTH (50) so the guard trips.
     data = current = {}
@@ -123,6 +125,7 @@ def test_excessive_nesting_raises_security_error():
 # ---------------------------------------------------------------------------
 # validate_file_security: representative safe MergeMate config does not raise
 # ---------------------------------------------------------------------------
+
 
 def test_safe_settings_config_does_not_raise():
     data = {
@@ -155,6 +158,7 @@ def test_safe_settings_config_does_not_raise():
 # load(): behavior tests using a minimal fake Dynaconf-like object
 # ---------------------------------------------------------------------------
 
+
 def _write(tmp_path, name, content):
     p = Path(tmp_path) / name
     p.write_text(content, encoding="utf-8")
@@ -179,7 +183,7 @@ def test_load_silent_true_skips_on_forbidden_directive(tmp_path):
     bad = _write(
         tmp_path,
         "bad.toml",
-        "[config]\nmodel = \"gpt-4\"\ndynaconf_include = [\"other.toml\"]\n",
+        '[config]\nmodel = "gpt-4"\ndynaconf_include = ["other.toml"]\n',
     )
     obj = FakeDynaconf(settings_files=[bad])
     # silent=True: exception is swallowed; no values should be set
@@ -191,7 +195,7 @@ def test_load_silent_false_raises_on_forbidden_directive(tmp_path):
     bad = _write(
         tmp_path,
         "bad.toml",
-        "[config]\nmodel = \"gpt-4\"\nincludes = [\"other.toml\"]\n",
+        '[config]\nmodel = "gpt-4"\nincludes = ["other.toml"]\n',
     )
     obj = FakeDynaconf(settings_files=[bad])
     with pytest.raises(SecurityError):
@@ -200,14 +204,14 @@ def test_load_silent_false_raises_on_forbidden_directive(tmp_path):
 
 def test_load_silent_false_raises_on_top_level_includes_attr(tmp_path):
     # The loader also checks the object's own .includes attribute.
-    good = _write(tmp_path, "ok.toml", "[config]\nmodel = \"gpt-4\"\n")
+    good = _write(tmp_path, "ok.toml", '[config]\nmodel = "gpt-4"\n')
     obj = FakeDynaconf(settings_files=[good], includes=["something.toml"])
     with pytest.raises(SecurityError):
         load(obj, silent=False)
 
 
 def test_load_silent_false_raises_on_top_level_preload_attr(tmp_path):
-    good = _write(tmp_path, "ok.toml", "[config]\nmodel = \"gpt-4\"\n")
+    good = _write(tmp_path, "ok.toml", '[config]\nmodel = "gpt-4"\n')
     obj = FakeDynaconf(settings_files=[good], preload=["something.toml"])
     with pytest.raises(SecurityError):
         load(obj, silent=False)
@@ -217,7 +221,7 @@ def test_load_valid_toml_sets_expected_sections(tmp_path):
     a = _write(
         tmp_path,
         "a.toml",
-        "[config]\nmodel = \"gpt-4\"\nverbosity_level = 1\n\n[pr_reviewer]\nnum_code_suggestions = 4\n",
+        '[config]\nmodel = "gpt-4"\nverbosity_level = 1\n\n[pr_reviewer]\nnum_code_suggestions = 4\n',
     )
     obj = FakeDynaconf(settings_files=[a])
     load(obj)
@@ -232,7 +236,7 @@ def test_load_respects_single_key_loading(tmp_path):
     a = _write(
         tmp_path,
         "a.toml",
-        "[config]\nmodel = \"gpt-4\"\n\n[pr_reviewer]\nnum_code_suggestions = 4\n",
+        '[config]\nmodel = "gpt-4"\n\n[pr_reviewer]\nnum_code_suggestions = 4\n',
     )
     obj = FakeDynaconf(settings_files=[a])
     # key matching is case-insensitive in the loader
@@ -242,8 +246,8 @@ def test_load_respects_single_key_loading(tmp_path):
 
 
 def test_load_later_file_replaces_earlier_field(tmp_path):
-    a = _write(tmp_path, "a.toml", "[config]\nmodel = \"gpt-4\"\nshared = \"from_a\"\n")
-    b = _write(tmp_path, "b.toml", "[config]\nshared = \"from_b\"\n")
+    a = _write(tmp_path, "a.toml", '[config]\nmodel = "gpt-4"\nshared = "from_a"\n')
+    b = _write(tmp_path, "b.toml", '[config]\nshared = "from_b"\n')
     obj = FakeDynaconf(settings_files=[a, b])
     load(obj)
     assert obj._store["config"]["shared"] == "from_b"

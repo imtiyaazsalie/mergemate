@@ -5,6 +5,7 @@ non-string value -> key omitted; non-Mapping -> {}; never raises.
 langfuse_span: no-op-safe when langfuse unavailable AND when meta is partial/empty;
 W3C transform locked (root-task-id de-hyphenated -> trace_id, last 16 hex of
 super-task-id -> parent_span_id, context_id -> session_id)."""
+
 import contextlib
 import sys
 import types
@@ -57,6 +58,7 @@ class TestLangfuseSpanNoOpSafety:
     def test_partial_meta_does_not_raise_when_langfuse_unavailable(self, monkeypatch):
         # Simulate langfuse import failure inside the CM; it must degrade to untraced.
         import builtins
+
         real_import = builtins.__import__
 
         def fake_import(name, *args, **kwargs):
@@ -106,11 +108,13 @@ class TestLangfuseSpanW3CTransform:
         fake_langfuse.propagate_attributes = fake_propagate_attributes
         monkeypatch.setitem(sys.modules, "langfuse", fake_langfuse)
 
-        meta = parse_observability_metadata({
-            "mosaico-root-task-id": "123e4567-e89b-12d3-a456-426614174000",
-            "mosaico-super-task-id": "00112233-4455-6677-8899-aabbccddeeff",
-            "mosaico-root-task-name": "root-task",
-        })
+        meta = parse_observability_metadata(
+            {
+                "mosaico-root-task-id": "123e4567-e89b-12d3-a456-426614174000",
+                "mosaico-super-task-id": "00112233-4455-6677-8899-aabbccddeeff",
+                "mosaico-root-task-name": "root-task",
+            }
+        )
         ran = {"v": False}
         with langfuse_span(meta, "ctx-id-42"):
             ran["v"] = True

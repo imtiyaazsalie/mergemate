@@ -9,8 +9,9 @@ from mergemate.secret_providers.secret_provider import SecretProvider
 class GoogleCloudStorageSecretProvider(SecretProvider):
     def __init__(self):
         try:
-            self.client = storage.Client.from_service_account_info(ujson.loads(get_settings().google_cloud_storage.
-                                                                               service_account))
+            self.client = storage.Client.from_service_account_info(
+                ujson.loads(get_settings().google_cloud_storage.service_account)
+            )
             self.bucket_name = get_settings().google_cloud_storage.bucket_name
             self.bucket = self.client.bucket(self.bucket_name)
         except Exception as e:

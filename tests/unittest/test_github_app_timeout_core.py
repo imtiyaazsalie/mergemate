@@ -66,9 +66,7 @@ def _key_times(d):
 class TestDefaultDictWithTimeout:
     def test_update_key_time_on_get_true_refreshes_access_time(self, fake_clock):
         # Use a large refresh_interval to keep __refresh from interfering.
-        d = DefaultDictWithTimeout(
-            lambda: 0, ttl=1000, refresh_interval=1000, update_key_time_on_get=True
-        )
+        d = DefaultDictWithTimeout(lambda: 0, ttl=1000, refresh_interval=1000, update_key_time_on_get=True)
         d["a"] = 1
         t_set = fake_clock["t"]
         assert _key_times(d)["a"] == t_set
@@ -78,9 +76,7 @@ class TestDefaultDictWithTimeout:
         assert _key_times(d)["a"] == t_set + 7.5
 
     def test_update_key_time_on_get_false_keeps_original_time(self, fake_clock):
-        d = DefaultDictWithTimeout(
-            lambda: 0, ttl=1000, refresh_interval=1000, update_key_time_on_get=False
-        )
+        d = DefaultDictWithTimeout(lambda: 0, ttl=1000, refresh_interval=1000, update_key_time_on_get=False)
         d["a"] = 1
         original = _key_times(d)["a"]
 
@@ -89,9 +85,7 @@ class TestDefaultDictWithTimeout:
         assert _key_times(d)["a"] == original
 
     def test_setitem_always_updates_key_time(self, fake_clock):
-        d = DefaultDictWithTimeout(
-            lambda: 0, ttl=1000, refresh_interval=1000, update_key_time_on_get=False
-        )
+        d = DefaultDictWithTimeout(lambda: 0, ttl=1000, refresh_interval=1000, update_key_time_on_get=False)
         d["a"] = 1
         first = _key_times(d)["a"]
         fake_clock["t"] += 3
@@ -101,9 +95,7 @@ class TestDefaultDictWithTimeout:
     def test_expires_keys_older_than_ttl_when_refresh_runs(self, fake_clock):
         # ttl < refresh_interval so we can advance past both: the throttle
         # permits __refresh to run, and the stale keys are then evicted.
-        d = DefaultDictWithTimeout(
-            lambda: 0, ttl=2, refresh_interval=5, update_key_time_on_get=False
-        )
+        d = DefaultDictWithTimeout(lambda: 0, ttl=2, refresh_interval=5, update_key_time_on_get=False)
         d["a"] = 1
         d["b"] = 2
 
@@ -138,9 +130,7 @@ class TestDefaultDictWithTimeout:
         assert "a" not in _key_times(d)
 
     def test_refresh_runs_after_long_idle_period(self, fake_clock):
-        d = DefaultDictWithTimeout(
-            lambda: 0, ttl=2, refresh_interval=5, update_key_time_on_get=False
-        )
+        d = DefaultDictWithTimeout(lambda: 0, ttl=2, refresh_interval=5, update_key_time_on_get=False)
         d["a"] = 1
         # Idle well past both the TTL and the refresh interval.  Accessing any
         # key must trigger __refresh and expire stale entries, even after a
@@ -334,14 +324,8 @@ class TestCheckPullRequestEvent:
         assert github_app._check_pull_request_event("opened", body, {}) == ({}, "")
 
     def test_rejects_synchronize_when_created_equals_updated(self):
-        body = {
-            "pull_request": self._pr(
-                created_at="2024-01-01T00:00:00Z", updated_at="2024-01-01T00:00:00Z"
-            )
-        }
-        assert (
-            github_app._check_pull_request_event("synchronize", body, {}) == ({}, "")
-        )
+        body = {"pull_request": self._pr(created_at="2024-01-01T00:00:00Z", updated_at="2024-01-01T00:00:00Z")}
+        assert github_app._check_pull_request_event("synchronize", body, {}) == ({}, "")
 
     def test_accepts_synchronize_when_timestamps_differ(self):
         body = {"pull_request": self._pr()}
@@ -365,12 +349,8 @@ def push_trigger_env(monkeypatch):
     # Swap module-level dedupe state with fresh test-local instances so we
     # don't leak entries into other tests and don't depend on prior state.
     fresh_duplicate_push_triggers = DefaultDictWithTimeout(ttl=None)
-    fresh_pending_conditions = DefaultDictWithTimeout(
-        asyncio.locks.Condition, ttl=None
-    )
-    monkeypatch.setattr(
-        github_app, "_duplicate_push_triggers", fresh_duplicate_push_triggers
-    )
+    fresh_pending_conditions = DefaultDictWithTimeout(asyncio.locks.Condition, ttl=None)
+    monkeypatch.setattr(github_app, "_duplicate_push_triggers", fresh_duplicate_push_triggers)
     monkeypatch.setattr(
         github_app,
         "_pending_task_duplicate_push_conditions",
@@ -387,9 +367,7 @@ def push_trigger_env(monkeypatch):
     monkeypatch.setattr(github_app, "get_settings", lambda: settings)
     monkeypatch.setattr(github_app, "apply_repo_settings", lambda api_url: None)
 
-    eligible_provider = SimpleNamespace(
-        verify_eligibility=lambda *a, **kw: github_app.Eligibility.ELIGIBLE
-    )
+    eligible_provider = SimpleNamespace(verify_eligibility=lambda *a, **kw: github_app.Eligibility.ELIGIBLE)
     monkeypatch.setattr(github_app, "get_identity_provider", lambda: eligible_provider)
 
     calls = {"count": 0}
@@ -422,9 +400,7 @@ class TestPushTriggerDedupe:
         api_url = body["pull_request"]["url"]
 
         asyncio.run(
-            github_app.handle_push_trigger_for_new_commits(
-                body, "push", "alice", "1", "synchronize", {}, agent=None
-            )
+            github_app.handle_push_trigger_for_new_commits(body, "push", "alice", "1", "synchronize", {}, agent=None)
         )
 
         assert push_trigger_env["count"] == 1
@@ -436,9 +412,7 @@ class TestPushTriggerDedupe:
         body["before"] = body["after"]
 
         asyncio.run(
-            github_app.handle_push_trigger_for_new_commits(
-                body, "push", "alice", "1", "synchronize", {}, agent=None
-            )
+            github_app.handle_push_trigger_for_new_commits(body, "push", "alice", "1", "synchronize", {}, agent=None)
         )
 
         assert push_trigger_env["count"] == 0
@@ -450,9 +424,7 @@ class TestPushTriggerDedupe:
         settings.github_app.push_trigger_ignore_merge_commits = True
 
         asyncio.run(
-            github_app.handle_push_trigger_for_new_commits(
-                body, "push", "alice", "1", "synchronize", {}, agent=None
-            )
+            github_app.handle_push_trigger_for_new_commits(body, "push", "alice", "1", "synchronize", {}, agent=None)
         )
 
         assert push_trigger_env["count"] == 0
@@ -475,9 +447,7 @@ class TestPushTriggerDedupe:
         github_app._duplicate_push_triggers[api_url] = 1
 
         asyncio.run(
-            github_app.handle_push_trigger_for_new_commits(
-                body, "push", "alice", "1", "synchronize", {}, agent=None
-            )
+            github_app.handle_push_trigger_for_new_commits(body, "push", "alice", "1", "synchronize", {}, agent=None)
         )
 
         # Third path: counter is left untouched, perform never runs.
@@ -489,9 +459,7 @@ class TestPushTriggerDedupe:
         body["pull_request"]["state"] = "closed"
 
         asyncio.run(
-            github_app.handle_push_trigger_for_new_commits(
-                body, "push", "alice", "1", "synchronize", {}, agent=None
-            )
+            github_app.handle_push_trigger_for_new_commits(body, "push", "alice", "1", "synchronize", {}, agent=None)
         )
 
         assert push_trigger_env["count"] == 0

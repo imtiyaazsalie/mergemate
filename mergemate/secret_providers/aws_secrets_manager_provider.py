@@ -11,12 +11,13 @@ from mergemate.secret_providers.secret_provider import SecretProvider
 class AWSSecretsManagerProvider(SecretProvider):
     def __init__(self):
         try:
-            region_name = get_settings().get("aws_secrets_manager.region_name") or \
-                         get_settings().get("aws.AWS_REGION_NAME")
+            region_name = get_settings().get("aws_secrets_manager.region_name") or get_settings().get(
+                "aws.AWS_REGION_NAME"
+            )
             if region_name:
-                self.client = boto3.client('secretsmanager', region_name=region_name)
+                self.client = boto3.client("secretsmanager", region_name=region_name)
             else:
-                self.client = boto3.client('secretsmanager')
+                self.client = boto3.client("secretsmanager")
 
             self.secret_arn = get_settings().get("aws_secrets_manager.secret_arn")
             if not self.secret_arn:
@@ -31,7 +32,7 @@ class AWSSecretsManagerProvider(SecretProvider):
         """
         try:
             response = self.client.get_secret_value(SecretId=secret_name)
-            return response['SecretString']
+            return response["SecretString"]
         except Exception as e:
             get_logger().warning(f"Failed to get secret {secret_name} from AWS Secrets Manager: {e}")
             return ""
@@ -42,17 +43,14 @@ class AWSSecretsManagerProvider(SecretProvider):
         """
         try:
             response = self.client.get_secret_value(SecretId=self.secret_arn)
-            return json.loads(response['SecretString'])
+            return json.loads(response["SecretString"])
         except Exception as e:
             get_logger().error(f"Failed to get secrets from AWS Secrets Manager {self.secret_arn}: {e}")
             return {}
 
     def store_secret(self, secret_name: str, secret_value: str):
         try:
-            self.client.put_secret_value(
-                SecretId=secret_name,
-                SecretString=secret_value
-            )
+            self.client.put_secret_value(SecretId=secret_name, SecretString=secret_value)
         except Exception as e:
             get_logger().error(f"Failed to store secret {secret_name} in AWS Secrets Manager: {e}")
             raise e

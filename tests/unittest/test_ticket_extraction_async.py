@@ -5,6 +5,7 @@ Unit tests for async ticket extraction & caching in
 These tests are deterministic and fake-provider based — no live API or
 network access is performed.
 """
+
 import asyncio
 
 import pytest
@@ -21,6 +22,7 @@ from tests.unittest._settings_helpers import restore_settings, snapshot_settings
 # ---------------------------------------------------------------------------
 # Test doubles
 # ---------------------------------------------------------------------------
+
 
 class _FakeLabel:
     def __init__(self, name):
@@ -89,6 +91,7 @@ def _make_azure_provider(work_items):
 # Settings snapshot helper
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def settings_snapshot():
     """Snapshot and restore settings keys mutated by these tests.
@@ -99,9 +102,7 @@ def settings_snapshot():
     that would leak into subsequent tests.
     """
     s = get_settings()
-    snapshot = snapshot_settings(
-        ["related_tickets", "pr_reviewer.require_ticket_analysis_review"]
-    )
+    snapshot = snapshot_settings(["related_tickets", "pr_reviewer.require_ticket_analysis_review"])
     # Reset to known defaults for each test
     s.set("related_tickets", [])
     s.set("pr_reviewer.require_ticket_analysis_review", False)
@@ -115,15 +116,18 @@ def settings_snapshot():
 # Scenario 1: GitHub extraction merges description + branch, dedupes, caps
 # ---------------------------------------------------------------------------
 
+
 class TestGithubExtractionMerging:
     def test_branch_extraction_contributes_ticket_not_in_description(self, settings_snapshot):
         # Description mentions only #1; branch contributes #2. Without branch
         # extraction the result would be [1]; with it, [1, 2] (description first).
         desc = "Fixes #1"
-        repo_obj = _FakeRepoObj({
-            1: _FakeIssue(1, title="One", body="body1"),
-            2: _FakeIssue(2, title="Two", body="body2"),
-        })
+        repo_obj = _FakeRepoObj(
+            {
+                1: _FakeIssue(1, title="One", body="body1"),
+                2: _FakeIssue(2, title="Two", body="body2"),
+            }
+        )
         provider = _make_github_provider(
             user_description=desc,
             branch="feature/2-dup",
@@ -139,10 +143,12 @@ class TestGithubExtractionMerging:
         # Description references both #1 and #2; branch also points at #2.
         # The branch duplicate must not produce a second entry for #2.
         desc = "Fixes #1 and addresses #2"
-        repo_obj = _FakeRepoObj({
-            1: _FakeIssue(1, title="One", body="body1"),
-            2: _FakeIssue(2, title="Two", body="body2"),
-        })
+        repo_obj = _FakeRepoObj(
+            {
+                1: _FakeIssue(1, title="One", body="body1"),
+                2: _FakeIssue(2, title="Two", body="body2"),
+            }
+        )
         provider = _make_github_provider(
             user_description=desc,
             branch="feature/2-dup",
@@ -158,9 +164,11 @@ class TestGithubExtractionMerging:
     def test_branch_only_extraction_produces_single_ticket(self, settings_snapshot):
         # Description carries no ticket references — the branch must still
         # surface its issue number on its own.
-        repo_obj = _FakeRepoObj({
-            77: _FakeIssue(77, title="From branch", body="bb"),
-        })
+        repo_obj = _FakeRepoObj(
+            {
+                77: _FakeIssue(77, title="From branch", body="bb"),
+            }
+        )
         provider = _make_github_provider(
             user_description="No ticket reference here.",
             branch="feature/77-add-thing",
@@ -180,12 +188,14 @@ class TestGithubExtractionMerging:
             "and https://github.com/org/repo/issues/11 "
             "and https://github.com/org/repo/issues/12"
         )
-        repo_obj = _FakeRepoObj({
-            10: _FakeIssue(10),
-            11: _FakeIssue(11),
-            12: _FakeIssue(12),
-            13: _FakeIssue(13),
-        })
+        repo_obj = _FakeRepoObj(
+            {
+                10: _FakeIssue(10),
+                11: _FakeIssue(11),
+                12: _FakeIssue(12),
+                13: _FakeIssue(13),
+            }
+        )
         provider = _make_github_provider(
             user_description=desc,
             branch="feature/13-extra",
@@ -204,13 +214,12 @@ class TestGithubExtractionMerging:
 # Scenario 2: Long body truncation
 # ---------------------------------------------------------------------------
 
+
 class TestBodyTruncation:
     def test_main_issue_body_truncated_to_10000_chars_plus_ellipsis(self, settings_snapshot):
         long_body = "x" * 10500
         repo_obj = _FakeRepoObj({1: _FakeIssue(1, body=long_body)})
-        provider = _make_github_provider(
-            user_description="Fixes #1", repo_obj=repo_obj
-        )
+        provider = _make_github_provider(user_description="Fixes #1", repo_obj=repo_obj)
         result = asyncio.run(extract_tickets(provider))
         assert result and len(result) == 1
         body = result[0]["body"]
@@ -219,9 +228,7 @@ class TestBodyTruncation:
 
     def test_short_body_not_truncated(self, settings_snapshot):
         repo_obj = _FakeRepoObj({1: _FakeIssue(1, body="short")})
-        provider = _make_github_provider(
-            user_description="Fixes #1", repo_obj=repo_obj
-        )
+        provider = _make_github_provider(user_description="Fixes #1", repo_obj=repo_obj)
         result = asyncio.run(extract_tickets(provider))
         assert result[0]["body"] == "short"
 
@@ -230,15 +237,14 @@ class TestBodyTruncation:
 # Scenario 3: get_issue failure on one ticket does not block others
 # ---------------------------------------------------------------------------
 
+
 class TestGetIssueFailureIsolated:
     def test_failure_on_one_issue_does_not_break_others(self, settings_snapshot):
         repo_obj = _FakeRepoObj(
             issues_by_number={2: _FakeIssue(2, title="Two")},
             raise_for={1},
         )
-        provider = _make_github_provider(
-            user_description="Fixes #1 and #2", repo_obj=repo_obj
-        )
+        provider = _make_github_provider(user_description="Fixes #1 and #2", repo_obj=repo_obj)
         result = asyncio.run(extract_tickets(provider))
         assert result is not None
         ids = [t["ticket_id"] for t in result]
@@ -249,13 +255,16 @@ class TestGetIssueFailureIsolated:
 # Scenario 4 + 5: sub-issue fetch success and exception handling
 # ---------------------------------------------------------------------------
 
+
 class TestSubIssues:
     def test_sub_issue_success_populates_and_truncates(self, settings_snapshot):
         long_sub_body = "y" * 10500
-        repo_obj = _FakeRepoObj({
-            1: _FakeIssue(1, title="Main", body="m"),
-            99: _FakeIssue(99, title="Sub", body=long_sub_body),
-        })
+        repo_obj = _FakeRepoObj(
+            {
+                1: _FakeIssue(1, title="Main", body="m"),
+                99: _FakeIssue(99, title="Sub", body=long_sub_body),
+            }
+        )
         sub_url = "https://github.com/org/repo/issues/99"
         provider = _make_github_provider(
             user_description="Fixes #1",
@@ -295,9 +304,7 @@ class TestSubIssues:
         provider = _make_github_provider(
             user_description="Fixes #1",
             repo_obj=repo_obj,
-            sub_issues_map={
-                "https://github.com/org/repo/issues/1": [sub_bad, sub_good]
-            },
+            sub_issues_map={"https://github.com/org/repo/issues/1": [sub_bad, sub_good]},
         )
         result = asyncio.run(extract_tickets(provider))
         subs = result[0]["sub_issues"]
@@ -308,24 +315,25 @@ class TestSubIssues:
 # Scenario 6: labels — supports both object-style and string-style
 # ---------------------------------------------------------------------------
 
+
 class TestLabelExtraction:
     def test_object_labels_extracted_by_name(self, settings_snapshot):
-        repo_obj = _FakeRepoObj({
-            1: _FakeIssue(1, labels=[_FakeLabel("bug"), _FakeLabel("urgent")]),
-        })
-        provider = _make_github_provider(
-            user_description="Fixes #1", repo_obj=repo_obj
+        repo_obj = _FakeRepoObj(
+            {
+                1: _FakeIssue(1, labels=[_FakeLabel("bug"), _FakeLabel("urgent")]),
+            }
         )
+        provider = _make_github_provider(user_description="Fixes #1", repo_obj=repo_obj)
         result = asyncio.run(extract_tickets(provider))
         assert result[0]["labels"] == "bug, urgent"
 
     def test_string_labels_also_supported(self, settings_snapshot):
-        repo_obj = _FakeRepoObj({
-            1: _FakeIssue(1, labels=["bug", "urgent"]),
-        })
-        provider = _make_github_provider(
-            user_description="Fixes #1", repo_obj=repo_obj
+        repo_obj = _FakeRepoObj(
+            {
+                1: _FakeIssue(1, labels=["bug", "urgent"]),
+            }
         )
+        provider = _make_github_provider(user_description="Fixes #1", repo_obj=repo_obj)
         result = asyncio.run(extract_tickets(provider))
         assert result[0]["labels"] == "bug, urgent"
 
@@ -337,9 +345,7 @@ class TestLabelExtraction:
         issue = _FakeIssue(1)
         issue.labels = _Boom()
         repo_obj = _FakeRepoObj({1: issue})
-        provider = _make_github_provider(
-            user_description="Fixes #1", repo_obj=repo_obj
-        )
+        provider = _make_github_provider(user_description="Fixes #1", repo_obj=repo_obj)
         result = asyncio.run(extract_tickets(provider))
         assert result[0]["labels"] == ""
 
@@ -347,6 +353,7 @@ class TestLabelExtraction:
 # ---------------------------------------------------------------------------
 # Scenario 7: Azure DevOps linked work items mapping
 # ---------------------------------------------------------------------------
+
 
 class TestAzureDevopsExtraction:
     def test_linked_work_items_mapped_with_truncation(self, settings_snapshot):
@@ -387,6 +394,7 @@ class TestAzureDevopsExtraction:
 # Scenario 11: Unsupported provider returns None per current contract
 # ---------------------------------------------------------------------------
 
+
 class TestUnsupportedProvider:
     def test_non_github_non_azure_provider_returns_none(self, settings_snapshot):
         class _OtherProvider:
@@ -401,19 +409,16 @@ class TestUnsupportedProvider:
 # Scenarios 8-10: extract_and_cache_pr_tickets behavior
 # ---------------------------------------------------------------------------
 
+
 class TestExtractAndCachePrTickets:
-    def test_review_setting_disabled_returns_without_provider_calls(
-        self, settings_snapshot
-    ):
+    def test_review_setting_disabled_returns_without_provider_calls(self, settings_snapshot):
         settings_snapshot.set("pr_reviewer.require_ticket_analysis_review", False)
         calls = {"n": 0}
 
         class _Tripwire:
             def __getattr__(self, name):
                 calls["n"] += 1
-                raise AttributeError(
-                    f"Provider should not be touched (attr={name})"
-                )
+                raise AttributeError(f"Provider should not be touched (attr={name})")
 
         vars_ = {}
         result = asyncio.run(extract_and_cache_pr_tickets(_Tripwire(), vars_))
@@ -421,9 +426,7 @@ class TestExtractAndCachePrTickets:
         assert calls["n"] == 0
         assert "related_tickets" not in vars_
 
-    def test_uses_existing_related_tickets_cache_without_extract(
-        self, settings_snapshot, monkeypatch
-    ):
+    def test_uses_existing_related_tickets_cache_without_extract(self, settings_snapshot, monkeypatch):
         settings_snapshot.set("pr_reviewer.require_ticket_analysis_review", True)
         cached = [{"ticket_id": 42, "title": "cached"}]
         settings_snapshot.set("related_tickets", cached)
@@ -438,9 +441,7 @@ class TestExtractAndCachePrTickets:
         asyncio.run(extract_and_cache_pr_tickets(object(), vars_))
         assert vars_["related_tickets"] == cached
 
-    def test_stores_sub_issues_before_main_issue_in_related_tickets(
-        self, settings_snapshot, monkeypatch
-    ):
+    def test_stores_sub_issues_before_main_issue_in_related_tickets(self, settings_snapshot, monkeypatch):
         settings_snapshot.set("pr_reviewer.require_ticket_analysis_review", True)
         settings_snapshot.set("related_tickets", [])
 
@@ -469,9 +470,7 @@ class TestExtractAndCachePrTickets:
         # Settings cache is also populated
         assert get_settings().get("related_tickets") == stored
 
-    def test_no_tickets_extracted_leaves_vars_untouched(
-        self, settings_snapshot, monkeypatch
-    ):
+    def test_no_tickets_extracted_leaves_vars_untouched(self, settings_snapshot, monkeypatch):
         settings_snapshot.set("pr_reviewer.require_ticket_analysis_review", True)
         settings_snapshot.set("related_tickets", [])
 

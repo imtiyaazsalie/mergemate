@@ -6,6 +6,7 @@ TaskUpdater that captures add_artifact()/complete()/failed() calls. asyncio_mode
 Non-vacuity (Fix C): test_non_vacuity_ok_false_must_not_complete verifies that if
 ok=False causes complete() instead of failed(), the assertion fails — proving the
 test can detect a Fix C regression."""
+
 import pytest
 from a2a.types import Message, Part, Role
 from starlette_context import request_cycle_context
@@ -56,9 +57,9 @@ class _SpyTaskUpdater:
         self.event_queue = event_queue
         self.task_id = task_id
         self.context_id = context_id
-        self.artifacts = []       # list of Part lists passed to add_artifact
+        self.artifacts = []  # list of Part lists passed to add_artifact
         self.completed = False
-        self.failed_with = None   # message text passed to failed()
+        self.failed_with = None  # message text passed to failed()
         type(self).last = self
 
     async def add_artifact(self, parts, **kwargs):
@@ -121,6 +122,7 @@ class TestExecute:
     @pytest.mark.asyncio
     async def test_completes_with_artifact(self, monkeypatch, spy_updater):
         """ok=True path: result goes into add_artifact (RISK 2), then complete()."""
+
         async def fake_route_and_run_result(text):
             return RouteResult("RENDERED", True)
 
@@ -171,6 +173,7 @@ class TestExecute:
     @pytest.mark.asyncio
     async def test_failed_result_marks_failed_not_completed(self, monkeypatch, spy_updater):
         """ok=False path (Fix C): artifact is added, then failed() — never complete()."""
+
         async def fake_route_and_run_result(text):
             return RouteResult("boom", ok=False)
 
@@ -188,6 +191,7 @@ class TestExecute:
     async def test_non_vacuity_ok_false_must_not_complete(self, monkeypatch, spy_updater):
         """Non-vacuity guard (Fix C): if ok=False route calls complete() instead of
         failed(), this assertion fails — proving the test catches a Fix C regression."""
+
         async def bad_url_result(text):
             return RouteResult("SSRF blocked", ok=False)
 
@@ -198,9 +202,7 @@ class TestExecute:
 
         spy = spy_updater.last
         # If Fix C is reverted (complete() called on ok=False), this assertion fails.
-        assert spy.completed is False, (
-            "ok=False path must call failed(), not complete() — Fix C guard"
-        )
+        assert spy.completed is False, "ok=False path must call failed(), not complete() — Fix C guard"
         assert spy.failed_with is not None
 
     @pytest.mark.parametrize("missing", ["task_id", "context_id"])
@@ -209,6 +211,7 @@ class TestExecute:
         """Defense in depth: a RequestContext lacking the A2A 1.0 task_id/context_id
         fields raises a controlled error (logged) before any TaskUpdater is built —
         not an uncaught crash, and never a silent complete()."""
+
         async def fake_route_and_run_result(text):
             return RouteResult("RENDERED", True)
 

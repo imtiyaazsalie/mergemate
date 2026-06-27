@@ -35,13 +35,17 @@ async def test_run_action_invokes_enabled_auto_tools_for_pull_request_event(monk
     had_github_action_config = "GITHUB_ACTION_CONFIG" in settings
     original_github_action_config = copy.deepcopy(settings.get("GITHUB_ACTION_CONFIG", None))
     event_path = tmp_path / "event.json"
-    event_path.write_text(json.dumps({
-        "action": "opened",
-        "pull_request": {
-            "url": "https://api.github.com/repos/org/repo/pulls/1",
-            "html_url": "https://github.com/org/repo/pull/1",
-        },
-    }))
+    event_path.write_text(
+        json.dumps(
+            {
+                "action": "opened",
+                "pull_request": {
+                    "url": "https://api.github.com/repos/org/repo/pulls/1",
+                    "html_url": "https://github.com/org/repo/pull/1",
+                },
+            }
+        )
+    )
     monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
     monkeypatch.setenv("GITHUB_EVENT_PATH", str(event_path))
     monkeypatch.setenv("GITHUB_TOKEN", "token")
@@ -127,15 +131,19 @@ def restore_github_settings():
 
 def _write_issue_comment_event(tmp_path, sender_type):
     event_path = tmp_path / "event.json"
-    event_path.write_text(json.dumps({
-        "action": "created",
-        "comment": {"body": "/review", "id": 123},
-        "issue": {
-            "pull_request": {"url": "https://api.github.com/repos/org/repo/pulls/1"},
-            "url": "https://api.github.com/repos/org/repo/issues/1",
-        },
-        "sender": {"type": sender_type},
-    }))
+    event_path.write_text(
+        json.dumps(
+            {
+                "action": "created",
+                "comment": {"body": "/review", "id": 123},
+                "issue": {
+                    "pull_request": {"url": "https://api.github.com/repos/org/repo/pulls/1"},
+                    "url": "https://api.github.com/repos/org/repo/issues/1",
+                },
+                "sender": {"type": sender_type},
+            }
+        )
+    )
     return event_path
 
 

@@ -40,9 +40,9 @@ def _mock_response():
 def _assert_api_key(kwargs, expected_value):
     """Assert api_key is present and equals expected_value in litellm.acompletion kwargs."""
     actual = kwargs.get("api_key")
-    assert actual == expected_value, (
-        f"Expected api_key={expected_value!r} in acompletion kwargs, got {actual!r}. Full kwargs: {kwargs}"
-    )
+    assert (
+        actual == expected_value
+    ), f"Expected api_key={expected_value!r} in acompletion kwargs, got {actual!r}. Full kwargs: {kwargs}"
 
 
 def _assert_no_api_key(kwargs):
@@ -197,6 +197,6 @@ class TestApiKeyGuard:
             await handler.chat_completion(model="groq/llama-3.1-70b", system="sys", user="usr")
             _assert_api_key(mock_call.call_args[1], groq_key)
             # api_base should NOT leak from Ollama
-            assert "api_base" not in mock_call.call_args[1], (
-                f"api_base should not be present for Groq call. Full kwargs: {mock_call.call_args[1]}"
-            )
+            assert (
+                "api_base" not in mock_call.call_args[1]
+            ), f"api_base should not be present for Groq call. Full kwargs: {mock_call.call_args[1]}"

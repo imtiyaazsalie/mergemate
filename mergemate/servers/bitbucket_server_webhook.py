@@ -26,9 +26,7 @@ setup_logger(fmt=LoggingFormat.JSON, level=get_settings().get("CONFIG.LOG_LEVEL"
 router = APIRouter()
 
 
-def handle_request(
-    background_tasks: BackgroundTasks, url: str, body: str, log_context: dict
-):
+def handle_request(background_tasks: BackgroundTasks, url: str, body: str, log_context: dict):
     log_context["action"] = body
     log_context["api_url"] = url
 
@@ -40,6 +38,7 @@ def handle_request(
             get_logger().error(f"Failed to handle webhook: {e}")
 
     background_tasks.add_task(inner)
+
 
 def should_process_pr_logic(data) -> bool:
     try:
@@ -68,7 +67,9 @@ def should_process_pr_logic(data) -> bool:
         ignore_repos = get_settings().get("CONFIG.IGNORE_REPOSITORIES", [])
         if repo_full_name and ignore_repos:
             if any(re.search(regex, repo_full_name) for regex in ignore_repos):
-                get_logger().info(f"Ignoring PR from repository '{repo_full_name}' due to 'config.ignore_repositories' setting")
+                get_logger().info(
+                    f"Ignoring PR from repository '{repo_full_name}' due to 'config.ignore_repositories' setting"
+                )
                 return False
 
         # To ignore PRs from specific users
@@ -89,20 +90,23 @@ def should_process_pr_logic(data) -> bool:
 
         ignore_pr_source_branches = get_settings().get("CONFIG.IGNORE_PR_SOURCE_BRANCHES", [])
         ignore_pr_target_branches = get_settings().get("CONFIG.IGNORE_PR_TARGET_BRANCHES", [])
-        if (ignore_pr_source_branches or ignore_pr_target_branches):
+        if ignore_pr_source_branches or ignore_pr_target_branches:
             if any(re.search(regex, source_branch) for regex in ignore_pr_source_branches):
                 get_logger().info(
-                    f"Ignoring PR with source branch '{source_branch}' due to config.ignore_pr_source_branches settings")
+                    f"Ignoring PR with source branch '{source_branch}' due to config.ignore_pr_source_branches settings"
+                )
                 return False
             if any(re.search(regex, target_branch) for regex in ignore_pr_target_branches):
                 get_logger().info(
-                    f"Ignoring PR with target branch '{target_branch}' due to config.ignore_pr_target_branches settings")
+                    f"Ignoring PR with target branch '{target_branch}' due to config.ignore_pr_target_branches settings"
+                )
                 return False
 
         # Allow_only_specific_folders
         allowed_folders = get_settings().config.get("allow_only_specific_folders", [])
         if allowed_folders and pr_id and project_key and repo_slug:
             from mergemate.git_providers.bitbucket_server_provider import BitbucketServerProvider
+
             bitbucket_server_url = get_settings().get("BITBUCKET_SERVER.URL", "")
             pr_url = f"{bitbucket_server_url}/projects/{project_key}/repos/{repo_slug}/pull-requests/{pr_id}"
             provider = BitbucketServerProvider(pr_url=pr_url)
@@ -116,16 +120,20 @@ def should_process_pr_logic(data) -> bool:
                         break
 
                 if all_files_outside:
-                    get_logger().info(f"Ignoring PR because all files {changed_files} are outside allowed folders {allowed_folders}")
+                    get_logger().info(
+                        f"Ignoring PR because all files {changed_files} are outside allowed folders {allowed_folders}"
+                    )
                     return False
     except Exception as e:
         get_logger().error(f"Failed 'should_process_pr_logic': {e}")
-        return True # On exception - we continue. Otherwise, we could just end up with filtering all PRs
+        return True  # On exception - we continue. Otherwise, we could just end up with filtering all PRs
     return True
+
 
 @router.post("/")
 async def redirect_to_webhook():
     return RedirectResponse(url="/webhook")
+
 
 @router.post("/webhook")
 async def handle_webhook(background_tasks: BackgroundTasks, request: Request):
@@ -136,7 +144,7 @@ async def handle_webhook(background_tasks: BackgroundTasks, request: Request):
     webhook_secret = get_settings().get("BITBUCKET_SERVER.WEBHOOK_SECRET", None)
     if webhook_secret:
         body_bytes = await request.body()
-        if body_bytes.decode('utf-8') == '{"test": true}':
+        if body_bytes.decode("utf-8") == '{"test": true}':
             return JSONResponse(
                 status_code=status.HTTP_200_OK, content=jsonable_encoder({"message": "connection test successful"})
             )
@@ -154,8 +162,9 @@ async def handle_webhook(background_tasks: BackgroundTasks, request: Request):
 
     commands_to_run = []
 
-    if (data["eventKey"] == "pr:opened"
-            or (data["eventKey"] == "repo:refs_changed" and data.get("pullRequest", {}).get("id", -1) != -1)):  # push event; -1 for push unassigned to a PR: #Check auto commands for creation/updating
+    if data["eventKey"] == "pr:opened" or (
+        data["eventKey"] == "repo:refs_changed" and data.get("pullRequest", {}).get("id", -1) != -1
+    ):  # push event; -1 for push unassigned to a PR: #Check auto commands for creation/updating
         apply_repo_settings(pr_url)
         if not should_process_pr_logic(data):
             get_logger().info(f"PR ignored due to config settings", **log_context)
@@ -165,20 +174,22 @@ async def handle_webhook(background_tasks: BackgroundTasks, request: Request):
         if get_settings().config.disable_auto_feedback:  # auto commands for PR, and auto feedback is disabled
             get_logger().info(f"Auto feedback is disabled, skipping auto commands for PR {pr_url}", **log_context)
             return JSONResponse(
-                status_code=status.HTTP_200_OK, content=jsonable_encoder({"message": "PR ignored due to auto feedback not enabled"})
+                status_code=status.HTTP_200_OK,
+                content=jsonable_encoder({"message": "PR ignored due to auto feedback not enabled"}),
             )
         get_settings().set("config.is_auto_command", True)
         if data["eventKey"] == "pr:opened":
-            commands_to_run.extend(_get_commands_list_from_settings('BITBUCKET_SERVER.PR_COMMANDS'))
-        else: #Has to be: data["eventKey"] == "pr:from_ref_updated"
+            commands_to_run.extend(_get_commands_list_from_settings("BITBUCKET_SERVER.PR_COMMANDS"))
+        else:  # Has to be: data["eventKey"] == "pr:from_ref_updated"
             if not get_settings().get("BITBUCKET_SERVER.HANDLE_PUSH_TRIGGER"):
                 get_logger().info(f"Push trigger is disabled, skipping push commands for PR {pr_url}", **log_context)
                 return JSONResponse(
-                    status_code=status.HTTP_200_OK, content=jsonable_encoder({"message": "PR ignored due to push trigger not enabled"})
+                    status_code=status.HTTP_200_OK,
+                    content=jsonable_encoder({"message": "PR ignored due to push trigger not enabled"}),
                 )
 
             get_settings().set("config.is_new_pr", False)
-            commands_to_run.extend(_get_commands_list_from_settings('BITBUCKET_SERVER.PUSH_COMMANDS'))
+            commands_to_run.extend(_get_commands_list_from_settings("BITBUCKET_SERVER.PUSH_COMMANDS"))
     elif data["eventKey"] == "pr:comment:added":
         commands_to_run.append(data["comment"]["text"])
     else:
@@ -195,9 +206,7 @@ async def handle_webhook(background_tasks: BackgroundTasks, request: Request):
 
     background_tasks.add_task(inner)
 
-    return JSONResponse(
-        status_code=status.HTTP_200_OK, content=jsonable_encoder({"message": "success"})
-    )
+    return JSONResponse(status_code=status.HTTP_200_OK, content=jsonable_encoder({"message": "success"}))
 
 
 async def _run_commands_sequentially(commands: List[str], url: str, log_context: dict):
@@ -217,6 +226,7 @@ async def _run_commands_sequentially(commands: List[str], url: str, log_context:
         except Exception as e:
             get_logger().error(f"Failed to handle command: {command} , error: {e}")
 
+
 def _process_command(command: str, url) -> str:
     # don't think we need this
     apply_repo_settings(url)
@@ -226,7 +236,7 @@ def _process_command(command: str, url) -> str:
     args = split_command[1:]
     # do I need this? if yes, shouldn't this be done in MergeMateAgent?
     other_args = update_settings_from_args(args)
-    new_command = ' '.join([command] + other_args)
+    new_command = " ".join([command] + other_args)
     return new_command
 
 

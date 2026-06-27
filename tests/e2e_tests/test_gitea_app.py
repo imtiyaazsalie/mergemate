@@ -19,9 +19,10 @@ log_level = os.environ.get("LOG_LEVEL", "INFO")
 setup_logger(log_level)
 logger = get_logger()
 
+
 def test_e2e_run_gitea_app():
-    repo_name = 'settings-tests'
-    owner = 'mergemate'
+    repo_name = "settings-tests"
+    owner = "mergemate"
     base_branch = "main"
     new_branch = f"gitea_app_e2e_test-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
     get_settings().config.git_provider = "gitea"
@@ -44,89 +45,70 @@ def test_e2e_run_gitea_app():
             assert False, "GITEA.TOKEN is not set in the configuration"
 
         headers = {
-            'Authorization': f'token {gitea_token}',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            "Authorization": f"token {gitea_token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
         }
 
         logger.info(f"Creating a new branch {new_branch} from {base_branch}")
 
-        response = requests.get(
-            f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/branches/{base_branch}",
-            headers=headers
-        )
+        response = requests.get(f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/branches/{base_branch}", headers=headers)
         response.raise_for_status()
         base_branch_data = response.json()
-        base_commit_sha = base_branch_data['commit']['id']
+        base_commit_sha = base_branch_data["commit"]["id"]
 
-        branch_data = {
-            'ref': f"refs/heads/{new_branch}",
-            'sha': base_commit_sha
-        }
+        branch_data = {"ref": f"refs/heads/{new_branch}", "sha": base_commit_sha}
         response = requests.post(
-            f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/git/refs",
-            headers=headers,
-            json=branch_data
+            f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/git/refs", headers=headers, json=branch_data
         )
         response.raise_for_status()
 
         logger.info(f"Updating file {FILE_PATH} in branch {new_branch}")
 
         import base64
+
         file_content_encoded = base64.b64encode(NEW_FILE_CONTENT.encode()).decode()
 
         try:
             response = requests.get(
-                f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/contents/{FILE_PATH}?ref={new_branch}",
-                headers=headers
+                f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/contents/{FILE_PATH}?ref={new_branch}", headers=headers
             )
             response.raise_for_status()
             existing_file = response.json()
-            file_sha = existing_file.get('sha')
+            file_sha = existing_file.get("sha")
 
             file_data = {
-                'message': 'Update cli.py',
-                'content': file_content_encoded,
-                'sha': file_sha,
-                'branch': new_branch
+                "message": "Update cli.py",
+                "content": file_content_encoded,
+                "sha": file_sha,
+                "branch": new_branch,
             }
         except:
-            file_data = {
-                'message': 'Add cli.py',
-                'content': file_content_encoded,
-                'branch': new_branch
-            }
+            file_data = {"message": "Add cli.py", "content": file_content_encoded, "branch": new_branch}
 
         response = requests.put(
-            f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/contents/{FILE_PATH}",
-            headers=headers,
-            json=file_data
+            f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/contents/{FILE_PATH}", headers=headers, json=file_data
         )
         response.raise_for_status()
 
         logger.info(f"Creating a pull request from {new_branch} to {base_branch}")
         pr_data = {
-            'title': f'Test PR from {new_branch}',
-            'body': 'update cli.py',
-            'head': new_branch,
-            'base': base_branch
+            "title": f"Test PR from {new_branch}",
+            "body": "update cli.py",
+            "head": new_branch,
+            "base": base_branch,
         }
-        response = requests.post(
-            f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/pulls",
-            headers=headers,
-            json=pr_data
-        )
+        response = requests.post(f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/pulls", headers=headers, json=pr_data)
         response.raise_for_status()
         pr = response.json()
-        pr_number = pr['number']
+        pr_number = pr["number"]
 
         for i in range(NUM_MINUTES):
             logger.info(f"Waiting for the PR to get all the tool results...")
             time.sleep(60)
 
             response = requests.get(
-                f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/issues/{pr_number}/comments",
-                headers=headers
+                f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/issues/{pr_number}/comments", headers=headers
             )
             response.raise_for_status()
             comments = response.json()
@@ -134,7 +116,7 @@ def test_e2e_run_gitea_app():
             if len(comments) >= 5:
                 valid_review = False
                 for comment in comments:
-                    if comment['body'].startswith('## PR Reviewer Guide 🔍'):
+                    if comment["body"].startswith("## PR Reviewer Guide 🔍"):
                         valid_review = True
                         break
                 if valid_review:
@@ -149,17 +131,14 @@ def test_e2e_run_gitea_app():
 
         logger.info(f"Cleaning up: closing PR and deleting branch {new_branch}")
 
-        close_data = {'state': 'closed'}
+        close_data = {"state": "closed"}
         response = requests.patch(
-            f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/pulls/{pr_number}",
-            headers=headers,
-            json=close_data
+            f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/pulls/{pr_number}", headers=headers, json=close_data
         )
         response.raise_for_status()
 
         response = requests.delete(
-            f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/git/refs/heads/{new_branch}",
-            headers=headers
+            f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/git/refs/heads/{new_branch}", headers=headers
         )
         response.raise_for_status()
 
@@ -176,15 +155,15 @@ def test_e2e_run_gitea_app():
                 requests.patch(
                     f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/pulls/{pr_number}",
                     headers=headers,
-                    json={'state': 'closed'}
+                    json={"state": "closed"},
                 )
 
             requests.delete(
-                f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/git/refs/heads/{new_branch}",
-                headers=headers
+                f"{gitea_url}/api/v1/repos/{owner}/{repo_name}/git/refs/heads/{new_branch}", headers=headers
             )
         except Exception as cleanup_error:
             logger.error(f"Failed to clean up after test: {cleanup_error}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test_e2e_run_gitea_app()

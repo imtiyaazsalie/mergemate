@@ -228,9 +228,9 @@ def test_resolve_malformed_auth_header_warns_and_drops(http_server, monkeypatch)
         assert path is not None, "request should proceed even with malformed auth header"
         assert is_temp is True
         combined = "\n".join(captured_lines)
-        assert "MERGEMATE_EXTRA_CONFIG_AUTH_HEADER" in combined and "malformed" in combined.lower(), (
-            "Malformed auth header must produce a warning so misconfiguration is diagnosable"
-        )
+        assert (
+            "MERGEMATE_EXTRA_CONFIG_AUTH_HEADER" in combined and "malformed" in combined.lower()
+        ), "Malformed auth header must produce a warning so misconfiguration is diagnosable"
     finally:
         if path and os.path.exists(path):
             os.remove(path)
@@ -499,16 +499,16 @@ fake_api_key = "{openai_secret}"
 
     combined = "\n".join(captured_lines)
 
-    assert secret_token not in combined, (
-        "Secret value leaked into log output — _apply_settings_from_file must log section names only, never raw values."
-    )
+    assert (
+        secret_token not in combined
+    ), "Secret value leaked into log output — _apply_settings_from_file must log section names only, never raw values."
     assert openai_secret not in combined, "API-key-shaped value leaked into log output"
 
     # Section name *is* safe and useful for debugging — confirm it's emitted
     # (dynaconf upper-cases section keys, so compare case-insensitively).
-    assert _TEST_SECTION.lower() in combined.lower(), (
-        "Expected the section name to appear in the merged-sections log line"
-    )
+    assert (
+        _TEST_SECTION.lower() in combined.lower()
+    ), "Expected the section name to appear in the merged-sections log line"
 
 
 def test_apply_settings_file_silently_skips_invalid_toml(tmp_path, settings_sandbox):
@@ -651,9 +651,9 @@ def test_env_var_overrides_extra_config(tmp_path, settings_sandbox, monkeypatch)
     from dynaconf.loaders import env_loader as _env_loader
 
     _env_loader.load(get_settings())
-    assert get_settings().get(f"{_TEST_SECTION}.token") == "from-env", (
-        "precondition: env var must populate the section before the merge"
-    )
+    assert (
+        get_settings().get(f"{_TEST_SECTION}.token") == "from-env"
+    ), "precondition: env var must populate the section before the merge"
 
     path = _write_toml(
         tmp_path,
@@ -694,9 +694,9 @@ repo_only = "repo-value"
 
     apply_repo_settings("https://example.com/pr/1")
 
-    assert get_settings().get(f"{_TEST_SECTION}.token") == "from-env", (
-        "env-sourced value must survive a repo-local merge as well"
-    )
+    assert (
+        get_settings().get(f"{_TEST_SECTION}.token") == "from-env"
+    ), "env-sourced value must survive a repo-local merge as well"
     assert get_settings().get(f"{_TEST_SECTION}.repo_only") == "repo-value"
 
 
@@ -789,9 +789,9 @@ def test_resolve_warns_when_windows_path_missing(monkeypatch):
 
     assert path is None
     combined = "\n".join(captured)
-    assert "not found at local path" in combined, (
-        "Windows path miss must produce the local-path-not-found warning, not the unsupported-scheme warning"
-    )
+    assert (
+        "not found at local path" in combined
+    ), "Windows path miss must produce the local-path-not-found warning, not the unsupported-scheme warning"
     assert "Unsupported scheme" not in combined
 
 
@@ -916,9 +916,9 @@ def test_settings_sandbox_restores_auto_cast_env_var(monkeypatch):
     next(gen)  # equivalent to entering the with-block
     try:
         apply_repo_settings("https://example.com/pr/1")
-        assert os.environ.get(_AUTO_CAST_ENV) == "false", (
-            "apply_repo_settings must set AUTO_CAST_FOR_DYNACONF during the test"
-        )
+        assert (
+            os.environ.get(_AUTO_CAST_ENV) == "false"
+        ), "apply_repo_settings must set AUTO_CAST_FOR_DYNACONF during the test"
     finally:
         try:
             next(gen)
@@ -975,9 +975,9 @@ benign_key = "should-not-be-applied"
     assert call_log["strict"] == 1, "hardened Dynaconf path must be attempted first"
     assert call_log["fallback"] == 0, "fallback must NOT run after security pre-validation rejects the file"
     # The malicious file's keys must not have been applied
-    assert get_settings().get(f"{_TEST_SECTION}.benign_key") == sentinel, (
-        "values from a file with forbidden directives must not be merged"
-    )
+    assert (
+        get_settings().get(f"{_TEST_SECTION}.benign_key") == sentinel
+    ), "values from a file with forbidden directives must not be merged"
 
 
 def test_env_var_overrides_extra_config_when_default_exists(tmp_path, settings_sandbox, monkeypatch):
@@ -1004,9 +1004,9 @@ def test_env_var_overrides_extra_config_when_default_exists(tmp_path, settings_s
     from dynaconf.loaders import env_loader as _env_loader
 
     _env_loader.load(settings)
-    assert settings.get(f"{_TEST_SECTION}.endpoint") == "from-env", (
-        "precondition: env var must overwrite the default value"
-    )
+    assert (
+        settings.get(f"{_TEST_SECTION}.endpoint") == "from-env"
+    ), "precondition: env var must overwrite the default value"
 
     path = _write_toml(
         tmp_path,
@@ -1048,9 +1048,9 @@ endpoint = "from-repo-file"
 
     apply_repo_settings("https://example.com/pr/1")
 
-    assert settings.get(f"{_TEST_SECTION}.endpoint") == "from-env", (
-        "env-sourced value must survive a repo-local merge for keys with baseline defaults too"
-    )
+    assert (
+        settings.get(f"{_TEST_SECTION}.endpoint") == "from-env"
+    ), "env-sourced value must survive a repo-local merge for keys with baseline defaults too"
 
 
 def test_extra_config_applied_before_git_provider(tmp_path, settings_sandbox, monkeypatch):
@@ -1095,6 +1095,6 @@ provider_critical = "from-extra"
     # The provider must be constructed AFTER the extra config is applied, so
     # the merged value is visible inside provider __init__.
     init_event = next(e for e in events if e[0] == "provider_init_sees")
-    assert init_event[1] == "from-extra", (
-        f"extra_config_url must be merged before the git provider is constructed; provider saw {init_event[1]!r}"
-    )
+    assert (
+        init_event[1] == "from-extra"
+    ), f"extra_config_url must be merged before the git provider is constructed; provider saw {init_event[1]!r}"

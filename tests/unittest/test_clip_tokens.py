@@ -25,7 +25,7 @@ class TestClipTokens:
         """Test text that is exactly at the token limit."""
         text = "This is exactly at the limit"
         # Mock the token encoder to return exact limit
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_tokenizer = MagicMock()
             mock_tokenizer.encode.return_value = [1] * 10  # Exactly 10 tokens
             mock_encoder.return_value = mock_tokenizer
@@ -38,7 +38,7 @@ class TestClipTokens:
         text = "This is a longer text that should be clipped when it exceeds the token limit"
         max_tokens = 5
 
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_tokenizer = MagicMock()
             mock_tokenizer.encode.return_value = [1] * 20  # 20 tokens
             mock_encoder.return_value = mock_tokenizer
@@ -52,7 +52,7 @@ class TestClipTokens:
         text = "This is a longer text that should be clipped"
         max_tokens = 5
 
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_tokenizer = MagicMock()
             mock_tokenizer.encode.return_value = [1] * 20  # 20 tokens
             mock_encoder.return_value = mock_tokenizer
@@ -81,7 +81,7 @@ class TestClipTokens:
         text = "Line 1\nLine 2\nLine 3\nLine 4"
         max_tokens = 5
 
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_tokenizer = MagicMock()
             mock_tokenizer.encode.return_value = [1] * 20  # 20 tokens
             mock_encoder.return_value = mock_tokenizer
@@ -102,7 +102,7 @@ class TestClipTokens:
         num_input_tokens = 15
 
         # Should not call the encoder when num_input_tokens is provided
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_encoder.return_value = None  # Should not be called
 
             result = clip_tokens(text, max_tokens, num_input_tokens=num_input_tokens)
@@ -115,7 +115,7 @@ class TestClipTokens:
         max_tokens = 20
         num_input_tokens = 5
 
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_encoder.return_value = None  # Should not be called
 
             result = clip_tokens(text, max_tokens, num_input_tokens=num_input_tokens)
@@ -127,7 +127,7 @@ class TestClipTokens:
         text = "Special chars: @#$%^&*()_+ áéíóú 中문 🚀 emoji"
         max_tokens = 5
 
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_tokenizer = MagicMock()
             mock_tokenizer.encode.return_value = [1] * 20  # 20 tokens
             mock_encoder.return_value = mock_tokenizer
@@ -141,7 +141,7 @@ class TestClipTokens:
         text = "Line 1\nLine 2\nLine 3\nLine 4\nLine 5"
         max_tokens = 5
 
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_tokenizer = MagicMock()
             mock_tokenizer.encode.return_value = [1] * 20  # 20 tokens
             mock_encoder.return_value = mock_tokenizer
@@ -154,7 +154,7 @@ class TestClipTokens:
         text = "A" * 10000  # Very long text
         max_tokens = 10
 
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_tokenizer = MagicMock()
             mock_tokenizer.encode.return_value = [1] * 5000  # Many tokens
             mock_encoder.return_value = mock_tokenizer
@@ -168,7 +168,7 @@ class TestClipTokens:
         text = "Test text"
         max_tokens = 10
 
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_encoder.side_effect = Exception("Encoder error")
 
             # Should return original text when encoder fails
@@ -180,7 +180,7 @@ class TestClipTokens:
         text = "Test"
         max_tokens = 10
 
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_tokenizer = MagicMock()
             mock_tokenizer.encode.return_value = []  # Empty tokens (could cause division by zero)
             mock_encoder.return_value = mock_tokenizer
@@ -196,7 +196,7 @@ class TestClipTokens:
 
         # Only whitespace
         text = "   \n  \t  "
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_tokenizer = MagicMock()
             mock_tokenizer.encode.return_value = [1] * 10
             mock_encoder.return_value = mock_tokenizer
@@ -206,7 +206,7 @@ class TestClipTokens:
 
         # Text with only newlines
         text = "\n\n\n\n"
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_tokenizer = MagicMock()
             mock_tokenizer.encode.return_value = [1] * 10
             mock_encoder.return_value = mock_tokenizer
@@ -219,23 +219,21 @@ class TestClipTokens:
         text = "Multi\nline\ntext\nfor\ntesting"
         max_tokens = 5
 
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_tokenizer = MagicMock()
             mock_tokenizer.encode.return_value = [1] * 20
             mock_encoder.return_value = mock_tokenizer
 
             # Test all combinations
             combinations = [
-                (True, True),   # add_three_dots=True, delete_last_line=True
+                (True, True),  # add_three_dots=True, delete_last_line=True
                 (True, False),  # add_three_dots=True, delete_last_line=False
                 (False, True),  # add_three_dots=False, delete_last_line=True
-                (False, False), # add_three_dots=False, delete_last_line=False
+                (False, False),  # add_three_dots=False, delete_last_line=False
             ]
 
             for add_dots, delete_line in combinations:
-                result = clip_tokens(text, max_tokens,
-                                     add_three_dots=add_dots,
-                                     delete_last_line=delete_line)
+                result = clip_tokens(text, max_tokens, add_three_dots=add_dots, delete_last_line=delete_line)
                 assert isinstance(result, str)
                 if add_dots and len(result) > 0:
                     assert result.endswith("\n...(truncated)") or result == text
@@ -245,7 +243,7 @@ class TestClipTokens:
         text = "Short"
         max_tokens = 1
 
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_tokenizer = MagicMock()
             mock_tokenizer.encode.return_value = [1] * 1000  # Many tokens for short text
             mock_encoder.return_value = mock_tokenizer
@@ -260,11 +258,11 @@ class TestClipTokens:
         max_tokens = 10
 
         # Patch the logger at the module level where it's imported
-        with patch('mergemate.algo.utils.get_logger') as mock_logger:
+        with patch("mergemate.algo.utils.get_logger") as mock_logger:
             mock_log_instance = MagicMock()
             mock_logger.return_value = mock_log_instance
 
-            with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+            with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
                 mock_encoder.side_effect = Exception("Test exception")
 
                 result = clip_tokens(text, max_tokens)
@@ -279,7 +277,7 @@ class TestClipTokens:
         text = "Test text that should be reduced by 10 percent for safety"
         max_tokens = 10
 
-        with patch.object(TokenEncoder, 'get_token_encoder') as mock_encoder:
+        with patch.object(TokenEncoder, "get_token_encoder") as mock_encoder:
             mock_tokenizer = MagicMock()
             mock_tokenizer.encode.return_value = [1] * 20  # 20 tokens
             mock_encoder.return_value = mock_tokenizer
@@ -293,7 +291,7 @@ class TestClipTokens:
 
             # Result should be around expected_chars length (plus truncation text)
             if result.endswith("\n...(truncated)"):
-                actual_content = result[:-len("\n...(truncated)")]
+                actual_content = result[: -len("\n...(truncated)")]
                 assert len(actual_content) <= expected_chars + 5  # Some tolerance
 
     # Test the original basic functionality to ensure backward compatibility
@@ -306,5 +304,5 @@ class TestClipTokens:
 
         max_tokens = 10
         result = clip_tokens(text, max_tokens)
-        expected_results = 'line1\nline2\nline3\n\n...(truncated)'
+        expected_results = "line1\nline2\nline3\n\n...(truncated)"
         assert result == expected_results

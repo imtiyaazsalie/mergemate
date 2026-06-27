@@ -16,6 +16,7 @@ TaskArtifactUpdateEvent (not a TaskStatusUpdateEvent), otherwise the SDK raises
 "Agent should enqueue Task before TaskStatusUpdateEvent event".
 
 health_check issues a single, NON-retry-wrapped litellm probe."""
+
 import copy
 
 from a2a.server.agent_execution import AgentExecutor, RequestContext
@@ -51,8 +52,7 @@ class MergeMateAgentExecutor(AgentExecutor):
 
             user_text = context.get_user_input() or ""
             meta = parse_observability_metadata(context.metadata)
-            with mosaico_log_context(meta, context.context_id), \
-                    langfuse_span(meta, context.context_id):
+            with mosaico_log_context(meta, context.context_id), langfuse_span(meta, context.context_id):
                 result = await route_and_run_result(user_text)
 
             output_text = result.text or "(no output produced)"
@@ -94,6 +94,7 @@ async def health_check() -> str:
         # config (api_base/key/callbacks/etc.) onto the litellm module — do NOT call its
         # retry-wrapped chat_completion.
         from mergemate.algo.ai_handlers.litellm_ai_handler import LiteLLMAIHandler
+
         handler = LiteLLMAIHandler()
 
         model = get_settings().get("CONFIG.MODEL", None)

@@ -75,21 +75,33 @@ def test_bitbucket_server_should_process_pr_logic_ignores_author_title_and_branc
     settings.set("CONFIG.IGNORE_PR_TARGET_BRANCHES", ["^legacy$"])
 
     try:
-        assert bitbucket_server_webhook.should_process_pr_logic(
-            _bitbucket_server_payload(author={"user": {"name": "dependabot"}})
-        ) is False
-        assert bitbucket_server_webhook.should_process_pr_logic(
-            _bitbucket_server_payload(title="WIP: generated docs")
-        ) is False
-        assert bitbucket_server_webhook.should_process_pr_logic(
-            _bitbucket_server_payload(fromRef={"displayId": "generated/api"})
-        ) is False
-        assert bitbucket_server_webhook.should_process_pr_logic(
-            _bitbucket_server_payload(toRef={
-                "displayId": "legacy",
-                "repository": {"slug": "repo", "project": {"key": "PROJ"}},
-            })
-        ) is False
+        assert (
+            bitbucket_server_webhook.should_process_pr_logic(
+                _bitbucket_server_payload(author={"user": {"name": "dependabot"}})
+            )
+            is False
+        )
+        assert (
+            bitbucket_server_webhook.should_process_pr_logic(_bitbucket_server_payload(title="WIP: generated docs"))
+            is False
+        )
+        assert (
+            bitbucket_server_webhook.should_process_pr_logic(
+                _bitbucket_server_payload(fromRef={"displayId": "generated/api"})
+            )
+            is False
+        )
+        assert (
+            bitbucket_server_webhook.should_process_pr_logic(
+                _bitbucket_server_payload(
+                    toRef={
+                        "displayId": "legacy",
+                        "repository": {"slug": "repo", "project": {"key": "PROJ"}},
+                    }
+                )
+            )
+            is False
+        )
     finally:
         settings.set("CONFIG.IGNORE_REPOSITORIES", original["ignore_repositories"])
         settings.set("CONFIG.IGNORE_PR_AUTHORS", original["ignore_pr_authors"])
@@ -140,15 +152,11 @@ def test_gitlab_should_process_pr_logic_ignores_labels_and_branches(gitlab_webho
     settings.set("CONFIG.IGNORE_PR_TARGET_BRANCHES", ["^legacy$"])
 
     try:
-        assert gitlab_webhook_module.should_process_pr_logic(
-            _gitlab_payload(labels=[{"title": "skip-settings"}])
-        ) is False
-        assert gitlab_webhook_module.should_process_pr_logic(
-            _gitlab_payload(source_branch="generated/api")
-        ) is False
-        assert gitlab_webhook_module.should_process_pr_logic(
-            _gitlab_payload(target_branch="legacy")
-        ) is False
+        assert (
+            gitlab_webhook_module.should_process_pr_logic(_gitlab_payload(labels=[{"title": "skip-settings"}])) is False
+        )
+        assert gitlab_webhook_module.should_process_pr_logic(_gitlab_payload(source_branch="generated/api")) is False
+        assert gitlab_webhook_module.should_process_pr_logic(_gitlab_payload(target_branch="legacy")) is False
     finally:
         settings.set("CONFIG.IGNORE_REPOSITORIES", original["ignore_repositories"])
         settings.set("CONFIG.IGNORE_PR_AUTHORS", original["ignore_pr_authors"])

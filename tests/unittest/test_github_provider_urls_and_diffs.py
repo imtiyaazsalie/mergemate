@@ -6,6 +6,7 @@ These tests deliberately avoid any network/GitHub API by instantiating
 the provider via ``__new__`` and exercising only pure helpers, or by
 wiring fake PR/file/repo objects for get_diff_files.
 """
+
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -32,35 +33,27 @@ class TestParsePrUrl:
 
     def test_github_api_url(self):
         p = _bare_provider()
-        repo, num = p._parse_pr_url(
-            "https://api.github.com/repos/owner/repo/pulls/7"
-        )
+        repo, num = p._parse_pr_url("https://api.github.com/repos/owner/repo/pulls/7")
         assert repo == "owner/repo"
         assert num == 7
 
     def test_ghes_api_v3_url(self):
         """GHES-style ``/api/v3`` URLs should be normalized to the same parse."""
         p = _bare_provider()
-        repo, num = p._parse_pr_url(
-            "https://ghes.example.com/api/v3/repos/acme/widgets/pulls/123"
-        )
+        repo, num = p._parse_pr_url("https://ghes.example.com/api/v3/repos/acme/widgets/pulls/123")
         assert repo == "acme/widgets"
         assert num == 123
 
     def test_ghes_html_url(self):
         """A GHES HTML URL is parsed identically to github.com HTML URLs."""
         p = _bare_provider()
-        repo, num = p._parse_pr_url(
-            "https://ghes.example.com/acme/widgets/pull/9"
-        )
+        repo, num = p._parse_pr_url("https://ghes.example.com/acme/widgets/pull/9")
         assert repo == "acme/widgets"
         assert num == 9
 
     def test_query_string_is_ignored(self):
         p = _bare_provider()
-        repo, num = p._parse_pr_url(
-            "https://github.com/owner/repo/pull/55?diff=split&w=1"
-        )
+        repo, num = p._parse_pr_url("https://github.com/owner/repo/pull/55?diff=split&w=1")
         assert repo == "owner/repo"
         assert num == 55
 
@@ -92,42 +85,32 @@ class TestParsePrUrl:
 class TestParseIssueUrl:
     def test_normal_github_html_url(self):
         p = _bare_provider()
-        repo, num = p._parse_issue_url(
-            "https://github.com/owner/repo/issues/12"
-        )
+        repo, num = p._parse_issue_url("https://github.com/owner/repo/issues/12")
         assert repo == "owner/repo"
         assert num == 12
 
     def test_github_api_url(self):
         p = _bare_provider()
-        repo, num = p._parse_issue_url(
-            "https://api.github.com/repos/owner/repo/issues/4"
-        )
+        repo, num = p._parse_issue_url("https://api.github.com/repos/owner/repo/issues/4")
         assert repo == "owner/repo"
         assert num == 4
 
     def test_ghes_api_v3_url(self):
         p = _bare_provider()
-        repo, num = p._parse_issue_url(
-            "https://ghes.example.com/api/v3/repos/acme/widgets/issues/77"
-        )
+        repo, num = p._parse_issue_url("https://ghes.example.com/api/v3/repos/acme/widgets/issues/77")
         assert repo == "acme/widgets"
         assert num == 77
 
     def test_query_string_is_ignored(self):
         p = _bare_provider()
-        repo, num = p._parse_issue_url(
-            "https://github.com/owner/repo/issues/8?foo=bar"
-        )
+        repo, num = p._parse_issue_url("https://github.com/owner/repo/issues/8?foo=bar")
         assert repo == "owner/repo"
         assert num == 8
 
     def test_invalid_url_non_integer(self):
         p = _bare_provider()
         with pytest.raises(ValueError):
-            p._parse_issue_url(
-                "https://github.com/owner/repo/issues/not-a-number"
-            )
+            p._parse_issue_url("https://github.com/owner/repo/issues/not-a-number")
 
     def test_invalid_url_wrong_segment(self):
         p = _bare_provider()
@@ -141,26 +124,15 @@ class TestParseIssueUrl:
 class TestRepoPathAndGitUrl:
     def test_owner_repo_from_pr_url(self):
         p = _bare_provider()
-        assert (
-            p._get_owner_and_repo_path("https://github.com/owner/repo/pull/1")
-            == "owner/repo"
-        )
+        assert p._get_owner_and_repo_path("https://github.com/owner/repo/pull/1") == "owner/repo"
 
     def test_owner_repo_from_issue_url(self):
         p = _bare_provider()
-        assert (
-            p._get_owner_and_repo_path(
-                "https://github.com/owner/repo/issues/2"
-            )
-            == "owner/repo"
-        )
+        assert p._get_owner_and_repo_path("https://github.com/owner/repo/issues/2") == "owner/repo"
 
     def test_owner_repo_from_git_url(self):
         p = _bare_provider()
-        assert (
-            p._get_owner_and_repo_path("https://github.com/owner/repo.git")
-            == "owner/repo"
-        )
+        assert p._get_owner_and_repo_path("https://github.com/owner/repo.git") == "owner/repo"
 
     def test_unknown_url_returns_empty(self):
         p = _bare_provider()
@@ -171,10 +143,7 @@ class TestRepoPathAndGitUrl:
     def test_get_git_repo_url_uses_html_base(self):
         p = _bare_provider()
         p.base_url_html = "https://github.com"
-        assert (
-            p.get_git_repo_url("https://github.com/owner/repo/pull/1")
-            == "https://github.com/owner/repo.git"
-        )
+        assert p.get_git_repo_url("https://github.com/owner/repo/pull/1") == "https://github.com/owner/repo.git"
 
     def test_get_git_repo_url_uses_ghes_html_base(self):
         p = _bare_provider()
@@ -226,9 +195,7 @@ def _make_provider_for_diff(files):
     )
     # repo_obj.compare returns an object with a merge_base_commit.
     p.repo_obj = SimpleNamespace(
-        compare=lambda b, h: SimpleNamespace(
-            merge_base_commit=SimpleNamespace(sha="base-sha")
-        )
+        compare=lambda b, h: SimpleNamespace(merge_base_commit=SimpleNamespace(sha="base-sha"))
     )
     return p
 
@@ -237,9 +204,11 @@ def _make_provider_for_diff(files):
 def patched_helpers():
     """Patch module-level helpers used by get_diff_files."""
     mod = "mergemate.git_providers.github_provider"
-    with patch(f"{mod}.filter_ignored", side_effect=lambda fs: fs), patch(
-        f"{mod}.is_valid_file", return_value=True
-    ), patch(f"{mod}.load_large_diff", return_value="LARGE_DIFF"):
+    with (
+        patch(f"{mod}.filter_ignored", side_effect=lambda fs: fs),
+        patch(f"{mod}.is_valid_file", return_value=True),
+        patch(f"{mod}.load_large_diff", return_value="LARGE_DIFF"),
+    ):
         yield
 
 

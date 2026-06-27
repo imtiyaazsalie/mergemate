@@ -8,6 +8,7 @@ the settings there; without the scope it raises ContextDoesNotExistError).
 Module import side effects (so build_app works in tests): JSON logger, apply_mosaico_env(),
 provider registration, and a one-time Langfuse client construction when creds are present.
 uvicorn.run is only invoked under __main__."""
+
 import os
 
 from a2a.server.request_handlers import DefaultRequestHandler
@@ -58,6 +59,7 @@ def _configure_runtime() -> None:
     apply_mosaico_env()
     # Idempotent registry insert (_GIT_PROVIDERS.setdefault("mosaico_diff", ...)).
     import mergemate.mosaico.provider_registration  # noqa: F401
+
     _configure_langfuse()
 
 
@@ -68,6 +70,7 @@ def _configure_langfuse() -> None:
         return
     try:
         from langfuse import Langfuse
+
         Langfuse(blocked_instrumentation_scopes=["a2a-python-sdk"])
         get_logger().info("MOSAICO: Langfuse client initialised (a2a-python-sdk spans blocked).")
     except Exception as e:
@@ -84,7 +87,7 @@ def build_app():
         agent_card=card,
     )
     routes = [
-        *create_agent_card_routes(card),          # GET /.well-known/agent-card.json
+        *create_agent_card_routes(card),  # GET /.well-known/agent-card.json
         *create_jsonrpc_routes(handler, rpc_url="/"),
         Route(HEALTH_PATH, _health, methods=["GET"]),
     ]
@@ -93,6 +96,7 @@ def build_app():
 
 def start() -> None:
     import uvicorn
+
     setup_logger(fmt=LoggingFormat.JSON)
     host = os.getenv("HOST", DEFAULT_HOST)
     port = int(os.getenv("PORT", DEFAULT_PORT))

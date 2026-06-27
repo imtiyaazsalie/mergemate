@@ -20,6 +20,7 @@ from mergemate.servers.utils import verify_signature
 setup_logger(fmt=LoggingFormat.JSON, level=get_settings().get("CONFIG.LOG_LEVEL", "DEBUG"))
 router = APIRouter()
 
+
 @router.post("/api/v1/gitea_webhooks")
 async def handle_gitea_webhooks(background_tasks: BackgroundTasks, request: Request, response: Response):
     """Handle incoming Gitea webhook requests"""
@@ -35,20 +36,20 @@ async def handle_gitea_webhooks(background_tasks: BackgroundTasks, request: Requ
     background_tasks.add_task(handle_request, body, event=request.headers.get("X-Gitea-Event", None))
     return {}
 
+
 async def get_body(request: Request):
     """Parse and verify webhook request body"""
     try:
         body = await request.json()
     except Exception as e:
-        get_logger().error("Error parsing request body", artifact={'error': e})
+        get_logger().error("Error parsing request body", artifact={"error": e})
         raise HTTPException(status_code=400, detail="Error parsing request body") from e
 
-
     # Verify webhook signature
-    webhook_secret = getattr(get_settings().gitea, 'webhook_secret', None)
+    webhook_secret = getattr(get_settings().gitea, "webhook_secret", None)
     if webhook_secret:
         body_bytes = await request.body()
-        signature_header = request.headers.get('x-gitea-signature', None)
+        signature_header = request.headers.get("x-gitea-signature", None)
         if not signature_header:
             get_logger().error("Missing signature header")
             raise HTTPException(status_code=400, detail="Missing signature header")
@@ -60,6 +61,7 @@ async def get_body(request: Request):
             raise HTTPException(status_code=401, detail="Invalid signature")
 
     return body
+
 
 async def handle_request(body: Dict[str, Any], event: str):
     """Process Gitea webhook events"""
@@ -82,6 +84,7 @@ async def handle_request(body: Dict[str, Any], event: str):
             await handle_comment_event(body, event, action, agent)
 
     return {}
+
 
 async def handle_pr_event(body: Dict[str, Any], event: str, action: str, agent: MergeMateAgent):
     """Handle pull request events"""
@@ -106,10 +109,11 @@ async def handle_pr_event(body: Dict[str, Any], event: str, action: str, agent: 
         if not commands_on_push or not handle_push_trigger:
             get_logger().info("Push event, but no push commands found or push trigger is disabled")
             return
-        get_logger().debug(f'A push event has been received: {api_url}')
+        get_logger().debug(f"A push event has been received: {api_url}")
         await _perform_commands_gitea("push_commands", agent, body, api_url)
         # for command in commands_on_push:
         #     await agent.handle_request(api_url, command)
+
 
 async def handle_comment_event(body: Dict[str, Any], event: str, action: str, agent: MergeMateAgent):
     """Handle comment events"""
@@ -127,12 +131,15 @@ async def handle_comment_event(body: Dict[str, Any], event: str, action: str, ag
 
     await agent.handle_request(pr_url, comment_body)
 
+
 async def _perform_commands_gitea(commands_conf: str, agent: MergeMateAgent, body: dict, api_url: str):
     apply_repo_settings(api_url)
-    if commands_conf == "pr_commands" and get_settings().config.disable_auto_feedback:  # auto commands for PR, and auto feedback is disabled
+    if (
+        commands_conf == "pr_commands" and get_settings().config.disable_auto_feedback
+    ):  # auto commands for PR, and auto feedback is disabled
         get_logger().info(f"Auto feedback is disabled, skipping auto commands for PR {api_url=}")
         return
-    if not should_process_pr_logic(body): # Here we already updated the configuration with the repo settings
+    if not should_process_pr_logic(body):  # Here we already updated the configuration with the repo settings
         return {}
     commands = get_settings().get(f"gitea.{commands_conf}")
     if not commands:
@@ -144,9 +151,10 @@ async def _perform_commands_gitea(commands_conf: str, agent: MergeMateAgent, bod
         command = split_command[0]
         args = split_command[1:]
         other_args = update_settings_from_args(args)
-        new_command = ' '.join([command] + other_args)
+        new_command = " ".join([command] + other_args)
         get_logger().info(f"{commands_conf}. Performing auto command '{new_command}', for {api_url=}")
         await agent.handle_request(api_url, new_command)
+
 
 def should_process_pr_logic(body) -> bool:
     try:
@@ -162,7 +170,9 @@ def should_process_pr_logic(body) -> bool:
         ignore_repos = get_settings().get("CONFIG.IGNORE_REPOSITORIES", [])
         if ignore_repos and repo_full_name:
             if any(re.search(regex, repo_full_name) for regex in ignore_repos):
-                get_logger().info(f"Ignoring PR from repository '{repo_full_name}' due to 'config.ignore_repositories' setting")
+                get_logger().info(
+                    f"Ignoring PR from repository '{repo_full_name}' due to 'config.ignore_repositories' setting"
+                )
                 return False
 
         # logic to ignore PRs from specific users
@@ -184,7 +194,7 @@ def should_process_pr_logic(body) -> bool:
         # logic to ignore PRs with specific labels or source branches or target branches.
         ignore_pr_labels = get_settings().get("CONFIG.IGNORE_PR_LABELS", [])
         if pr_labels and ignore_pr_labels:
-            labels = [label['name'] for label in pr_labels]
+            labels = [label["name"] for label in pr_labels]
             if any(label in ignore_pr_labels for label in labels):
                 labels_str = ", ".join(labels)
                 get_logger().info(f"Ignoring PR with labels '{labels_str}' due to config.ignore_pr_labels settings")
@@ -196,26 +206,32 @@ def should_process_pr_logic(body) -> bool:
         if pull_request and (ignore_pr_source_branches or ignore_pr_target_branches):
             if any(re.search(regex, source_branch) for regex in ignore_pr_source_branches):
                 get_logger().info(
-                    f"Ignoring PR with source branch '{source_branch}' due to config.ignore_pr_source_branches settings")
+                    f"Ignoring PR with source branch '{source_branch}' due to config.ignore_pr_source_branches settings"
+                )
                 return False
             if any(re.search(regex, target_branch) for regex in ignore_pr_target_branches):
                 get_logger().info(
-                    f"Ignoring PR with target branch '{target_branch}' due to config.ignore_pr_target_branches settings")
+                    f"Ignoring PR with target branch '{target_branch}' due to config.ignore_pr_target_branches settings"
+                )
                 return False
     except Exception as e:
         get_logger().error(f"Failed 'should_process_pr_logic': {e}")
     return True
+
 
 # FastAPI app setup
 middleware = [Middleware(RawContextMiddleware)]
 app = FastAPI(middleware=middleware)
 app.include_router(router)
 
+
 def start():
     """Start the Gitea webhook server"""
     port = int(os.environ.get("PORT", "3000"))
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=port)
+
 
 if __name__ == "__main__":
     start()

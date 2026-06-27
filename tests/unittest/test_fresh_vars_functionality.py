@@ -115,9 +115,9 @@ shared_secret = "{shared_secret}"
 
         # Second access - should return NEW value (not cached)
         second_token = settings.GITLAB.PERSONAL_ACCESS_TOKEN
-        assert second_token == "token_v2_updated", (
-            "After file modification, personal_access_token should be reloaded to 'token_v2_updated'"
-        )
+        assert (
+            second_token == "token_v2_updated"
+        ), "After file modification, personal_access_token should be reloaded to 'token_v2_updated'"
 
         # Verify the values are different (fresh_vars working)
         assert first_token != second_token, "fresh_vars should cause values to be reloaded, not cached"
@@ -219,9 +219,9 @@ shared_secret = "{shared_secret}"
         second_value = settings.GITLAB.PERSONAL_ACCESS_TOKEN
 
         # If this assertion fails, fresh_vars is broken with custom_merge_loader
-        assert second_value == "token_after_bug_test", (
-            "CRITICAL: fresh_vars should reload the value even with core_loaders=[]"
-        )
+        assert (
+            second_value == "token_after_bug_test"
+        ), "CRITICAL: fresh_vars should reload the value even with core_loaders=[]"
 
         assert first_value != second_value, "CRITICAL: Values should be different, indicating fresh_vars is working"
 
@@ -321,9 +321,9 @@ personal_access_token = "{personal_access_token}"
             access_3 = settings.GITLAB.PERSONAL_ACCESS_TOKEN
 
         # All should return the same value (file hasn't changed)
-        assert access_1 == access_2 == access_3 == "no_cache_v1", (
-            "Multiple accesses before modification should return same value"
-        )
+        assert (
+            access_1 == access_2 == access_3 == "no_cache_v1"
+        ), "Multiple accesses before modification should return same value"
 
         # Modify the file
         self.create_secrets_toml(personal_access_token="no_cache_v2")

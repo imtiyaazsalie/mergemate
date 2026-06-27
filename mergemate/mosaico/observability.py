@@ -5,6 +5,7 @@ Mirrors docstring-agent / mosaico-base-agents conventions, with one deliberate
 choice: parse_observability_metadata is TOLERANT (returns a partial dict, never
 raises) so partial/absent metadata degrades gracefully rather than failing the
 A2A request."""
+
 import contextlib
 from collections.abc import Mapping
 
@@ -23,7 +24,8 @@ def parse_observability_metadata(raw) -> dict:
     if not isinstance(raw, Mapping):
         if raw is not None:
             get_logger().warning(
-                f"MOSAICO: observability metadata is not a mapping (got {type(raw).__name__}); ignoring.")
+                f"MOSAICO: observability metadata is not a mapping (got {type(raw).__name__}); ignoring."
+            )
         return {}
     return {k: raw[k] for k in _KEYS if k in raw and isinstance(raw[k], str)}
 
@@ -62,6 +64,7 @@ def langfuse_span(meta, context_id):
         return
     try:
         from langfuse import get_client, propagate_attributes
+
         lf = get_client()
         trace_ctx = {}
         if meta.get("mosaico-root-task-id"):
@@ -71,8 +74,9 @@ def langfuse_span(meta, context_id):
             # W3C parent-id: last 16 hex digits (spec §observability lines 49-51).
             trace_ctx["parent_span_id"] = meta["mosaico-super-task-id"].replace("-", "")[-16:]
         with propagate_attributes(session_id=context_id, trace_name=meta.get("mosaico-root-task-name")):
-            with lf.start_as_current_observation(as_type="span", name=AGENT_NAME,
-                                                 **({"trace_context": trace_ctx} if trace_ctx else {})):
+            with lf.start_as_current_observation(
+                as_type="span", name=AGENT_NAME, **({"trace_context": trace_ctx} if trace_ctx else {})
+            ):
                 yield
     except Exception as e:
         get_logger().warning(f"MOSAICO: Langfuse span setup failed: {e}")

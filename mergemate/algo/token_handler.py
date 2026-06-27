@@ -12,11 +12,11 @@ from mergemate.log import get_logger
 class ModelTypeValidator:
     @staticmethod
     def is_openai_model(model_name: str) -> bool:
-        return 'gpt' in model_name or re.match(r"^o[1-9](-mini|-preview)?$", model_name)
+        return "gpt" in model_name or re.match(r"^o[1-9](-mini|-preview)?$", model_name)
 
     @staticmethod
     def is_anthropic_model(model_name: str) -> bool:
-        return 'claude' in model_name
+        return "claude" in model_name
 
 
 class TokenEncoder:
@@ -32,8 +32,9 @@ class TokenEncoder:
                 if cls._encoder_instance is None or model != cls._model:
                     cls._model = model
                     try:
-                        cls._encoder_instance = encoding_for_model(cls._model) if "gpt" in cls._model else get_encoding(
-                            "o200k_base")
+                        cls._encoder_instance = (
+                            encoding_for_model(cls._model) if "gpt" in cls._model else get_encoding("o200k_base")
+                        )
                     except:
                         cls._encoder_instance = get_encoding("o200k_base")
         return cls._encoder_instance
@@ -54,7 +55,7 @@ class TokenHandler:
 
     # Constants
     CLAUDE_MODEL = "claude-3-7-sonnet-20250219"
-    CLAUDE_MAX_CONTENT_SIZE = 9_000_000 # Maximum allowed content size (9MB) for Claude API
+    CLAUDE_MAX_CONTENT_SIZE = 9_000_000  # Maximum allowed content size (9MB) for Claude API
 
     def __init__(self, pr=None, vars: dict = {}, system="", user=""):
         """
@@ -102,10 +103,10 @@ class TokenHandler:
 
             from mergemate.algo import MAX_TOKENS
 
-            client = anthropic.Anthropic(api_key=get_settings(use_context=False).get('anthropic.key'))
+            client = anthropic.Anthropic(api_key=get_settings(use_context=False).get("anthropic.key"))
             max_tokens = MAX_TOKENS[get_settings().config.model]
 
-            if len(patch.encode('utf-8')) > self.CLAUDE_MAX_CONTENT_SIZE:
+            if len(patch.encode("utf-8")) > self.CLAUDE_MAX_CONTENT_SIZE:
                 get_logger().warning(
                     "Content too large for Anthropic token counting API, falling back to local tokenizer"
                 )
@@ -114,10 +115,7 @@ class TokenHandler:
             response = client.messages.count_tokens(
                 model=self.CLAUDE_MODEL,
                 system="system",
-                messages=[{
-                    "role": "user",
-                    "content": patch
-                }],
+                messages=[{"role": "user", "content": patch}],
             )
             return response.input_tokens
 
@@ -126,7 +124,7 @@ class TokenHandler:
             return max_tokens
 
     def _apply_estimation_factor(self, model_name: str, default_estimate: int) -> int:
-        factor = 1 + get_settings().get('config.model_token_count_estimate_factor', 0)
+        factor = 1 + get_settings().get("config.model_token_count_estimate_factor", 0)
         get_logger().warning(f"{model_name}'s token count cannot be accurately estimated. Using factor of {factor}")
 
         return ceil(factor * default_estimate)
@@ -144,10 +142,10 @@ class TokenHandler:
         """
         model_name = get_settings().config.model.lower()
 
-        if ModelTypeValidator.is_openai_model(model_name) and get_settings(use_context=False).get('openai.key'):
+        if ModelTypeValidator.is_openai_model(model_name) and get_settings(use_context=False).get("openai.key"):
             return default_estimate
 
-        if ModelTypeValidator.is_anthropic_model(model_name) and get_settings(use_context=False).get('anthropic.key'):
+        if ModelTypeValidator.is_anthropic_model(model_name) and get_settings(use_context=False).get("anthropic.key"):
             return self._calc_claude_tokens(patch)
 
         return self._apply_estimation_factor(model_name, default_estimate)

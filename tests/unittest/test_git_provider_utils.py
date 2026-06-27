@@ -9,12 +9,14 @@ class FakeMarkdownProvider:
         return capability == "gfm_markdown"
 
     def publish_persistent_comment(self, body, initial_header, update_header, final_update_message):
-        self.persistent_comments.append({
-            "body": body,
-            "initial_header": initial_header,
-            "update_header": update_header,
-            "final_update_message": final_update_message,
-        })
+        self.persistent_comments.append(
+            {
+                "body": body,
+                "initial_header": initial_header,
+                "update_header": update_header,
+                "final_update_message": final_update_message,
+            }
+        )
 
 
 class FakePlainProvider:
@@ -36,11 +38,16 @@ class FakeMarkdownCommentProvider(FakePlainProvider):
 def test_handle_configurations_errors_uses_persistent_comment_when_supported():
     provider = FakeMarkdownProvider()
 
-    handle_configurations_errors([{
-        "settings": b"[config]\nmodel =",
-        "error": "Invalid value",
-        "category": "local",
-    }], provider)
+    handle_configurations_errors(
+        [
+            {
+                "settings": b"[config]\nmodel =",
+                "error": "Invalid value",
+                "category": "local",
+            }
+        ],
+        provider,
+    )
 
     assert len(provider.persistent_comments) == 1
     comment = provider.persistent_comments[0]
@@ -56,11 +63,16 @@ def test_handle_configurations_errors_uses_persistent_comment_when_supported():
 def test_handle_configurations_errors_keeps_markdown_details_when_persistent_comment_is_missing():
     provider = FakeMarkdownCommentProvider()
 
-    handle_configurations_errors([{
-        "settings": b"[config]\nmodel =",
-        "error": "Invalid value",
-        "category": "local",
-    }], provider)
+    handle_configurations_errors(
+        [
+            {
+                "settings": b"[config]\nmodel =",
+                "error": "Invalid value",
+                "category": "local",
+            }
+        ],
+        provider,
+    )
 
     assert len(provider.comments) == 1
     assert "MergeMate failed to apply 'local' repo settings" in provider.comments[0]
@@ -72,11 +84,16 @@ def test_handle_configurations_errors_keeps_markdown_details_when_persistent_com
 def test_handle_configurations_errors_uses_plain_comment_without_markdown_support():
     provider = FakePlainProvider()
 
-    handle_configurations_errors([{
-        "settings": b"[config]\nmodel =",
-        "error": "Invalid value",
-        "category": "local",
-    }], provider)
+    handle_configurations_errors(
+        [
+            {
+                "settings": b"[config]\nmodel =",
+                "error": "Invalid value",
+                "category": "local",
+            }
+        ],
+        provider,
+    )
 
     assert len(provider.comments) == 1
     assert "❌ **MergeMate failed to apply 'local' repo settings**" in provider.comments[0]
@@ -96,18 +113,21 @@ def test_handle_configurations_errors_returns_without_errors():
 def test_handle_configurations_errors_publishes_each_error():
     provider = FakePlainProvider()
 
-    handle_configurations_errors([
-        {
-            "settings": b"[config]\nmodel =",
-            "error": "First error",
-            "category": "local",
-        },
-        {
-            "settings": b"[pr_reviewer]\nnum_max_findings =",
-            "error": "Second error",
-            "category": "global",
-        },
-    ], provider)
+    handle_configurations_errors(
+        [
+            {
+                "settings": b"[config]\nmodel =",
+                "error": "First error",
+                "category": "local",
+            },
+            {
+                "settings": b"[pr_reviewer]\nnum_max_findings =",
+                "error": "Second error",
+                "category": "global",
+            },
+        ],
+        provider,
+    )
 
     assert len(provider.comments) == 2
     assert "First error" in provider.comments[0]
@@ -127,14 +147,17 @@ def test_handle_configurations_errors_ignores_empty_sentinel_entry():
 def test_handle_configurations_errors_skips_empty_sentinel_entries_in_mixed_list():
     provider = FakePlainProvider()
 
-    handle_configurations_errors([
-        None,
-        {
-            "settings": b"[config]\nmodel =",
-            "error": "Only error",
-            "category": "local",
-        },
-    ], provider)
+    handle_configurations_errors(
+        [
+            None,
+            {
+                "settings": b"[config]\nmodel =",
+                "error": "Only error",
+                "category": "local",
+            },
+        ],
+        provider,
+    )
 
     assert len(provider.comments) == 1
     assert "Only error" in provider.comments[0]

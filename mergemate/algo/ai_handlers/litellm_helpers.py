@@ -24,7 +24,7 @@ async def _handle_streaming_response(response):
             if chunk.choices and len(chunk.choices) > 0:
                 choice = chunk.choices[0]
                 delta = choice.delta
-                content = getattr(delta, 'content', None)
+                content = getattr(delta, "content", None)
                 if content:
                     full_response += content
                 if choice.finish_reason:
@@ -37,8 +37,12 @@ async def _handle_streaming_response(response):
         get_logger().warning("Streaming response resulted in empty content with no finish reason")
         raise openai.APIError("Empty streaming response received without proper completion")
     elif not full_response and finish_reason:
-        get_logger().debug(f"Streaming response resulted in empty content but completed with finish_reason: {finish_reason}")
-        raise openai.APIError(f"Streaming response completed with finish_reason '{finish_reason}' but no content received")
+        get_logger().debug(
+            f"Streaming response resulted in empty content but completed with finish_reason: {finish_reason}"
+        )
+        raise openai.APIError(
+            f"Streaming response completed with finish_reason '{finish_reason}' but no content received"
+        )
     return full_response, finish_reason
 
 
@@ -46,14 +50,7 @@ class MockResponse:
     """Mock response object for streaming models to enable consistent logging."""
 
     def __init__(self, resp, finish_reason):
-        self._data = {
-            "choices": [
-                {
-                    "message": {"content": resp},
-                    "finish_reason": finish_reason
-                }
-            ]
-        }
+        self._data = {"choices": [{"message": {"content": resp}, "finish_reason": finish_reason}]}
 
     def dict(self):
         return self._data
@@ -66,11 +63,12 @@ def _get_azure_ad_token():
         str: The access token
     """
     from azure.identity import ClientSecretCredential
+
     try:
         credential = ClientSecretCredential(
             tenant_id=get_settings().azure_ad.tenant_id,
             client_id=get_settings().azure_ad.client_id,
-            client_secret=get_settings().azure_ad.client_secret
+            client_secret=get_settings().azure_ad.client_secret,
         )
         # Get token for Azure OpenAI service
         token = credential.get_token("https://cognitiveservices.azure.com/.default")
@@ -102,7 +100,9 @@ def _process_litellm_extra_body(kwargs: dict) -> dict:
                 raise ValueError("LITELLM.EXTRA_BODY must be a JSON object")
             unsupported_keys = set(litellm_extra_body.keys()) - allowed_extra_body_keys
             if unsupported_keys:
-                raise ValueError(f"LITELLM.EXTRA_BODY contains unsupported keys: {', '.join(unsupported_keys)}. Allowed keys: {', '.join(allowed_extra_body_keys)}")
+                raise ValueError(
+                    f"LITELLM.EXTRA_BODY contains unsupported keys: {', '.join(unsupported_keys)}. Allowed keys: {', '.join(allowed_extra_body_keys)}"
+                )
             colliding_keys = kwargs.keys() & litellm_extra_body.keys()
             if colliding_keys:
                 raise ValueError(f"LITELLM.EXTRA_BODY cannot override existing parameters: {', '.join(colliding_keys)}")

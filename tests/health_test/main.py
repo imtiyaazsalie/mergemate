@@ -31,9 +31,9 @@ async def run_async() -> None:
         await agent.handle_request(pr_url, ["describe"])
         pr_header_body = dict(get_settings().data)["artifact"]
         assert isinstance(pr_header_body, str), f"Expected artifact to be str, got {type(pr_header_body).__name__}"
-        assert pr_header_body.startswith("###") and "PR Type" in pr_header_body and "Description" in pr_header_body, (
-            "PR description artifact missing expected sections"
-        )
+        assert (
+            pr_header_body.startswith("###") and "PR Type" in pr_header_body and "Description" in pr_header_body
+        ), "PR description artifact missing expected sections"
         context["settings"] = copy.deepcopy(
             original_settings
         )  # Restore settings state after each test to prevent test interference
@@ -45,9 +45,9 @@ async def run_async() -> None:
         await agent.handle_request(pr_url, ["review"])
         pr_review_body = dict(get_settings().data)["artifact"]
         assert isinstance(pr_review_body, str), f"Expected artifact to be str, got {type(pr_review_body).__name__}"
-        assert pr_review_body.startswith("##") and "PR Reviewer Guide" in pr_review_body, (
-            "PR review artifact missing expected header"
-        )
+        assert (
+            pr_review_body.startswith("##") and "PR Reviewer Guide" in pr_review_body
+        ), "PR review artifact missing expected header"
         context["settings"] = copy.deepcopy(
             original_settings
         )  # Restore settings state after each test to prevent test interference
@@ -59,9 +59,9 @@ async def run_async() -> None:
         await agent.handle_request(pr_url, ["improve"])
         pr_improve_body = dict(get_settings().data)["artifact"]
         assert isinstance(pr_improve_body, str), f"Expected artifact to be str, got {type(pr_improve_body).__name__}"
-        assert pr_improve_body.startswith("##") and "PR Code Suggestions" in pr_improve_body, (
-            "PR improve artifact missing expected header"
-        )
+        assert (
+            pr_improve_body.startswith("##") and "PR Code Suggestions" in pr_improve_body
+        ), "PR improve artifact missing expected header"
         context["settings"] = copy.deepcopy(
             original_settings
         )  # Restore settings state after each test to prevent test interference

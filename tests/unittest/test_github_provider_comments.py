@@ -57,6 +57,7 @@ def _make_provider(pr=None, max_chars=65000):
 # create_inline_comment
 # ---------------------------------------------------------------------------
 
+
 def test_create_inline_comment_returns_line_payload(monkeypatch):
     """When a position is resolved, payload must include body/path/position."""
     provider = _make_provider()
@@ -162,6 +163,7 @@ def test_create_inline_comment_does_not_truncate_short_body(monkeypatch):
 # publish_inline_comment(s)
 # ---------------------------------------------------------------------------
 
+
 def test_publish_inline_comment_delegates_to_create_review(monkeypatch):
     """Single-comment publish path should result in a create_review call."""
     fake_pr = _FakePR()
@@ -186,9 +188,7 @@ def test_publish_inline_comments_non_422_reraises():
     provider = _make_provider(pr=fake_pr)
 
     with pytest.raises(_FakeGithubException) as excinfo:
-        provider.publish_inline_comments(
-            [{"body": "b", "path": "f.py", "position": 1}]
-        )
+        provider.publish_inline_comments([{"body": "b", "path": "f.py", "position": 1}])
     assert excinfo.value.status == 500
     # Only the original failing call was attempted - no fallback create_review.
     assert len(fake_pr.create_review_calls) == 1
@@ -240,9 +240,7 @@ def test_publish_inline_comments_fallback_failure_propagates(monkeypatch):
     provider._publish_inline_comments_fallback_with_verification = broken_fallback
 
     with pytest.raises(RuntimeError, match="fallback boom"):
-        provider.publish_inline_comments(
-            [{"body": "b", "path": "f.py", "position": 1}]
-        )
+        provider.publish_inline_comments([{"body": "b", "path": "f.py", "position": 1}])
 
 
 def test_publish_inline_comments_success_no_fallback():
@@ -267,6 +265,7 @@ def test_publish_inline_comments_success_no_fallback():
 # publish_code_suggestions - multi-line vs single-line payload shape
 # ---------------------------------------------------------------------------
 
+
 def _stub_validation_passthrough(provider):
     """Bypass hunk-validation so we can directly assert the constructed payload."""
     provider.validate_comments_inside_hunks = lambda suggestions: suggestions
@@ -285,12 +284,14 @@ def test_publish_code_suggestions_multi_line_payload_shape():
 
     provider.publish_inline_comments = capture
 
-    suggestions = [{
-        "body": "```suggestion\nnew\n```",
-        "relevant_file": "src/foo.py",
-        "relevant_lines_start": 10,
-        "relevant_lines_end": 14,
-    }]
+    suggestions = [
+        {
+            "body": "```suggestion\nnew\n```",
+            "relevant_file": "src/foo.py",
+            "relevant_lines_start": 10,
+            "relevant_lines_end": 14,
+        }
+    ]
 
     assert provider.publish_code_suggestions(suggestions) is True
 
@@ -316,12 +317,14 @@ def test_publish_code_suggestions_single_line_payload_shape():
     captured = {}
     provider.publish_inline_comments = lambda comments, disable_fallback=False: captured.setdefault("c", comments)
 
-    suggestions = [{
-        "body": "fix",
-        "relevant_file": "src/foo.py",
-        "relevant_lines_start": 7,
-        "relevant_lines_end": 7,
-    }]
+    suggestions = [
+        {
+            "body": "fix",
+            "relevant_file": "src/foo.py",
+            "relevant_lines_start": 7,
+            "relevant_lines_end": 7,
+        }
+    ]
 
     assert provider.publish_code_suggestions(suggestions) is True
     payload = captured["c"][0]
@@ -343,14 +346,10 @@ def test_publish_code_suggestions_skips_invalid_ranges():
     provider.publish_inline_comments = lambda comments, disable_fallback=False: captured.setdefault("c", comments)
 
     suggestions = [
-        {"body": "a", "relevant_file": "f.py",
-         "relevant_lines_start": None, "relevant_lines_end": 5},
-        {"body": "b", "relevant_file": "f.py",
-         "relevant_lines_start": -1, "relevant_lines_end": 5},
-        {"body": "c", "relevant_file": "f.py",
-         "relevant_lines_start": 10, "relevant_lines_end": 3},
-        {"body": "d", "relevant_file": "f.py",
-         "relevant_lines_start": 4, "relevant_lines_end": 4},
+        {"body": "a", "relevant_file": "f.py", "relevant_lines_start": None, "relevant_lines_end": 5},
+        {"body": "b", "relevant_file": "f.py", "relevant_lines_start": -1, "relevant_lines_end": 5},
+        {"body": "c", "relevant_file": "f.py", "relevant_lines_start": 10, "relevant_lines_end": 3},
+        {"body": "d", "relevant_file": "f.py", "relevant_lines_start": 4, "relevant_lines_end": 4},
     ]
 
     assert provider.publish_code_suggestions(suggestions) is True
@@ -369,8 +368,14 @@ def test_publish_code_suggestions_returns_false_on_publish_error():
 
     provider.publish_inline_comments = boom
 
-    result = provider.publish_code_suggestions([{
-        "body": "x", "relevant_file": "f.py",
-        "relevant_lines_start": 1, "relevant_lines_end": 2,
-    }])
+    result = provider.publish_code_suggestions(
+        [
+            {
+                "body": "x",
+                "relevant_file": "f.py",
+                "relevant_lines_start": 1,
+                "relevant_lines_end": 2,
+            }
+        ]
+    )
     assert result is False

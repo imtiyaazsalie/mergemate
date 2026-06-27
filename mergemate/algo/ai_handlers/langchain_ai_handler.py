@@ -3,6 +3,7 @@ _LANGCHAIN_INSTALLED = False
 try:
     from langchain_core.messages import HumanMessage, SystemMessage
     from langchain_openai import AzureChatOpenAI, ChatOpenAI
+
     _LANGCHAIN_INSTALLED = True
 except:  # we don't enforce langchain as a dependency, so if it's not installed, just move on
     pass
@@ -53,10 +54,7 @@ class LangChainOpenAIHandler(BaseAiHandler):
                 if openai_api_base is None or len(openai_api_base) == 0:
                     return ChatOpenAI(openai_api_key=get_settings().openai.key)
                 else:
-                    return ChatOpenAI(
-                        openai_api_key=get_settings().openai.key,
-                        openai_api_base=openai_api_base
-                    )
+                    return ChatOpenAI(openai_api_key=get_settings().openai.key, openai_api_base=openai_api_base)
         except AttributeError as e:
             # Handle configuration errors
             error_msg = f"OpenAI {e.name} is required" if getattr(e, "name") else str(e)
@@ -69,7 +67,9 @@ class LangChainOpenAIHandler(BaseAiHandler):
     )
     async def chat_completion(self, model: str, system: str, user: str, temperature: float = 0.2, img_path: str = None):
         if img_path:
-            get_logger().warning(f"Image path is not supported for LangChainOpenAIHandler. Ignoring image path: {img_path}")
+            get_logger().warning(
+                f"Image path is not supported for LangChainOpenAIHandler. Ignoring image path: {img_path}"
+            )
         try:
             messages = [SystemMessage(content=system), HumanMessage(content=user)]
             llm = await self._create_chat_async(deployment_id=self.deployment_id)
@@ -87,11 +87,7 @@ class LangChainOpenAIHandler(BaseAiHandler):
             # Handle parameters based on LLM type
             if isinstance(llm, (ChatOpenAI, AzureChatOpenAI)):
                 # OpenAI models support all parameters
-                resp = await llm.ainvoke(
-                    input=messages,
-                    model=model,
-                    temperature=temperature
-                )
+                resp = await llm.ainvoke(input=messages, model=model, temperature=temperature)
             else:
                 # Other LLMs (like Gemini) only support input parameter
                 get_logger().info(f"Using simplified ainvoke for {type(llm)}")

@@ -49,9 +49,9 @@ MULTI_HUNK_PATCH = (
 )
 
 
-def _make_file(filename="src/sample.py", patch=MULTI_HUNK_PATCH,
-               edit_type=EDIT_TYPE.MODIFIED, tokens=10,
-               base="orig", head="new"):
+def _make_file(
+    filename="src/sample.py", patch=MULTI_HUNK_PATCH, edit_type=EDIT_TYPE.MODIFIED, tokens=10, base="orig", head="new"
+):
     return FilePatchInfo(
         base_file=base,
         head_file=head,
@@ -123,11 +123,7 @@ class TestDecoupleAndConvertToHunks:
         assert "__old hunk__" not in out
 
     def test_pure_addition_hunk_emits_only_new_hunk_section(self):
-        patch = (
-            "@@ -0,0 +1,2 @@\n"
-            "+brand new line 1\n"
-            "+brand new line 2\n"
-        )
+        patch = "@@ -0,0 +1,2 @@\n" "+brand new line 1\n" "+brand new line 2\n"
         file = _make_file(patch=patch, edit_type=EDIT_TYPE.ADDED)
         out = decouple_and_convert_to_hunks_with_lines_numbers(patch, file)
 
@@ -263,7 +259,7 @@ class TestGenerateFullPatch:
         big_tokens = 5000  # exceeds (max_tokens - SOFT=1500) when added on top of prompt
         file_dict = {
             "small.py": {"patch": "+ small", "tokens": 5, "edit_type": EDIT_TYPE.MODIFIED},
-            "huge.py":  {"patch": "+ huge",  "tokens": big_tokens, "edit_type": EDIT_TYPE.MODIFIED},
+            "huge.py": {"patch": "+ huge", "tokens": big_tokens, "edit_type": EDIT_TYPE.MODIFIED},
         }
         total, patches, remaining, files_in = pr_processing.generate_full_patch(
             convert_hunks_to_line_numbers=False,
@@ -317,6 +313,7 @@ class TestGenerateFullPatch:
 class TestPrGenerateCompressedDiff:
     def _settings(self):
         from mergemate.config_loader import get_settings
+
         return get_settings()
 
     def test_deleted_files_collected_and_excluded_from_patches(self, monkeypatch):
@@ -333,15 +330,20 @@ class TestPrGenerateCompressedDiff:
         kept = _make_file(filename="kept.py", tokens=5)
         top_langs = [{"files": [deleted, kept]}]
 
-        (patches_list, total_tokens_list, deleted_files_list,
-         remaining_files_list, file_dict, files_in_patches_list) = \
-            pr_processing.pr_generate_compressed_diff(
-                top_langs=top_langs,
-                token_handler=FakeTokenHandler(prompt_tokens=10),
-                model="some-model",
-                convert_hunks_to_line_numbers=False,
-                large_pr_handling=False,
-            )
+        (
+            patches_list,
+            total_tokens_list,
+            deleted_files_list,
+            remaining_files_list,
+            file_dict,
+            files_in_patches_list,
+        ) = pr_processing.pr_generate_compressed_diff(
+            top_langs=top_langs,
+            token_handler=FakeTokenHandler(prompt_tokens=10),
+            model="some-model",
+            convert_hunks_to_line_numbers=False,
+            large_pr_handling=False,
+        )
 
         assert "gone.py" in deleted_files_list
         assert "gone.py" not in file_dict
@@ -378,21 +380,23 @@ class TestPrGenerateCompressedDiff:
         settings.pr_description.max_ai_calls = 4
 
         try:
-            files = [
-                _make_file(filename=f"f{i}.py", tokens=5, patch=patch_str)
-                for i in range(3)
-            ]
+            files = [_make_file(filename=f"f{i}.py", tokens=5, patch=patch_str) for i in range(3)]
 
             top_langs = [{"files": files}]
-            (patches_list, total_tokens_list, deleted_files_list,
-             remaining_files_list, file_dict, files_in_patches_list) = \
-                pr_processing.pr_generate_compressed_diff(
-                    top_langs=top_langs,
-                    token_handler=token_handler,
-                    model="some-model",
-                    convert_hunks_to_line_numbers=False,
-                    large_pr_handling=True,
-                )
+            (
+                patches_list,
+                total_tokens_list,
+                deleted_files_list,
+                remaining_files_list,
+                file_dict,
+                files_in_patches_list,
+            ) = pr_processing.pr_generate_compressed_diff(
+                top_langs=top_langs,
+                token_handler=token_handler,
+                model="some-model",
+                convert_hunks_to_line_numbers=False,
+                large_pr_handling=True,
+            )
 
             # Pagination actually fired: 3 batches, one file each, nothing left over.
             assert len(patches_list) == 3
@@ -410,8 +414,7 @@ class TestPrGenerateCompressedDiff:
         kept = _make_file(filename="kept.py", tokens=5)
         top_langs = [{"files": [empty, kept]}]
 
-        (patches_list, _, deleted_files_list, remaining_files_list,
-         file_dict, files_in_patches_list) = \
+        (patches_list, _, deleted_files_list, remaining_files_list, file_dict, files_in_patches_list) = (
             pr_processing.pr_generate_compressed_diff(
                 top_langs=top_langs,
                 token_handler=FakeTokenHandler(prompt_tokens=10),
@@ -419,6 +422,7 @@ class TestPrGenerateCompressedDiff:
                 convert_hunks_to_line_numbers=False,
                 large_pr_handling=False,
             )
+        )
 
         assert "empty.py" not in file_dict
         assert "empty.py" not in deleted_files_list
@@ -430,14 +434,13 @@ class TestPrGenerateCompressedDiff:
         kept = _make_file(filename="kept.py", tokens=5)
         top_langs = [{"files": [kept]}]
 
-        (patches_list, _, _, _, file_dict, files_in_patches_list) = \
-            pr_processing.pr_generate_compressed_diff(
-                top_langs=top_langs,
-                token_handler=FakeTokenHandler(prompt_tokens=10),
-                model="some-model",
-                convert_hunks_to_line_numbers=True,
-                large_pr_handling=False,
-            )
+        (patches_list, _, _, _, file_dict, files_in_patches_list) = pr_processing.pr_generate_compressed_diff(
+            top_langs=top_langs,
+            token_handler=FakeTokenHandler(prompt_tokens=10),
+            model="some-model",
+            convert_hunks_to_line_numbers=True,
+            large_pr_handling=False,
+        )
         # Decoupled output marker should be present in the stored patch.
         assert "__new hunk__" in file_dict["kept.py"]["patch"]
         assert files_in_patches_list[0] == ["kept.py"]
@@ -451,12 +454,10 @@ class TestPrGenerateCompressedDiff:
         settings.pr_description.max_ai_calls = 2  # allow 1 extra loop iteration (range(0))
 
         try:
-            files = [_make_file(filename=f"f{i}.py", tokens=5,
-                                patch=f"@@ -1 +1 @@\n+x_{i}\n")
-                     for i in range(3)]
+            files = [_make_file(filename=f"f{i}.py", tokens=5, patch=f"@@ -1 +1 @@\n+x_{i}\n") for i in range(3)]
             top_langs = [{"files": files}]
 
-            (patches_list, _, _, remaining_files_list, _, files_in_patches_list) = \
+            (patches_list, _, _, remaining_files_list, _, files_in_patches_list) = (
                 pr_processing.pr_generate_compressed_diff(
                     top_langs=top_langs,
                     token_handler=FakeTokenHandler(prompt_tokens=10_000),
@@ -464,6 +465,7 @@ class TestPrGenerateCompressedDiff:
                     convert_hunks_to_line_numbers=False,
                     large_pr_handling=True,
                 )
+            )
 
             # The first (mandatory) iteration always appends one batch, even if empty.
             assert len(patches_list) >= 1

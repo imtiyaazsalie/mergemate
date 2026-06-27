@@ -47,10 +47,13 @@ def test_get_repo_settings_uses_env_var_when_settings_are_missing():
     repo_obj.get_contents.return_value = SimpleNamespace(decoded_content=b"[config]\nmodel='env'")
     provider = _provider_with_repo(repo_obj)
 
-    with patch("mergemate.git_providers.github_provider.get_settings") as mock_settings, patch.dict(
-        "os.environ",
-        {"MERGEMATE_CONFIG_BRANCH": "env-branch"},
-        clear=False,
+    with (
+        patch("mergemate.git_providers.github_provider.get_settings") as mock_settings,
+        patch.dict(
+            "os.environ",
+            {"MERGEMATE_CONFIG_BRANCH": "env-branch"},
+            clear=False,
+        ),
     ):
         mock_settings.return_value.get.return_value = None
         settings = provider.get_repo_settings()
@@ -65,10 +68,13 @@ def test_get_repo_settings_whitespace_settings_falls_back_to_env_var():
     repo_obj.get_contents.return_value = SimpleNamespace(decoded_content=b"[config]\nmodel='env'")
     provider = _provider_with_repo(repo_obj)
 
-    with patch("mergemate.git_providers.github_provider.get_settings") as mock_settings, patch.dict(
-        "os.environ",
-        {"MERGEMATE_CONFIG_BRANCH": "env-branch"},
-        clear=False,
+    with (
+        patch("mergemate.git_providers.github_provider.get_settings") as mock_settings,
+        patch.dict(
+            "os.environ",
+            {"MERGEMATE_CONFIG_BRANCH": "env-branch"},
+            clear=False,
+        ),
     ):
         mock_settings.return_value.get.return_value = "   "
         settings = provider.get_repo_settings()

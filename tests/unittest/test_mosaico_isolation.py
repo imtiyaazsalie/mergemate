@@ -14,6 +14,7 @@ Non-vacuity: the test is wired so that WITHOUT the executor's
 global_settings), the interleaved writes would clobber each other and the read-back
 assertions would fail. test_isolation_is_non_vacuous proves this directly by running the
 same interleaving WITHOUT the per-request deepcopy and asserting the bleed DOES occur."""
+
 import asyncio
 
 import pytest
@@ -27,8 +28,7 @@ from mergemate.mosaico.executor import MergeMateAgentExecutor
 
 
 def _make_message(text: str) -> Message:
-    return Message(message_id=f"m-{text}", role=Role.ROLE_USER,
-                   parts=[Part(text=text)])
+    return Message(message_id=f"m-{text}", role=Role.ROLE_USER, parts=[Part(text=text)])
 
 
 class _RecordingEventQueue:
@@ -191,5 +191,4 @@ class TestConcurrencyIsolation:
 
         await asyncio.gather(run_shared("reqA"), run_shared("reqB"))
         # Without isolation, the interleaved writes MUST have clobbered each other.
-        assert bleed_detected["value"] is True, \
-            "expected cross-request bleed without isolation, but none was observed"
+        assert bleed_detected["value"] is True, "expected cross-request bleed without isolation, but none was observed"

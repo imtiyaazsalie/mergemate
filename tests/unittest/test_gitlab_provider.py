@@ -23,12 +23,13 @@ class TestGitLabProvider:
 
     @pytest.fixture
     def gitlab_provider(self, mock_gitlab_client, mock_project):
-        with patch('mergemate.git_providers.gitlab_provider.gitlab.Gitlab', return_value=mock_gitlab_client), \
-             patch('mergemate.git_providers.gitlab_provider.get_settings') as mock_settings:
-
+        with (
+            patch("mergemate.git_providers.gitlab_provider.gitlab.Gitlab", return_value=mock_gitlab_client),
+            patch("mergemate.git_providers.gitlab_provider.get_settings") as mock_settings,
+        ):
             mock_settings.return_value.get.side_effect = lambda key, default=None: {
                 "GITLAB.URL": "https://gitlab.com",
-                "GITLAB.PERSONAL_ACCESS_TOKEN": "fake_token"
+                "GITLAB.PERSONAL_ACCESS_TOKEN": "fake_token",
             }.get(key, default)
 
             mock_gitlab_client.projects.get.return_value = mock_project
@@ -81,17 +82,17 @@ class TestGitLabProvider:
         new_content = "# Changelog\n\n## v1.1.0\n- New feature"
         commit_message = "Add CHANGELOG.md"
 
-        gitlab_provider.create_or_update_pr_file(
-            "CHANGELOG.md", "feature-branch", new_content, commit_message
-        )
+        gitlab_provider.create_or_update_pr_file("CHANGELOG.md", "feature-branch", new_content, commit_message)
 
         mock_project.files.get.assert_called_once_with("CHANGELOG.md", "feature-branch")
-        mock_project.files.create.assert_called_once_with({
-            'file_path': 'CHANGELOG.md',
-            'branch': 'feature-branch',
-            'content': new_content,
-            'commit_message': commit_message,
-        })
+        mock_project.files.create.assert_called_once_with(
+            {
+                "file_path": "CHANGELOG.md",
+                "branch": "feature-branch",
+                "content": new_content,
+                "commit_message": commit_message,
+            }
+        )
 
     def test_create_or_update_pr_file_update_existing(self, gitlab_provider, mock_project):
         mock_file = MagicMock(ProjectFile)
@@ -101,9 +102,7 @@ class TestGitLabProvider:
         new_content = "# New changelog content"
         commit_message = "Update CHANGELOG.md"
 
-        gitlab_provider.create_or_update_pr_file(
-            "CHANGELOG.md", "feature-branch", new_content, commit_message
-        )
+        gitlab_provider.create_or_update_pr_file("CHANGELOG.md", "feature-branch", new_content, commit_message)
 
         mock_project.files.get.assert_called_once_with("CHANGELOG.md", "feature-branch")
         assert mock_file.content == new_content
@@ -114,9 +113,7 @@ class TestGitLabProvider:
         mock_project.files.get.side_effect = Exception("Network error")
 
         with pytest.raises(Exception):
-            gitlab_provider.create_or_update_pr_file(
-                "CHANGELOG.md", "feature-branch", "content", "message"
-            )
+            gitlab_provider.create_or_update_pr_file("CHANGELOG.md", "feature-branch", "content", "message")
 
     def test_has_create_or_update_pr_file_method(self, gitlab_provider):
         assert hasattr(gitlab_provider, "create_or_update_pr_file")
@@ -128,17 +125,20 @@ class TestGitLabProvider:
         sig = inspect.signature(gitlab_provider.create_or_update_pr_file)
         params = list(sig.parameters.keys())
 
-        expected_params = ['file_path', 'branch', 'contents', 'message']
+        expected_params = ["file_path", "branch", "contents", "message"]
         assert params == expected_params
 
-    @pytest.mark.parametrize("content,expected", [
-        ("simple text", "simple text"),
-        (b"bytes content", "bytes content"),
-        ("", ""),
-        (b"", ""),
-        ("unicode: café", "unicode: café"),
-        (b"unicode: caf\xc3\xa9", "unicode: café"),
-    ])
+    @pytest.mark.parametrize(
+        "content,expected",
+        [
+            ("simple text", "simple text"),
+            (b"bytes content", "bytes content"),
+            ("", ""),
+            (b"", ""),
+            ("unicode: café", "unicode: café"),
+            (b"unicode: caf\xc3\xa9", "unicode: café"),
+        ],
+    )
     def test_content_encoding_handling(self, gitlab_provider, mock_project, content, expected):
         mock_file = MagicMock(ProjectFile)
         mock_file.decode.return_value = content
@@ -155,10 +155,10 @@ class TestGitLabProvider:
 
         file_obj = MagicMock(ProjectFile)
         file_obj.decode.return_value = (
-            "[submodule \"libs/a\"]\n"
-            "    path = \"libs/a\"\n"
-            "    url = \"https://gitlab.com/a.git\"\n"
-            "[submodule \"libs/b\"]\n"
+            '[submodule "libs/a"]\n'
+            '    path = "libs/a"\n'
+            '    url = "https://gitlab.com/a.git"\n'
+            '[submodule "libs/b"]\n'
             "    path = libs/b\n"
             "    url = git@gitlab.com:b.git\n"
         )

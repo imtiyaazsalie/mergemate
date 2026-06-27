@@ -58,9 +58,9 @@ ALLOWED_ARGS_SINGLE = [
 def test_validate_user_args_rejects_forbidden(forbidden):
     ok, offending = CliArgs.validate_user_args([forbidden])
     assert ok is False, f"Expected {forbidden!r} to be rejected"
-    assert isinstance(offending, str) and offending, (
-        f"Expected an offending-token string for {forbidden!r}, got {offending!r}"
-    )
+    assert (
+        isinstance(offending, str) and offending
+    ), f"Expected an offending-token string for {forbidden!r}, got {offending!r}"
 
 
 @pytest.mark.parametrize("allowed", ALLOWED_ARGS_SINGLE)

@@ -17,6 +17,7 @@ class TestGithubProviderImport:
         """The module must import even when the mounted configuration has no [github] section,
         e.g. a GitLab-only deployment that replaces configuration.toml entirely.
         Runs in a subprocess so the modified global settings cannot leak into other tests."""
-        result = subprocess.run([sys.executable, "-c", _IMPORT_WITHOUT_GITHUB_SECTION],
-                                capture_output=True, text=True, timeout=60)
+        result = subprocess.run(
+            [sys.executable, "-c", _IMPORT_WITHOUT_GITHUB_SECTION], capture_output=True, text=True, timeout=60
+        )
         assert result.returncode == 0, f"import failed without a [github] section:\n{result.stderr}"

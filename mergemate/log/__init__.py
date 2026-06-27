@@ -43,7 +43,7 @@ def setup_logger(level: str = "INFO", fmt: LoggingFormat = LoggingFormat.CONSOLE
             colorize=False,
             serialize=True,
         )
-    elif fmt == LoggingFormat.CONSOLE: # does not print the 'extra' fields
+    elif fmt == LoggingFormat.CONSOLE:  # does not print the 'extra' fields
         logger.remove(None)
         logger.add(sys.stdout, level=level, colorize=True, filter=inv_analytics_filter)
 

@@ -12,7 +12,7 @@ def filter_bad_extensions(files):
     return [f for f in files if f.filename is not None and is_valid_file(f.filename, bad_extensions)]
 
 
-def is_valid_file(filename:str, bad_extensions=None) -> bool:
+def is_valid_file(filename: str, bad_extensions=None) -> bool:
     if not filename:
         return False
     if not bad_extensions:
@@ -21,17 +21,28 @@ def is_valid_file(filename:str, bad_extensions=None) -> bool:
             bad_extensions += get_settings().bad_extensions.extra
 
     auto_generated_files_exact = {
-        'package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', 'composer.lock', 'Gemfile.lock',
-        'poetry.lock', 'go.sum', '.terraform.lock.hcl', 'uv.lock',
-        'Cargo.lock', 'Pipfile.lock', 'mix.lock', 'pubspec.lock', 'bun.lockb',
+        "package-lock.json",
+        "yarn.lock",
+        "pnpm-lock.yaml",
+        "composer.lock",
+        "Gemfile.lock",
+        "poetry.lock",
+        "go.sum",
+        ".terraform.lock.hcl",
+        "uv.lock",
+        "Cargo.lock",
+        "Pipfile.lock",
+        "mix.lock",
+        "pubspec.lock",
+        "bun.lockb",
     }
-    auto_generated_suffixes = ('.min.js', '.min.css', '.js.map', '.ts.map', '.css.map')
-    if filename.replace('\\', '/').split('/')[-1] in auto_generated_files_exact:
+    auto_generated_suffixes = (".min.js", ".min.css", ".js.map", ".ts.map", ".css.map")
+    if filename.replace("\\", "/").split("/")[-1] in auto_generated_files_exact:
         return False
     if filename.endswith(auto_generated_suffixes):
         return False
 
-    return filename.split('.')[-1] not in bad_extensions
+    return filename.split(".")[-1] not in bad_extensions
 
 
 def sort_files_by_main_languages(languages: Dict, files: list):

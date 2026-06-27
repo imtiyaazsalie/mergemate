@@ -6,6 +6,7 @@ behavior itself was proven in 2c). Verifies the route + 200/503 response shape.
 Also exercises the REAL health_check() (no stub) to lock in Fix A: the removed
 'stop'-param gate must NOT short-circuit /health for models that lack 'stop' (e.g. the
 shipped gpt-5.x defaults), since MergeMate's LiteLLMAIHandler never sends 'stop'."""
+
 import litellm
 import pytest
 from starlette.testclient import TestClient
@@ -72,9 +73,7 @@ class TestHealthCheckGate:
     """Exercise the REAL health_check() (not the monkeypatched stub) to lock in Fix A."""
 
     @pytest.mark.asyncio
-    async def test_model_without_stop_probes_live_and_returns_ok(
-        self, monkeypatch, restore_config_model
-    ):
+    async def test_model_without_stop_probes_live_and_returns_ok(self, monkeypatch, restore_config_model):
         restore_config_model.set("CONFIG.MODEL", _MODEL_WITHOUT_STOP)
 
         called = {}
@@ -93,9 +92,7 @@ class TestHealthCheckGate:
         assert called.get("model") == _MODEL_WITHOUT_STOP
 
     @pytest.mark.asyncio
-    async def test_live_probe_failure_returns_unhealthy(
-        self, monkeypatch, restore_config_model
-    ):
+    async def test_live_probe_failure_returns_unhealthy(self, monkeypatch, restore_config_model):
         restore_config_model.set("CONFIG.MODEL", _MODEL_WITHOUT_STOP)
 
         async def boom_acompletion(**kwargs):
@@ -108,9 +105,7 @@ class TestHealthCheckGate:
         assert "connection refused" in result
 
     @pytest.mark.asyncio
-    async def test_no_model_configured_returns_unhealthy(
-        self, monkeypatch, restore_config_model
-    ):
+    async def test_no_model_configured_returns_unhealthy(self, monkeypatch, restore_config_model):
         restore_config_model.set("CONFIG.MODEL", "")
 
         async def should_not_be_called(**kwargs):

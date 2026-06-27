@@ -68,10 +68,13 @@ def test_get_progress_gif_width_non_positive_value_uses_default(mock_get_setting
 
 @patch("mergemate.tools.progress_comment.get_settings")
 def test_build_progress_comment_contains_expected_elements(mock_get_settings):
-    _mock_settings(mock_get_settings, {
-        "progress_gif_url": "https://example.com/custom.gif",
-        "progress_gif_width": 150,
-    })
+    _mock_settings(
+        mock_get_settings,
+        {
+            "progress_gif_url": "https://example.com/custom.gif",
+            "progress_gif_width": 150,
+        },
+    )
 
     progress_comment = build_progress_comment()
 
@@ -86,4 +89,7 @@ def test_build_progress_comment_uses_defaults(mock_get_settings):
 
     progress_comment = build_progress_comment()
 
-    assert f'<img src="{DEFAULT_PROGRESS_GIF_URL}" alt="Work in progress" width="{DEFAULT_PROGRESS_GIF_WIDTH}">' in progress_comment
+    assert (
+        f'<img src="{DEFAULT_PROGRESS_GIF_URL}" alt="Work in progress" width="{DEFAULT_PROGRESS_GIF_WIDTH}">'
+        in progress_comment
+    )
