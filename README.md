@@ -21,7 +21,17 @@ MergeMate automates code review workflows by providing AI-generated feedback, su
 
 ## Quick Start
 
-### GitHub Action
+```bash
+# AI-powered setup — auto-detects your project
+mergemate init
+
+# Or specify details
+mergemate init --model deepseek/deepseek-chat --language python --project-type web
+```
+
+This generates `.mergemate.toml` + GitHub Actions workflow. Add your API key as a repo secret, done.
+
+### Manual
 
 ```yaml
 # .github/workflows/mergemate.yml
