@@ -16,7 +16,7 @@ It detects your language, git provider, and project type, then uses AI to genera
 mergemate-review init --output /path/to/repo
 
 # Specify your preferences
-mergemate-review init --model deepseek/deepseek-chat --language python --project-type web
+mergemate-review init --model deepseek/deepseek-v4-flash --language python --project-type web
 ```
 
 ---

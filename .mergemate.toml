@@ -1,7 +1,7 @@
 # MergeMate configuration file
 
 [config]
-model = "deepseek/deepseek-chat"
+model = "deepseek/deepseek-v4-flash"
 max_model_tokens = 100000
 
 [pr_code_suggestions]

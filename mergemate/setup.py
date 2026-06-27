@@ -54,7 +54,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--output", "-o", type=str, default=".", help="Directory to write config files to")
     parser.add_argument("--provider", type=str, default="github", help="Git provider (github, gitlab, bitbucket)")
-    parser.add_argument("--model", type=str, default="deepseek/deepseek-chat", help="AI model for the wizard")
+    parser.add_argument("--model", type=str, default="deepseek/deepseek-v4-flash", help="AI model for the wizard")
     parser.add_argument("--description", "-d", type=str, help="Brief description of your project")
     parser.add_argument("--language", "-l", type=str, default="", help="Primary programming language")
     parser.add_argument("--team-size", type=str, default="small", choices=["solo", "small", "medium", "large"])
@@ -272,7 +272,7 @@ def _interactive_setup(info: dict) -> str:
 # Generated for a {info["project_type"]} project ({info.get("languages", "unknown")})
 
 [config]
-model = "{info.get("model", "deepseek/deepseek-chat")}"
+model = "{info.get("model", "deepseek/deepseek-v4-flash")}"
 git_provider = "{info["provider"]}"
 publish_output = true
 

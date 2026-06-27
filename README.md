@@ -26,7 +26,7 @@ MergeMate automates code review workflows by providing AI-generated feedback, su
 mergemate-review init
 
 # Or specify details
-mergemate-review init --model deepseek/deepseek-chat --language python --project-type web
+mergemate-review init --model deepseek/deepseek-v4-flash --language python --project-type web
 ```
 
 This generates `.mergemate.toml` + GitHub Actions workflow. Add your API key as a repo secret, done.

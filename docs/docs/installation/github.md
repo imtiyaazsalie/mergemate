@@ -35,7 +35,7 @@ jobs:
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          config.model: "deepseek/deepseek-chat"
+          config.model: "deepseek/deepseek-v4-flash"
 ```
 
 ### 2. Add your API key
@@ -74,7 +74,7 @@ And update `config.model`:
 
 ```yaml
 # DeepSeek (default)
-config.model: "deepseek/deepseek-chat"
+config.model: "deepseek/deepseek-v4-flash"
 
 # OpenAI
 config.model: "gpt-4o"

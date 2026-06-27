@@ -215,8 +215,8 @@ api_base = ...
 
 ```toml
 [config]
-model = "deepseek/deepseek-chat"
-fallback_models = ["deepseek/deepseek-chat"]
+model = "deepseek/deepseek-v4-flash"
+fallback_models = ["deepseek/deepseek-v4-flash"]
 
 # .secrets.toml
 [deepseek]
@@ -252,7 +252,7 @@ key = ...
 ```toml
 [config]
 model = "openrouter/anthropic/claude-3.7-sonnet"
-fallback_models = ["openrouter/deepseek/deepseek-chat"]
+fallback_models = ["openrouter/deepseek/deepseek-v4-flash"]
 custom_model_max_tokens = 20000
 
 # .secrets.toml
