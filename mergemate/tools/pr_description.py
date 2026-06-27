@@ -351,14 +351,14 @@ class PRDescription(BaseTool):
                 pr_body += (
                     "\n\n___\n\n> <details> <summary>  Need help?</summary><li>Type <code>/help how to ...</code> "
                     "in the comments thread for any questions about MergeMate usage.</li><li>Check out the "
-                    '<a href="https://mergemate-merge-docs.mergemate.ai/usage-guide/">documentation</a> '
+                    '<a href="https://imtiyaazsalie.github.io/mergemate/usage-guide/">documentation</a> '
                     "for more information.</li></details>"
                 )
             else:
                 pr_body += (
                     "\n\n___\n\n<details><summary>Need help?</summary>- Type <code>/help how to ...</code> in the comments "
                     "thread for any questions about MergeMate usage.<br>- Check out the "
-                    "<a href='https://mergemate-merge-docs.mergemate.ai/usage-guide/'>documentation</a> for more information.</details>"
+                    "<a href='https://imtiyaazsalie.github.io/mergemate/usage-guide/'>documentation</a> for more information.</details>"
                 )
 
         # Output relevant configurations if enabled

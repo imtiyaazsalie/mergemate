@@ -180,7 +180,7 @@ class PRHelpMessage(BaseTool):
             answer_str += f"### Question: \n{self.question_str}\n\n"
             answer_str += f"### Answer:\n{response_str.strip()}\n\n"
             answer_str += "#### Relevant Sources:\n\n"
-            base_path = "https://mergemate-merge-docs.mergemate.ai/"
+            base_path = "https://imtiyaazsalie.github.io/mergemate/"
             for section in relevant_sections:
                 file = section.get("file_name").strip().removesuffix(".md")
                 if str(section["relevant_section_header_string"]).strip():
@@ -228,7 +228,7 @@ class PRHelpMessage(BaseTool):
             "feedback, suggestions and more."
         )
         pr_comment += "\n\nHere is a list of tools you can use to interact with the MergeMate:\n"
-        base_path = "https://mergemate-docs.mergemate.ai/tools"
+        base_path = "https://imtiyaazsalie.github.io/mergemate/tools"
 
         tool_names = [
             f"[DESCRIBE]({base_path}/describe/)",
@@ -294,10 +294,10 @@ class PRHelpMessage(BaseTool):
             pr_comment += "</table>\n\n"
             pr_comment += (
                 "\n\n(1) Note that each tool can be [triggered automatically]"
-                "(https://mergemate-docs.mergemate.ai/usage-guide/automations_and_usage/"
+                "(https://imtiyaazsalie.github.io/mergemate/usage-guide/automations_and_usage/"
                 "#github-app-automatic-tools-when-a-new-pr-is-opened) when a new PR is opened, "
                 "or called manually by [commenting on a PR]"
-                "(https://mergemate-docs.mergemate.ai/usage-guide/automations_and_usage/#online-usage)."
+                "(https://imtiyaazsalie.github.io/mergemate/usage-guide/automations_and_usage/#online-usage)."
             )
             pr_comment += (
                 "\n\n(2) Tools marked with [*] require additional parameters to be passed. "
@@ -320,9 +320,9 @@ class PRHelpMessage(BaseTool):
             pr_comment += "</table>\n\n"
             pr_comment += (
                 "\n\nNote that each tool can be [invoked automatically]"
-                "(https://mergemate-docs.mergemate.ai/usage-guide/automations_and_usage/) "
+                "(https://imtiyaazsalie.github.io/mergemate/usage-guide/automations_and_usage/) "
                 "when a new PR is opened, or called manually by [commenting on a PR]"
-                "(https://mergemate-docs.mergemate.ai/usage-guide/automations_and_usage/#online-usage)."
+                "(https://imtiyaazsalie.github.io/mergemate/usage-guide/automations_and_usage/#online-usage)."
             )
 
         self.git_provider.publish_comment(pr_comment)

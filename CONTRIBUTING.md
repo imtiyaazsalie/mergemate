@@ -34,5 +34,5 @@ Thank you for your interest in contributing to the MergeMate project!
 ## Questions or Need Help?
 
 - Ask questions or start a discussion in [GitHub Discussions](https://github.com/mergemate/mergemate/discussions)
-- Check the [documentation](https://docs.mergemate.dev/) for detailed information
+- Check the [documentation](https://imtiyaazsalie.github.io/mergemate/) for detailed information
 - Report bugs or request features through [GitHub Issues](https://github.com/mergemate/mergemate/issues)
