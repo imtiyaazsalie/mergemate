@@ -1,7 +1,7 @@
 # MergeMate
 
 [![Tests](https://github.com/imtiyaazsalie/mergemate/actions/workflows/build-and-test.yaml/badge.svg)](https://github.com/imtiyaazsalie/mergemate/actions/workflows/build-and-test.yaml)
-[![Coverage](https://codecov.io/gh/imtiyaazsalie/mergemate/branch/main/graph/badge.svg)](https://codecov.io/gh/imtiyaazsalie/mergemate)
+[![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)](https://github.com/imtiyaazsalie/mergemate)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![PyPI](https://img.shields.io/pypi/v/mergemate-review.svg)](https://pypi.org/project/mergemate-review/)
 [![Docker](https://img.shields.io/docker/pulls/imtiyaazsalie/mergemate-review.svg)](https://hub.docker.com/r/imtiyaazsalie/mergemate-review)

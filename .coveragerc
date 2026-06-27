@@ -1,0 +1,15 @@
+[run]
+source = mergemate
+omit =
+    mergemate/servers/*
+    mergemate/git_providers/*
+    mergemate/identity_providers/*
+    mergemate/secret_providers/*
+    mergemate/mosaico/*
+    mergemate/algo/*
+    mergemate/settings/*
+    mergemate/setup.py
+    mergemate/cli_pip.py
+    mergemate/custom_merge_loader.py
+    mergemate/config_loader.py
+    mergemate/log/*
