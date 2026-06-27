@@ -59,18 +59,25 @@ theme:
     - content.code.copy
     - content.code.annotate
   palette:
-    - scheme: slate
+    - media: "(prefers-color-scheme)"
+      scheme: slate
       primary: black
       accent: lime
       toggle:
-        icon: material/weather-night
-        name: Dark mode
+        icon: material/brightness-auto
+        name: System preference
     - scheme: slate
       primary: black
       accent: lime
       toggle:
         icon: material/weather-sunny
         name: Light mode
+    - scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
 
 plugins:
   - search
