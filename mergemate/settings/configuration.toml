@@ -332,7 +332,7 @@ service_callback = []
 skip_comments = false
 force_update_dataset = false
 max_issues_to_scan = 500
-vectordb = "pinecone" # options: "pinecone", "lancedb", "qdrant"
+vectordb = "lancedb" # options: "pinecone", "lancedb", "qdrant"
 
 [pr_find_similar_component]
 class_name = ""
