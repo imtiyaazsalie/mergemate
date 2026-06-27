@@ -1,0 +1,7 @@
+[pr_description_only_description_prompts]
+system="""Write a PR title and description based on file change summaries.
+Output valid YAML with: title, type, description, pr_files."""
+user="""File changes:
+{{ files_walkthrough }}
+
+Output YAML:"""

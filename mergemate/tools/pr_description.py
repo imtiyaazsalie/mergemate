@@ -287,9 +287,8 @@ class PRDescription(BaseTool):
         self._describe_cfg = describe_cfg
 
     async def _predict(self) -> dict[str, Any]:
-        """Call the AI model (with retry) and parse the prediction."""
-        # Run the prediction with fallback models
-        await retry_with_fallback_models(self._prepare_and_predict, ModelType.WEAK)
+        """Call the AI model and parse the prediction."""
+        await self._prepare_and_predict(self.config.model.model)
 
         if not self._prediction:
             get_logger().warning(f"Empty prediction, PR: {self._pr_id()}")
@@ -429,7 +428,14 @@ class PRDescription(BaseTool):
             return
 
         large_pr_handling = (
-            describe_cfg.get("enable_large_pr_handling") and "pr_description_only_files_prompts" in self._raw_all()
+            describe_cfg.get("enable_large_pr_handling", True)
+            and "pr_description_only_files_prompts" in self._raw_all()
+        )
+
+        # Auto-detect large PRs and split into chunks
+        large_pr_handling = (
+            describe_cfg.get("enable_large_pr_handling", True)
+            and "pr_description_only_files_prompts" in self._raw_all()
         )
 
         output = get_pr_diff(
