@@ -1,0 +1,190 @@
+/* Terminal theme for MergeMate docs */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+  --md-default-bg-color: #0a0a0a;
+  --md-default-fg-color: #c0c0c0;
+  --md-default-fg-color--light: #909090;
+  --md-default-fg-color--lighter: #606060;
+  --md-typeset-color: #c0c0c0;
+  --md-typeset-a-color: #a0ff60;
+  --md-accent-fg-color: #80ff40;
+  --md-primary-fg-color: #0d0d0d;
+  --md-primary-fg-color--dark: #000000;
+  --md-code-bg-color: #111111;
+  --md-code-fg-color: #c0ff80;
+  --md-code-hl-color: #1a2a10;
+}
+
+/* Monospace everywhere */
+body, input {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.md-typeset h1 {
+  color: #80ff40;
+  font-weight: 700;
+  font-size: 1.8em;
+  border-bottom: 1px solid #1a2a10;
+  padding-bottom: 0.3em;
+}
+
+.md-typeset h1::before {
+  content: "$ ";
+  color: #404040;
+}
+
+.md-typeset h2 {
+  color: #c0ff80;
+  font-weight: 700;
+  font-size: 1.3em;
+  margin-top: 1.5em;
+}
+
+.md-typeset h2::before {
+  content: "> ";
+  color: #404040;
+}
+
+.md-typeset h3 {
+  color: #a0ff60;
+  font-weight: 700;
+}
+
+.md-typeset h3::before {
+  content: ">> ";
+  color: #404040;
+}
+
+/* Code blocks */
+.md-typeset code {
+  background: #111111;
+  color: #80ff40;
+  border: 1px solid #1a2a10;
+  border-radius: 2px;
+  padding: 0.1em 0.3em;
+  font-size: 0.9em;
+}
+
+.md-typeset pre > code {
+  background: #0a0a0a;
+  border: 1px solid #1a2a10;
+  border-radius: 4px;
+  padding: 1em;
+}
+
+/* Links */
+.md-typeset a {
+  color: #80ff40;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.md-typeset a:hover {
+  color: #a0ff80;
+  background: #1a2a10;
+}
+
+/* Tables */
+.md-typeset table {
+  border-collapse: collapse;
+  background: #0d0d0d;
+  border: 1px solid #1a2a10;
+}
+
+.md-typeset table th {
+  background: #111111;
+  color: #80ff40;
+  border-bottom: 1px solid #80ff40;
+  padding: 0.5em 0.8em;
+}
+
+.md-typeset table td {
+  border-bottom: 1px solid #0a0a0a;
+  padding: 0.4em 0.8em;
+}
+
+/* Admonitions */
+.md-typeset .admonition {
+  border: 1px solid #1a2a10;
+  border-left: 3px solid #80ff40;
+  background: #0d0d0d;
+  border-radius: 0;
+}
+
+.md-typeset .admonition-title {
+  background: #111111;
+  color: #80ff40;
+  font-weight: 700;
+  border-radius: 0;
+}
+
+/* Navigation */
+.md-nav__link {
+  color: #909090;
+}
+
+.md-nav__link:hover {
+  color: #80ff40;
+}
+
+.md-nav__link--active {
+  color: #80ff40;
+}
+
+/* Header */
+.md-header {
+  background: #050505;
+  border-bottom: 1px solid #1a2a10;
+}
+
+/* Search */
+.md-search__input {
+  background: #0d0d0d;
+  border: 1px solid #1a2a10;
+  color: #c0c0c0;
+  border-radius: 2px;
+}
+
+.md-search__input::placeholder {
+  color: #404040;
+}
+
+/* Tabs */
+.md-tabs {
+  background: #050505;
+  border-bottom: 1px solid #1a2a10;
+}
+
+.md-tabs__link {
+  color: #909090;
+}
+
+.md-tabs__link--active {
+  color: #80ff40;
+}
+
+/* Footer */
+.md-footer {
+  background: #050505;
+  border-top: 1px solid #1a2a10;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a2a10;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #80ff40;
+}

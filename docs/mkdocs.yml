@@ -59,15 +59,15 @@ theme:
     - content.code.copy
     - content.code.annotate
   palette:
-    - scheme: default
-      primary: deep purple
-      accent: purple
+    - scheme: slate
+      primary: black
+      accent: lime
       toggle:
         icon: material/weather-night
         name: Dark mode
     - scheme: slate
-      primary: deep purple
-      accent: purple
+      primary: black
+      accent: lime
       toggle:
         icon: material/weather-sunny
         name: Light mode
@@ -75,6 +75,9 @@ theme:
 plugins:
   - search
   - glightbox
+
+extra_css:
+  - css/terminal.css
 
 markdown_extensions:
   - pymdownx.highlight:
