@@ -70,9 +70,7 @@ class TestEmphasizeHeader:
         assert "<br>" not in out
 
     def test_reference_link_html(self):
-        out = emphasize_header(
-            "Header: rest", reference_link="https://example.com/x"
-        )
+        out = emphasize_header("Header: rest", reference_link="https://example.com/x")
         assert "<a href='https://example.com/x'>Header:</a>" in out
         assert out.startswith("<strong>")
 
@@ -109,29 +107,21 @@ class TestConvertToMarkdownV2Branches:
         assert "Review for commits since previous MergeMate review 2 commits" in out
 
     def test_relevant_tests_yes_branch_gfm(self):
-        out = convert_to_markdown_v2(
-            {"review": {"relevant_tests": "Yes"}}
-        )
+        out = convert_to_markdown_v2({"review": {"relevant_tests": "Yes"}})
         assert "<strong>PR contains tests</strong>" in out
         assert "<table>" in out and "</table>" in out
 
     def test_relevant_tests_yes_branch_non_gfm(self):
-        out = convert_to_markdown_v2(
-            {"review": {"relevant_tests": "Yes"}}, gfm_supported=False
-        )
+        out = convert_to_markdown_v2({"review": {"relevant_tests": "Yes"}}, gfm_supported=False)
         assert "### 🧪 PR contains tests" in out
         assert "<table>" not in out
 
     def test_relevant_tests_no_branch_non_gfm(self):
-        out = convert_to_markdown_v2(
-            {"review": {"relevant_tests": "No"}}, gfm_supported=False
-        )
+        out = convert_to_markdown_v2({"review": {"relevant_tests": "No"}}, gfm_supported=False)
         assert "### 🧪 No relevant tests" in out
 
     def test_security_concerns_with_details_gfm(self):
-        out = convert_to_markdown_v2(
-            {"review": {"security_concerns": "SQL injection: details follow"}}
-        )
+        out = convert_to_markdown_v2({"review": {"security_concerns": "SQL injection: details follow"}})
         assert "<strong>Security concerns</strong>" in out
         # emphasize_header wraps the part before ':' in <strong>.
         assert "<strong>SQL injection:</strong>" in out
@@ -145,15 +135,11 @@ class TestConvertToMarkdownV2Branches:
         assert "**SQL injection:**" in out
 
     def test_key_issues_no_major_issues_gfm(self):
-        out = convert_to_markdown_v2(
-            {"review": {"key_issues_to_review": "No"}}
-        )
+        out = convert_to_markdown_v2({"review": {"key_issues_to_review": "No"}})
         assert "<strong>No major issues detected</strong>" in out
 
     def test_key_issues_no_major_issues_non_gfm(self):
-        out = convert_to_markdown_v2(
-            {"review": {"key_issues_to_review": "No"}}, gfm_supported=False
-        )
+        out = convert_to_markdown_v2({"review": {"key_issues_to_review": "No"}}, gfm_supported=False)
         assert "### ⚡ No major issues detected" in out
 
     def test_key_issues_possible_bug_header_softened(self):
@@ -201,28 +187,16 @@ class TestConvertToMarkdownV2Branches:
 
     def test_estimated_effort_non_numeric_prefix(self):
         # "3, because ..." → only the leading integer is used.
-        out = convert_to_markdown_v2(
-            {"review": {"estimated_effort_to_review_[1-5]": "3, because of churn"}}
-        )
+        out = convert_to_markdown_v2({"review": {"estimated_effort_to_review_[1-5]": "3, because of churn"}})
         assert "Estimated effort to review</strong>: 3 🔵🔵🔵⚪⚪" in out
 
     def test_estimated_effort_invalid_value_is_skipped(self):
         # Completely unparsable value falls through `continue` and is omitted.
-        out = convert_to_markdown_v2(
-            {"review": {"estimated_effort_to_review_[1-5]": "not-a-number"}}
-        )
+        out = convert_to_markdown_v2({"review": {"estimated_effort_to_review_[1-5]": "not-a-number"}})
         assert "Estimated effort to review" not in out
 
     def test_can_be_split_single_item_renders_no_themes(self):
-        out = convert_to_markdown_v2(
-            {
-                "review": {
-                    "can_be_split": [
-                        {"relevant_files": ["a.py"], "title": "Only one"}
-                    ]
-                }
-            }
-        )
+        out = convert_to_markdown_v2({"review": {"can_be_split": [{"relevant_files": ["a.py"], "title": "Only one"}]}})
         assert "<strong>No multiple PR themes</strong>" in out
 
     def test_can_be_split_empty_renders_no_themes(self):
@@ -230,9 +204,7 @@ class TestConvertToMarkdownV2Branches:
         assert "<strong>No multiple PR themes</strong>" in out
 
     def test_default_branch_unknown_key_gfm(self):
-        out = convert_to_markdown_v2(
-            {"review": {"some_other_field": "interesting value"}}
-        )
+        out = convert_to_markdown_v2({"review": {"some_other_field": "interesting value"}})
         # Fallback formatting capitalizes & joins with ': '.
         assert "<strong>Some other field</strong>: interesting value" in out
 
@@ -249,9 +221,7 @@ class TestConvertToMarkdownV2Branches:
         assert "✅" in out
 
     def test_todo_sections_no_value_non_gfm(self):
-        out = convert_to_markdown_v2(
-            {"review": {"todo_sections": "No"}}, gfm_supported=False
-        )
+        out = convert_to_markdown_v2({"review": {"todo_sections": "No"}}, gfm_supported=False)
         assert "### ✅ No TODO sections" in out
 
     def test_todo_sections_list_with_provider_gfm(self):
@@ -331,9 +301,7 @@ class TestTicketMarkdownLogic:
         assert "Ticket compliance analysis **" in out
 
     def test_not_compliant_only_renders_red_x(self):
-        tickets = [
-            self._ticket(not_compliant_requirements="- broken\n")
-        ]
+        tickets = [self._ticket(not_compliant_requirements="- broken\n")]
         out = ticket_markdown_logic("🎫", "", tickets, True)
         assert "Ticket compliance analysis ❌" in out
         assert "Not compliant" in out
@@ -410,9 +378,7 @@ class TestProcessCanBeSplit:
         assert "No multiple PR themes" in out
 
     def test_single_element_list_returns_no_themes(self):
-        out = process_can_be_split(
-            "🔀", [{"title": "only one", "relevant_files": ["a.py"]}]
-        )
+        out = process_can_be_split("🔀", [{"title": "only one", "relevant_files": ["a.py"]}])
         assert "No multiple PR themes" in out
 
     def test_multiple_themes_render_details(self):
@@ -503,10 +469,7 @@ class TestFormatTodoItems:
         assert out.startswith("- ")
 
     def test_list_truncates_to_max_items_gfm(self):
-        items = [
-            {"relevant_file": f"f{i}.py", "line_number": i, "content": "x"}
-            for i in range(10)
-        ]
+        items = [{"relevant_file": f"f{i}.py", "line_number": i, "content": "x"} for i in range(10)]
         out = format_todo_items(items, self._provider(), gfm_supported=True)
         # MAX_ITEMS is 5 — only the first five files appear, the rest are dropped.
         for i in range(5):
@@ -516,10 +479,7 @@ class TestFormatTodoItems:
         assert out.count("<li>") == 5
 
     def test_list_truncates_to_max_items_non_gfm(self):
-        items = [
-            {"relevant_file": f"f{i}.py", "line_number": i, "content": "x"}
-            for i in range(7)
-        ]
+        items = [{"relevant_file": f"f{i}.py", "line_number": i, "content": "x"} for i in range(7)]
         out = format_todo_items(items, self._provider(), gfm_supported=False)
         # Counts bullet rows.
         assert out.count("\n- ") + (1 if out.startswith("- ") else 0) == 5
@@ -558,14 +518,6 @@ class TestParseCodeSuggestionGfm:
         assert "<tr><td>relevant line</td>" in out
         assert "foo = 1" in out
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason=(
-            "parse_code_suggestion only left-strips a leading backtick from "
-            "relevant_line; the trailing backtick is not stripped. This xfail "
-            "encodes the desired symmetric stripping behavior."
-        ),
-    )
     def test_relevant_line_strips_both_backticks(self):
         suggestion = {
             "relevant_file": "src/app.py",
@@ -648,9 +600,7 @@ class TestExtractTicketLinksFromPRDescription:
 
     def test_shorthand_owner_repo_issue(self):
         desc = "See foo/bar#42 for context"
-        out = extract_ticket_links_from_pr_description(
-            desc, "foo/bar", base_url_html="https://github.com"
-        )
+        out = extract_ticket_links_from_pr_description(desc, "foo/bar", base_url_html="https://github.com")
         assert "https://github.com/foo/bar/issues/42" in out
 
     def test_hash_only_uses_repo_path(self):
@@ -676,7 +626,5 @@ class TestExtractTicketLinksFromPRDescription:
 
     def test_base_url_trailing_slash_is_stripped(self):
         desc = "See foo/bar#1"
-        out = extract_ticket_links_from_pr_description(
-            desc, "foo/bar", base_url_html="https://ghe.example.com/"
-        )
+        out = extract_ticket_links_from_pr_description(desc, "foo/bar", base_url_html="https://ghe.example.com/")
         assert out == ["https://ghe.example.com/foo/bar/issues/1"]
