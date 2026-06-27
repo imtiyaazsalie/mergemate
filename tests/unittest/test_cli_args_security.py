@@ -92,9 +92,16 @@ def test_validate_user_args_all_allowed_together():
     assert offending == ""
 
 
-@pytest.mark.skip(
-    reason="Integration test needs updating for new agent API — CliArgs.validate_user_args is tested above; handle() routing test is covered in test_mergemate_routing.py"
-)
 @pytest.mark.asyncio
-async def test_handle_request_uses_real_validator_to_block_forbidden(monkeypatch):
-    pass
+async def test_cli_parser_rejects_known_secret_args():
+    """The CLI parser should not accept args like --openai.key or --github.webhook_secret."""
+    from mergemate.cli import build_parser
+
+    parser = build_parser()
+
+    # Verify the parser only has safe, expected arguments
+    known_args = {action.dest for action in parser._actions if action.dest != "help"}
+    forbidden_patterns = ["key", "secret", "token", "password", "bearer", "private"]
+    for arg in known_args:
+        for pattern in forbidden_patterns:
+            assert pattern not in arg.lower(), f"Potentially unsafe arg found: {arg}"

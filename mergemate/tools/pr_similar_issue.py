@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Any, List
 
 import openai
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from mergemate.algo import MAX_TOKENS
 from mergemate.algo.token_handler import TokenHandler
@@ -34,8 +34,7 @@ class Metadata(BaseModel):
     created_at: str = Field(default="01-01-1970 00:00:00.00000")
     level: IssueLevel = Field(default=IssueLevel.ISSUE)
 
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class Record(BaseModel):

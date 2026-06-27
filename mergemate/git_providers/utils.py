@@ -2,11 +2,11 @@ import copy
 import os
 import re
 import tempfile
-import tomllib
 import traceback
 from urllib.parse import urlparse
 from urllib.request import Request, url2pathname, urlopen
 
+import tomllib
 from dynaconf import Dynaconf
 from dynaconf.loaders import env_loader
 from starlette_context import context
@@ -31,7 +31,7 @@ def _safe_url_for_log(url: str) -> str:
     """
     try:
         parsed = urlparse(url)
-        netloc = parsed.hostname or ''
+        netloc = parsed.hostname or ""
         if parsed.port:
             netloc = f"{netloc}:{parsed.port}"
         return f"{parsed.scheme}://{netloc}{parsed.path}"
@@ -57,9 +57,7 @@ def _resolve_extra_config_to_file(source):
     """
     # Validate / normalise the input at the boundary
     if not isinstance(source, str):
-        get_logger().warning(
-            f"Ignoring CONFIG.EXTRA_CONFIG_URL: expected str, got {type(source).__name__}"
-        )
+        get_logger().warning(f"Ignoring CONFIG.EXTRA_CONFIG_URL: expected str, got {type(source).__name__}")
         return None, False
     source = source.strip()
     if not source:
@@ -108,8 +106,7 @@ def _resolve_extra_config_to_file(source):
         else:
             # Surface misconfiguration instead of silently dropping the header.
             get_logger().warning(
-                "MERGEMATE_EXTRA_CONFIG_AUTH_HEADER is set but malformed "
-                "(expected '<HeaderName>: <value>'); ignoring."
+                "MERGEMATE_EXTRA_CONFIG_AUTH_HEADER is set but malformed (expected '<HeaderName>: <value>'); ignoring."
             )
 
     try:
@@ -117,9 +114,7 @@ def _resolve_extra_config_to_file(source):
         with urlopen(req, timeout=_FETCH_TIMEOUT_SECONDS) as resp:
             data = resp.read(_MAX_EXTRA_CONFIG_BYTES + 1)
         if len(data) > _MAX_EXTRA_CONFIG_BYTES:
-            get_logger().warning(
-                f"Extra config exceeds {_MAX_EXTRA_CONFIG_BYTES} bytes, skipping: {safe_url}"
-            )
+            get_logger().warning(f"Extra config exceeds {_MAX_EXTRA_CONFIG_BYTES} bytes, skipping: {safe_url}")
             return None, False
         fd, tmp_path = tempfile.mkstemp(suffix=".toml")
         with os.fdopen(fd, "wb") as f:
@@ -182,9 +177,7 @@ def _apply_settings_from_file(path: str, label: str):
                     parsed_toml = tomllib.load(f)
                 validate_file_security(parsed_toml, path)
             except Exception as sec_err:
-                get_logger().warning(
-                    f"Extra config failed security pre-validation; skipping: {sec_err}"
-                )
+                get_logger().warning(f"Extra config failed security pre-validation; skipping: {sec_err}")
                 return
 
             get_logger().warning(
@@ -215,9 +208,7 @@ def _apply_settings_from_file(path: str, label: str):
         # secrets (e.g. openai.key, gitlab.personal_access_token) that would
         # otherwise leak into CI logs. Section names are safe and sufficient
         # for debugging which file contributed what.
-        get_logger().info(
-            f"Applied {label} settings from {path} (sections merged: {sorted(merged_sections)})"
-        )
+        get_logger().info(f"Applied {label} settings from {path} (sections merged: {sorted(merged_sections)})")
     except Exception as e:
         get_logger().warning(f"Failed to apply {label} settings from {path}: {e}")
 
@@ -244,14 +235,9 @@ def apply_repo_settings(pr_url):
                     try:
                         os.remove(extra_path)
                     except Exception as e:
-                        get_logger().error(
-                            f"Failed to remove temp extra config {extra_path}: {e}"
-                        )
+                        get_logger().error(f"Failed to remove temp extra config {extra_path}: {e}")
     elif extra_source is not None and not isinstance(extra_source, str):
-        get_logger().warning(
-            "Ignoring CONFIG.EXTRA_CONFIG_URL: expected str, got "
-            f"{type(extra_source).__name__}"
-        )
+        get_logger().warning(f"Ignoring CONFIG.EXTRA_CONFIG_URL: expected str, got {type(extra_source).__name__}")
 
     git_provider = get_git_provider_with_context(pr_url)
 
@@ -273,56 +259,71 @@ def apply_repo_settings(pr_url):
             error_local = None
             if repo_settings:
                 repo_settings_file = None
-                category = 'local'
+                category = "local"
+                # Pre-validate TOML before creating Dynaconf so malformed/
+                # forbidden payloads produce a local configuration error
+                # instead of being silently swallowed by the custom loader.
                 try:
-                    fd, repo_settings_file = tempfile.mkstemp(suffix='.toml')
-                    try:
-                        os.write(fd, repo_settings)
-                    finally:
-                        os.close(fd)
-
-                    try:
-                        dynconf_kwargs = {'core_loaders': [],  # DISABLE default loaders, otherwise will load toml files more than once.
-                             'loaders': ['mergemate.custom_merge_loader'],
-                             # Use a custom loader to merge sections, but overwrite their overlapping values. Don't involve ENV variables.
-                             'merge_enabled': True  # Merge multiple files; ensures [XYZ] sections only overwrite overlapping keys, not whole sections.
-                         }
-
-                        new_settings = Dynaconf(settings_files=[repo_settings_file],
-                                                # Disable all dynamic loading features
-                                                load_dotenv=False,  # Don't load .env files
-                                                envvar_prefix=False,  # Drop DYNACONF for env. variables
-                                                **dynconf_kwargs
-                                                )
-                    except TypeError as e:
-                        # Fallback for older Dynaconf versions that don't support these parameters
-                        get_logger().warning(
-                            "Your Dynaconf version does not support disabled 'load_dotenv'/'merge_enabled' parameters. "
-                            "Loading repo settings without these security features. "
-                            "Please upgrade Dynaconf for better security.",
-                            artifact={"error": e, "traceback": traceback.format_exc()})
-                        new_settings = Dynaconf(settings_files=[repo_settings_file])
-
-                    for section, contents in new_settings.as_dict().items():
-                        if not contents:
-                            # Skip excluded items, such as forbidden to load env.
-                            get_logger().debug(f"Skipping a section: {section} which is not allowed")
-                            continue
-                        section_dict = copy.deepcopy(get_settings().as_dict().get(section, {}))
-                        for key, value in contents.items():
-                            section_dict[key] = value
-                        get_settings().unset(section)
-                        get_settings().set(section, section_dict, merge=False)
-                    # Same precedence-restoration rationale as the extra-config
-                    # path: env-sourced values must remain the highest layer.
-                    _reapply_env_overrides()
-                    get_logger().info(f"Applying repo settings:\n{new_settings.as_dict()}")
-                except Exception as e:
-                    get_logger().warning(f"Failed to apply repo {category} settings, error: {str(e)}")
-                    error_local = {'error': str(e), 'settings': repo_settings, 'category': category}
+                    parsed = tomllib.loads(repo_settings.decode("utf-8"))
+                    validate_file_security(parsed, "<repo_settings>")
+                except Exception as pre_err:
+                    error_local = {"error": str(pre_err), "settings": repo_settings, "category": category}
 
                 if error_local:
                     handle_configurations_errors([error_local], git_provider)
+                else:
+                    try:
+                        fd, repo_settings_file = tempfile.mkstemp(suffix=".toml")
+                        try:
+                            os.write(fd, repo_settings)
+                        finally:
+                            os.close(fd)
+
+                        try:
+                            dynconf_kwargs = {
+                                "core_loaders": [],  # DISABLE default loaders, otherwise will load toml files more than once.
+                                "loaders": ["mergemate.custom_merge_loader"],
+                                # Use a custom loader to merge sections, but overwrite their overlapping values. Don't involve ENV variables.
+                                "merge_enabled": True,  # Merge multiple files; ensures [XYZ] sections only overwrite overlapping keys, not whole sections.
+                            }
+
+                            new_settings = Dynaconf(
+                                settings_files=[repo_settings_file],
+                                # Disable all dynamic loading features
+                                load_dotenv=False,  # Don't load .env files
+                                envvar_prefix=False,  # Drop DYNACONF for env. variables
+                                **dynconf_kwargs,
+                            )
+                        except TypeError as e:
+                            # Fallback for older Dynaconf versions that don't support these parameters
+                            get_logger().warning(
+                                "Your Dynaconf version does not support disabled 'load_dotenv'/'merge_enabled' parameters. "
+                                "Loading repo settings without these security features. "
+                                "Please upgrade Dynaconf for better security.",
+                                artifact={"error": e, "traceback": traceback.format_exc()},
+                            )
+                            new_settings = Dynaconf(settings_files=[repo_settings_file])
+
+                        for section, contents in new_settings.as_dict().items():
+                            if not contents:
+                                # Skip excluded items, such as forbidden to load env.
+                                get_logger().debug(f"Skipping a section: {section} which is not allowed")
+                                continue
+                            section_dict = copy.deepcopy(get_settings().as_dict().get(section, {}))
+                            for key, value in contents.items():
+                                section_dict[key] = value
+                            get_settings().unset(section)
+                            get_settings().set(section, section_dict, merge=False)
+                        # Same precedence-restoration rationale as the extra-config
+                        # path: env-sourced values must remain the highest layer.
+                        _reapply_env_overrides()
+                        get_logger().info(f"Applying repo settings:\n{new_settings.as_dict()}")
+                    except Exception as e:
+                        get_logger().warning(f"Failed to apply repo {category} settings, error: {str(e)}")
+                        error_local = {"error": str(e), "settings": repo_settings, "category": category}
+
+                    if error_local:
+                        handle_configurations_errors([error_local], git_provider)
         except Exception as e:
             get_logger().exception("Failed to apply repo settings", e)
         finally:
@@ -333,7 +334,7 @@ def apply_repo_settings(pr_url):
                     get_logger().error(f"Failed to remove temporary settings file {repo_settings_file}", e)
 
     # enable switching models with a short definition
-    if get_settings().config.model.lower() == 'claude-3-5-sonnet':
+    if get_settings().config.model.lower() == "claude-3-5-sonnet":
         set_claude_model()
 
 
@@ -344,9 +345,9 @@ def handle_configurations_errors(config_errors, git_provider):
 
         for err in config_errors:
             if err:
-                configuration_file_content = err['settings'].decode()
-                err_message = err['error']
-                config_type = err['category']
+                configuration_file_content = err["settings"].decode()
+                err_message = err["error"]
+                config_type = err["category"]
                 header = f"❌ **MergeMate failed to apply '{config_type}' repo settings**"
                 body = f"{header}\n\nThe configuration file needs to be a valid [TOML](https://imtiyaazsalie.github.io/mergemate/usage-guide/configuration_options/), please fix it.\n\n"
                 body += f"___\n\n**Error message:**\n`{err_message}`\n\n"
@@ -354,13 +355,12 @@ def handle_configurations_errors(config_errors, git_provider):
                     body += f"\n\n<details><summary>Configuration content:</summary>\n\n```toml\n{configuration_file_content}\n```\n\n</details>"
                 else:
                     body += f"\n\n**Configuration content:**\n\n```toml\n{configuration_file_content}\n```\n\n"
-                get_logger().warning(f"Sending a 'configuration error' comment to the PR", artifact={'body': body})
+                get_logger().warning(f"Sending a 'configuration error' comment to the PR", artifact={"body": body})
                 # git_provider.publish_comment(body)
-                if hasattr(git_provider, 'publish_persistent_comment'):
-                    git_provider.publish_persistent_comment(body,
-                                                            initial_header=header,
-                                                            update_header=False,
-                                                            final_update_message=False)
+                if hasattr(git_provider, "publish_persistent_comment"):
+                    git_provider.publish_persistent_comment(
+                        body, initial_header=header, update_header=False, final_update_message=False
+                    )
                 else:
                     git_provider.publish_comment(body)
     except Exception as e:
@@ -372,6 +372,6 @@ def set_claude_model():
     set the claude-sonnet-3.5 model easily (even by users), just by stating: --config.model='claude-3-5-sonnet'
     """
     model_claude = "bedrock/anthropic.claude-3-5-sonnet-20240620-v1:0"
-    get_settings().set('config.model', model_claude)
-    get_settings().set('config.model_weak', model_claude)
-    get_settings().set('config.fallback_models', [model_claude])
+    get_settings().set("config.model", model_claude)
+    get_settings().set("config.model_weak", model_claude)
+    get_settings().set("config.fallback_models", [model_claude])
