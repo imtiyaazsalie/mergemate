@@ -16,7 +16,7 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt -r requirements-dev.txt
       - run: pip install pytest-cov && PYTHONPATH=. pytest tests/unittest --cov=mergemate.core --cov=mergemate.agent --cov=mergemate.tools.base --cov=mergemate.tools.pr_reviewer --cov-report=xml --cov-report=term
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: core
