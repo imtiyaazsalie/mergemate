@@ -23,15 +23,12 @@ MergeMate watches your pull requests and gives you honest, actionable feedback. 
 
 ```bash
 pip install mergemate
-export DEEPSEEK_API_KEY="sk-..."
-export GITHUB_TOKEN="ghp_..."
-
-mergemate --pr_url https://github.com/you/repo/pull/42 review
+mergemate init
 ```
 
-That's it. The review appears as a comment on your PR.
+That auto-detects your project, generates `.mergemate.toml` and a GitHub Actions workflow using AI. Add your API key as a repo secret, done.
 
-## Or run it on every PR
+## Or run it on any PR
 
 Drop this in `.github/workflows/mergemate.yml`:
 

@@ -1,5 +1,28 @@
 # Running MergeMate on Your Machine
 
+## AI-Powered Setup
+
+The fastest way to get started — MergeMate auto-detects your project and generates everything:
+
+```bash
+pip install mergemate
+mergemate init
+```
+
+It detects your language, git provider, and project type, then uses AI to generate the optimal `.mergemate.toml` and GitHub Actions workflow. You get a production-ready setup in under 30 seconds.
+
+```bash
+# Point it at an existing repo
+mergemate init --output /path/to/repo
+
+# Specify your preferences
+mergemate init --model deepseek/deepseek-chat --language python --project-type web
+```
+
+---
+
+## Manual Setup
+
 Before you start, you'll need two things:
 
 1. **A model provider key** — grab one from [OpenAI](https://platform.openai.com/api-keys){:target="_blank"} (GPT-4o or later), or configure MergeMate to use any of the [supported models](../usage-guide/changing_a_model.md).

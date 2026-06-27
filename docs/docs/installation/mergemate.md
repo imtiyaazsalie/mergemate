@@ -2,6 +2,17 @@
 
 MergeMate runs wherever your code lives. Here's a quick map to help you choose the right setup.
 
+## ⚡ AI-Powered Setup
+
+Let MergeMate figure it out for you:
+
+```bash
+pip install mergemate
+mergemate init
+```
+
+It auto-detects your project and generates `.mergemate.toml` + GitHub Actions workflow using AI. Takes 30 seconds. [See the local guide →](./locally.md)
+
 ## 🖥️ Run Locally
 
 Spin it up on your own machine with Docker, pip, or a direct source checkout.
