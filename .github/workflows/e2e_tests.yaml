@@ -1,0 +1,22 @@
+name: E2E Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: GitHub E2E
+        env:
+          TOKEN_GITHUB: ${{ secrets.TOKEN_GITHUB }}
+        run: PYTHONPATH=. pytest tests/e2e_tests/test_github_app.py -v
+      - name: GitLab E2E
+        env:
+          TOKEN_GITLAB: ${{ secrets.TOKEN_GITLAB }}
+        run: PYTHONPATH=. pytest tests/e2e_tests/test_gitlab_webhook.py -v
