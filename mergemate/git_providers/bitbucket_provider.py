@@ -261,8 +261,8 @@ class BitbucketProvider(GitProvider):
         # "diff --git filename
         # new file mode 100644 (optional)
         #  index caa56f0..61528d7 100644
-        #   --- a/mergemate/cli_pip.py
-        #  +++ b/mergemate/cli_pip.py
+        #   --- a/mergemate/cli.py
+        #  +++ b/mergemate/cli.py
         #   @@ -... @@"
         for i, _ in enumerate(diff_split):
             diff_split_lines = diff_split[i].splitlines()

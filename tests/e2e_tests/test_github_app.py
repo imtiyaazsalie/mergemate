@@ -47,7 +47,7 @@ def test_e2e_run_github_app():
 
         # Update the file content
         logger.info(f"Updating the file {FILE_PATH}")
-        commit_message = "update cli_pip.py"
+        commit_message = "update cli.py"
         repo.update_file(
             file.path,
             commit_message,
@@ -60,7 +60,7 @@ def test_e2e_run_github_app():
         logger.info(f"Creating a pull request from {new_branch} to {base_branch}")
         pr = repo.create_pull(
             title=new_branch,
-            body="update cli_pip.py",
+            body="update cli.py",
             head=new_branch,
             base=base_branch
         )

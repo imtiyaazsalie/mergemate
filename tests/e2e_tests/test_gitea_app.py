@@ -85,14 +85,14 @@ def test_e2e_run_gitea_app():
             file_sha = existing_file.get('sha')
 
             file_data = {
-                'message': 'Update cli_pip.py',
+                'message': 'Update cli.py',
                 'content': file_content_encoded,
                 'sha': file_sha,
                 'branch': new_branch
             }
         except:
             file_data = {
-                'message': 'Add cli_pip.py',
+                'message': 'Add cli.py',
                 'content': file_content_encoded,
                 'branch': new_branch
             }
@@ -107,7 +107,7 @@ def test_e2e_run_gitea_app():
         logger.info(f"Creating a pull request from {new_branch} to {base_branch}")
         pr_data = {
             'title': f'Test PR from {new_branch}',
-            'body': 'update cli_pip.py',
+            'body': 'update cli.py',
             'head': new_branch,
             'base': base_branch
         }

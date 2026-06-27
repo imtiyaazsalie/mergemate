@@ -43,7 +43,7 @@ def test_e2e_run_github_app():
 
         # Update the file content
         logger.info(f"Updating the file {FILE_PATH}")
-        commit_message = "update cli_pip.py"
+        commit_message = "update cli.py"
         file.content = NEW_FILE_CONTENT
         file.save(branch=new_branch, commit_message=commit_message)
 
@@ -53,7 +53,7 @@ def test_e2e_run_github_app():
             'source_branch': new_branch,
             'target_branch': base_branch,
             'title': new_branch,
-            'description': "update cli_pip.py"
+            'description': "update cli.py"
         })
         logger.info(f"Merge request created: {mr.web_url}")
 

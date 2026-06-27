@@ -49,7 +49,7 @@ def test_e2e_run_bitbucket_app():
         url = f"https://api.bitbucket.org/2.0/repositories/{project_key}/{repo_slug}/src"
         files={FILE_PATH: NEW_FILE_CONTENT}
         data={
-            "message": "update cli_pip.py",
+            "message": "update cli.py",
             "branch": new_branch,
         }
         requests.request("POST", url, auth=HTTPBasicAuth(username, password), data=data, files=files)
@@ -59,7 +59,7 @@ def test_e2e_run_bitbucket_app():
         logger.info(f"Creating a pull request from {new_branch} to {base_branch}")
         pr = repo.pullrequests.create(
             title=f'{new_branch}',
-            description="update cli_pip.py",
+            description="update cli.py",
             source_branch=new_branch,
             destination_branch=base_branch
         )
