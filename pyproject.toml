@@ -30,10 +30,10 @@ dynamic = ["dependencies"]
 dependencies = { file = ["requirements.txt"] }
 
 [project.urls]
-"Homepage" = "https://github.com/mergemate/mergemate"
+"Homepage" = "https://github.com/imtiyaazsalie/mergemate"
 "Documentation" = "https://imtiyaazsalie.github.io/mergemate/"
-"Repository" = "https://github.com/mergemate/mergemate"
-"Issues" = "https://github.com/mergemate/mergemate/issues"
+"Repository" = "https://github.com/imtiyaazsalie/mergemate"
+"Issues" = "https://github.com/imtiyaazsalie/mergemate/issues"
 
 [tool.setuptools]
 include-package-data = true
