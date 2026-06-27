@@ -1,36 +1,58 @@
 # MergeMate
 
-**AI code review that lives in your pull requests.**
+**AI code review. Automatic. Free.**
 
 ---
 
-MergeMate watches your pull requests and gives you honest, actionable feedback. It reads the diff, thinks about what changed, and tells you what matters — bugs, improvements, missing tests, confusing patterns.
+MergeMate reviews every pull request you open. It finds bugs, suggests improvements, writes descriptions — all automatically. You open a PR, it does the work.
 
-## What it does
+## How it works
 
-| Command | One-line |
-|---|---|
-| `review` | Full code review posted as a PR comment |
-| `describe` | Generates a PR title and description from the diff |
-| `improve` | Inline suggestions on specific lines of code |
-| `ask` | Answer any question about the PR in context |
-| `labels` | Auto-label PRs based on what changed |
-| `docs` | Write documentation for new or changed code |
-| `changelog` | Update your CHANGELOG from PR contents |
-| `similar` | Find issues related to this PR |
+1. You open a pull request
+2. MergeMate reads your code
+3. It posts a review with what to fix
+4. You merge better code
 
-## Start in 60 seconds
+That's it.
+
+## Get started
+
+### 1. Install
 
 ```bash
 pip install mergemate
+```
+
+### 2. Let AI set it up
+
+```bash
 mergemate init
 ```
 
-That auto-detects your project, generates `.mergemate.toml` and a GitHub Actions workflow using AI. Add your API key as a repo secret, done.
+This looks at your project and creates everything you need. Takes 30 seconds.
 
-## Or run it on any PR
+### 3. Add your key
 
-Drop this in `.github/workflows/mergemate.yml`:
+Go to your repo → Settings → Secrets → Actions → New secret:
+
+- Name: `DEEPSEEK_API_KEY`
+- Value: your DeepSeek API key (get one at [platform.deepseek.com](https://platform.deepseek.com))
+
+### 4. Push
+
+```bash
+git add .mergemate.toml .github/
+git commit -m "Add MergeMate"
+git push
+```
+
+Done. Your next PR gets reviewed automatically.
+
+---
+
+## Prefer to do it manually?
+
+Create `.github/workflows/mergemate.yml`:
 
 ```yaml
 name: MergeMate
@@ -38,6 +60,9 @@ on: [pull_request]
 jobs:
   review:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
     steps:
       - uses: mergemate/mergemate@main
         env:
@@ -45,27 +70,35 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-Now every PR gets reviewed automatically.
+Add your `DEEPSEEK_API_KEY` secret, push, done.
 
-## Works with
+---
 
-- **GitHub** — Action, App, or CLI
-- **GitLab** — Webhook, CI pipeline, or CLI
-- **Bitbucket** — Pipeline or CLI
-- **Azure DevOps** — Pipeline or CLI
-- **Gitea** — Webhook or CLI
+## What you get
 
-## Pick your model
-
-| Provider | Model |
+| Command | Result |
 |---|---|
-| DeepSeek | `deepseek/deepseek-chat` |
-| OpenAI | `gpt-4o` |
-| Anthropic | `claude-sonnet-4-20250514` |
-| Google | `gemini/gemini-2.5-flash` |
-| Local | `ollama/llama3` |
+| `review` | A full code review in the PR comments |
+| `describe` | Auto-generated PR title and description |
+| `improve` | Inline suggestions on specific lines |
+| `ask "question"` | Answers about the PR |
+| `labels` | Auto-labels based on changes |
+| `changelog` | Updates CHANGELOG.md |
+| `docs` | Writes docs for new code |
 
-## Self-hosted, always
+---
 
-MergeMate runs on your machine or your CI. Your code never leaves your infrastructure.
-API calls go directly from you to your AI provider. No middleman, no telemetry, no accounts.
+## Use any AI model
+
+| If you use | Set your key |
+|---|---|
+| DeepSeek | `DEEPSEEK_API_KEY` |
+| OpenAI | `OPENAI_KEY` |
+| Anthropic | `ANTHROPIC_KEY` |
+| Google Gemini | `GEMINI_API_KEY` |
+
+---
+
+## Your code stays yours
+
+MergeMate runs on your machine or GitHub Actions. Your code goes straight to your AI provider. Nothing passes through us.
