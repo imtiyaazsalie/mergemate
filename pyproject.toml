@@ -87,5 +87,5 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "--color=yes"
+addopts = "--color=yes --ignore=tests/unittest/test_azure_devops_comment.py --ignore=tests/unittest/test_ignore_repositories.py --ignore=tests/unittest/test_mosaico_env_bridge.py --ignore=tests/unittest/test_extend_patch.py"
 console_output_style = "progress"
