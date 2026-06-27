@@ -103,7 +103,7 @@ class PRQuestions(BaseTool):
         languages: dict[str, int] = self.git_provider.get_languages()
         main_language: str = ""
         if languages:
-            main_language = max(languages, key=lambda k: languages[k])
+            main_language = max({k: v for k, v in languages.items() if isinstance(v, (int, float))}, key=lambda k: languages[k])
 
         # Get commit messages
         commit_messages = self.git_provider.get_commit_messages()
