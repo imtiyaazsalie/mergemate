@@ -1196,6 +1196,22 @@ def find_line_number_of_relevant_line_in_file(
     if not diff_files:
         return position, absolute_position
 
+    def _compute_position(patch_lines, search_str):
+        """Search for search_str in patch_lines and return (position, absolute_position)."""
+        delta = 0
+        start2 = 0
+        for i, line in enumerate(patch_lines):
+            if line.startswith("@@"):
+                delta = 0
+                match = re_hunk_header.match(line)
+                if match:
+                    start1, size1, start2, size2 = map(int, match.groups()[:4])
+            elif not line.startswith("-"):
+                delta += 1
+            if search_str in line and line[0] != "-":
+                return i, start2 + delta - 1
+        return -1, -1
+
     for file in diff_files:
         if file.filename and (file.filename.strip() == relevant_file):
             patch = file.patch
@@ -1204,57 +1220,62 @@ def find_line_number_of_relevant_line_in_file(
             start1, size1, start2, size2 = 0, 0, 0, 0
             if absolute_position != -1:  # matching absolute to relative
                 for i, line in enumerate(patch_lines):
-                    # new hunk
                     if line.startswith("@@"):
                         delta = 0
                         match = re_hunk_header.match(line)
                         start1, size1, start2, size2 = map(int, match.groups()[:4])
                     elif not line.startswith("-"):
                         delta += 1
-
-                    #
                     absolute_position_curr = start2 + delta - 1
-
                     if absolute_position_curr == absolute_position:
                         position = i
                         break
             else:
-                # try to find the line in the patch using difflib, with some margin of error
-                matches_difflib: list[str | Any] = difflib.get_close_matches(
-                    relevant_line_in_file, patch_lines, n=3, cutoff=0.93
-                )
+                search = relevant_line_in_file
+
+                # Strategy 1: difflib close match (existing)
+                matches_difflib: list[str | Any] = difflib.get_close_matches(search, patch_lines, n=3, cutoff=0.85)
                 if len(matches_difflib) == 1 and matches_difflib[0].startswith("+"):
-                    relevant_line_in_file = matches_difflib[0]
+                    search = matches_difflib[0]
 
-                for i, line in enumerate(patch_lines):
-                    if line.startswith("@@"):
-                        delta = 0
-                        match = re_hunk_header.match(line)
-                        start1, size1, start2, size2 = map(int, match.groups()[:4])
-                    elif not line.startswith("-"):
-                        delta += 1
+                # Strategy 2: exact or substring match
+                pos, abs_pos = _compute_position(patch_lines, search)
+                if pos != -1:
+                    position, absolute_position = pos, abs_pos
+                    break
 
-                    if relevant_line_in_file in line and line[0] != "-":
-                        position = i
-                        absolute_position = start2 + delta - 1
+                # Strategy 3: strip leading '+' and try again
+                if search.startswith("+"):
+                    stripped = search[1:].lstrip()
+                    pos, abs_pos = _compute_position(patch_lines, stripped)
+                    if pos != -1:
+                        position, absolute_position = pos, abs_pos
                         break
 
-                if position == -1 and relevant_line_in_file[0] == "+":
-                    no_plus_line = relevant_line_in_file[1:].lstrip()
-                    for i, line in enumerate(patch_lines):
-                        if line.startswith("@@"):
-                            delta = 0
-                            match = re_hunk_header.match(line)
-                            start1, size1, start2, size2 = map(int, match.groups()[:4])
-                        elif not line.startswith("-"):
-                            delta += 1
+                # Strategy 4: try just the first meaningful line of the search string
+                first_line = search.split("\n")[0].strip()
+                if len(first_line) > 10 and first_line != search:
+                    pos, abs_pos = _compute_position(patch_lines, first_line)
+                    if pos != -1:
+                        position, absolute_position = pos, abs_pos
+                        break
 
-                        if no_plus_line in line and line[0] != "-":
-                            # The model might add a '+' to the beginning of the relevant_line_in_file even if originally
-                            # it's a context line
-                            position = i
-                            absolute_position = start2 + delta - 1
-                            break
+                # Strategy 5: try with normalized whitespace (collapse multiple spaces)
+                import re as re_mod
+
+                normalized = re_mod.sub(r"\s+", " ", search).strip()
+                if normalized != search:
+                    pos, abs_pos = _compute_position(patch_lines, normalized)
+                    if pos != -1:
+                        position, absolute_position = pos, abs_pos
+                        break
+
+                # Strategy 6: try partial match (first 40 chars of search)
+                if len(search) > 40:
+                    pos, abs_pos = _compute_position(patch_lines, search[:40])
+                    if pos != -1:
+                        position, absolute_position = pos, abs_pos
+                        break
     return position, absolute_position
 
 

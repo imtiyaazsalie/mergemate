@@ -456,9 +456,25 @@ class GithubProvider(GitProvider):
         return dict(body=body, path=path, position=position) if subject_type == "LINE" else {}
 
     def publish_inline_comments(self, comments: list[dict], disable_fallback: bool = False):
+        # Filter out empty comments (position not found) and publish them as
+        # regular PR comments instead, so the AI's suggestions are never lost.
+        valid_comments = []
+        for comment in comments:
+            if comment and comment.get("body"):
+                if comment.get("position") is not None:
+                    valid_comments.append(comment)
+                else:
+                    # Post as a regular comment with file reference
+                    fallback_body = f"{comment['body']}\n\n> 📁 `{comment.get('path', 'unknown')}`"
+                    self.publish_comment(fallback_body)
+
+        if not valid_comments:
+            get_logger().info("No valid inline comments to publish (all fell back to regular comments)")
+            return
+
         try:
             # publish all comments in a single message
-            self.pr.create_review(commit=self.last_commit_id, comments=comments)
+            self.pr.create_review(commit=self.last_commit_id, comments=valid_comments)
         except Exception as e:
             get_logger().info(f"Initially failed to publish inline comments as committable")
 
@@ -468,7 +484,7 @@ class GithubProvider(GitProvider):
                 raise e  # will end up with publishing the comments one by one
 
             try:
-                self._publish_inline_comments_fallback_with_verification(comments)
+                self._publish_inline_comments_fallback_with_verification(valid_comments)
             except Exception as e:
                 get_logger().error(f"Failed to publish inline code comments fallback, error: {e}")
                 raise e
