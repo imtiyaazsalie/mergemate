@@ -126,14 +126,20 @@ class BaseTool(ABC):
         """Get this tool's configuration section."""
         return self.config.get_tool_config(f"pr_{self.tool_name}")
 
-    async def _call_ai(self, system: str, user: str) -> tuple[str, str]:
-        """Make an AI completion call with the current model config."""
+    async def _call_ai(self, system: str, user: str, temperature: float | None = None) -> tuple[str, str]:
+        """Make an AI completion call with the current model config.
+
+        Args:
+            system: System prompt.
+            user: User prompt.
+            temperature: Override the model's default temperature. If None, uses config value.
+        """
         model_cfg = self.config.model
         response, status = await self.ai_handler.chat_completion(
             model=model_cfg.model,
             system=system,
             user=user,
-            temperature=model_cfg.temperature,
+            temperature=temperature if temperature is not None else model_cfg.temperature,
         )
 
         if status == "error":
