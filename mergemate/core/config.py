@@ -121,6 +121,10 @@ class AppConfig:
     def _from_raw(cls, raw: dict[str, Any]) -> AppConfig:
         """Build AppConfig from raw settings dict."""
         config_section = raw.get("configuration", raw.get("config", {}))
+        # configuration.toml uses a [config] header, creating double-nesting
+        # with the filename section. Unwrap one level if needed.
+        if "config" in config_section and isinstance(config_section["config"], dict):
+            config_section = config_section["config"]
 
         return cls(
             model=ModelConfig(

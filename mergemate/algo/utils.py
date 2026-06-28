@@ -789,6 +789,17 @@ def load_yaml(response_text: str, keys_fix_yaml: List[str] = [], first_key="", l
         data = yaml.safe_load(response_text)
     except Exception as e:
         get_logger().warning(f"Initial failure to parse AI prediction: {e}")
+        # DeepSeek and other models sometimes return markdown bullet lists
+        # instead of proper YAML mappings. Try wrapping in a default key.
+        if isinstance(response_text, str) and response_text.strip().startswith("-"):
+            wrapped = "pr_files:\n" + "\n".join("  " + line for line in response_text.strip().split("\n"))
+            try:
+                data = yaml.safe_load(wrapped)
+                if data:
+                    get_logger().info("Wrapped markdown list into YAML mapping successfully")
+                    return data
+            except Exception:
+                pass
         data = try_fix_yaml(
             response_text,
             keys_fix_yaml=keys_fix_yaml,
