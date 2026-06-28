@@ -15,7 +15,7 @@ from typing import Any, Optional
 import litellm
 import openai
 import requests
-from tenacity import retry, retry_if_exception_type, retry_if_not_exception_type, stop_after_attempt
+from tenacity import retry, retry_if_exception_type, retry_if_not_exception_type, stop_after_attempt, wait_exponential
 
 from mergemate.algo import (
     CLAUDE_EXTENDED_THINKING_MODELS,
@@ -34,7 +34,27 @@ from mergemate.core.config import ModelConfig
 from mergemate.core.errors import AIHandlerError
 from mergemate.log import get_logger
 
+# ---------------------------------------------------------------------------
+# Connection pooling — configure httpx for production-grade throughput
+# ---------------------------------------------------------------------------
+try:
+    import httpx
+
+    _httpx_limits = httpx.Limits(max_connections=100, max_keepalive_connections=20)
+    _httpx_timeout = httpx.Timeout(connect=10.0, read=180.0, write=10.0, pool=10.0)
+    # Use a module-level client so all handler instances share the connection pool.
+    _shared_http_client: httpx.AsyncClient | None = None
+
+    def _get_http_client() -> httpx.AsyncClient:
+        global _shared_http_client
+        if _shared_http_client is None:
+            _shared_http_client = httpx.AsyncClient(limits=_httpx_limits, timeout=_httpx_timeout)
+        return _shared_http_client
+except ImportError:
+    _get_http_client = None  # type: ignore[assignment]
+
 MODEL_RETRIES = 2
+AI_TIMEOUT_SECONDS = 180  # 3-minute timeout for AI calls
 DUMMY_LITELLM_API_KEY = "dummy_key"  # placeholder set when no OpenAI key is configured
 
 
@@ -427,8 +447,10 @@ class LiteLLMAIHandler:
             return f"Unexpected error: {exc}", "error"
 
     @retry(
-        retry=retry_if_exception_type(openai.APIError) & retry_if_not_exception_type(openai.RateLimitError),
-        stop=stop_after_attempt(MODEL_RETRIES),
+        retry=retry_if_exception_type((openai.APIError, ConnectionError, TimeoutError, asyncio.TimeoutError))
+        & retry_if_not_exception_type(openai.RateLimitError),
+        stop=stop_after_attempt(MODEL_RETRIES + 1),  # 3 total attempts
+        wait=wait_exponential(multiplier=1, min=2, max=10),
     )
     async def _do_chat_completion(
         self,
@@ -481,7 +503,8 @@ class LiteLLMAIHandler:
             # Process extra body parameters
             kwargs = _process_litellm_extra_body(kwargs)
 
-            # Make the API call
+            # Make the API call with timeout
+            kwargs["timeout"] = AI_TIMEOUT_SECONDS
             if model in self.streaming_required_models:
                 response = await _handle_streaming_response(
                     await litellm.acompletion(model=model, messages=messages, **kwargs)

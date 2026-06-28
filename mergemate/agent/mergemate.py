@@ -7,6 +7,7 @@ and clean separation from the old config_loader global singleton.
 from __future__ import annotations
 
 import shlex
+import time
 from typing import Any, Callable
 
 from mergemate.core.config import AppConfig
@@ -201,6 +202,7 @@ class MergeMateAgent:
         self.registry = registry or _default_registry()
         self._git_provider_factory = git_provider_factory or _default_git_provider_factory
         self._ai_handler_factory = ai_handler_factory or _default_ai_handler_factory
+        self._pr_diff_cache: dict[str, list[FilePatchInfo]] = {}  # PR URL → cached diff
 
     async def handle(self, pr_url: str, request: list[str] | str, *, notify: Callable[[], None] | None = None) -> bool:
         """Handle a PR review command.
@@ -263,10 +265,18 @@ class MergeMateAgent:
                 context=tool_ctx,
                 args=args,
             )
+            started = time.monotonic()
             await tool.run()
+            elapsed = time.monotonic() - started
+            get_logger().info(f"Tool '{command}' completed in {elapsed:.2f}s", pr_url=pr_url)
+            # Cache the diff after successful tool execution so subsequent
+            # commands on the same PR reuse the fetched diff.
+            if hasattr(tool, "diff_files") and tool.diff_files:
+                self._pr_diff_cache[pr_url] = tool.diff_files
             return True
         except Exception:
-            get_logger().exception(f"Tool '{command}' failed", pr_url=pr_url)
+            elapsed = time.monotonic() - started if "started" in dir() else 0
+            get_logger().exception(f"Tool '{command}' failed after {elapsed:.2f}s", pr_url=pr_url)
             return False
 
     def _parse_request(self, request: list[str] | str) -> tuple[str, list[str]]:
