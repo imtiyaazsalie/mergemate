@@ -202,7 +202,7 @@ class MergeMateAgent:
         self.registry = registry or _default_registry()
         self._git_provider_factory = git_provider_factory or _default_git_provider_factory
         self._ai_handler_factory = ai_handler_factory or _default_ai_handler_factory
-        self._pr_diff_cache: dict[str, list[FilePatchInfo]] = {}  # PR URL → cached diff
+        self._pr_diff_cache: dict[str, list] = {}  # PR URL → cached diff
 
     async def handle(self, pr_url: str, request: list[str] | str, *, notify: Callable[[], None] | None = None) -> bool:
         """Handle a PR review command.
