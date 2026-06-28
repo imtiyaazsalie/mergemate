@@ -260,8 +260,11 @@ class ProviderCredentials:
             if self.gemini_api_key:
                 kwargs["api_key"] = self.gemini_api_key
         elif model.startswith("deepseek/"):
+            # Route DeepSeek through the OpenAI-compatible endpoint directly.
+            # DeepSeek's API is fully OpenAI SDK compatible at https://api.deepseek.com.
             if self.deepseek_key:
                 kwargs["api_key"] = self.deepseek_key
+                kwargs["api_base"] = "https://api.deepseek.com/v1"
         elif model.startswith("mistral/"):
             if self.mistral_key:
                 kwargs["api_key"] = self.mistral_key
