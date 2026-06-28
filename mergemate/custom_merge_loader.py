@@ -1,9 +1,10 @@
+import logging
 from pathlib import Path
 
 import tomllib  # tomllib should be used instead of Py toml for Python 3.11+
 from jinja2.exceptions import SecurityError
 
-from mergemate.log import get_logger
+logger = logging.getLogger("mergemate.custom_merge_loader")
 
 
 def load(obj, env=None, silent=True, key=None, filename=None):
@@ -38,7 +39,7 @@ def load(obj, env=None, silent=True, key=None, filename=None):
         else []
     )
     if not settings_files or not isinstance(settings_files, list):
-        get_logger().warning(
+        logger.warning(
             "No settings files specified, or missing keys "
             "(tried looking for 'settings_files' or 'settings_file'), or not a list. Skipping loading.",
             artifact={"toml_obj_attributes_names": dir(obj)},
@@ -52,12 +53,12 @@ def load(obj, env=None, silent=True, key=None, filename=None):
     if hasattr(obj, "includes") and obj.includes:
         if not silent:
             raise SecurityError("Configuration includes forbidden option: 'includes'. Skipping loading.")
-        get_logger().error("Configuration includes forbidden option: 'includes'. Skipping loading.")
+        logger.error("Configuration includes forbidden option: 'includes'. Skipping loading.")
         return
     if hasattr(obj, "preload") and obj.preload:
         if not silent:
             raise SecurityError("Configuration includes forbidden option: 'preload'. Skipping loading.")
-        get_logger().error("Configuration includes forbidden option: 'preload'. Skipping loading.")
+        logger.error("Configuration includes forbidden option: 'preload'. Skipping loading.")
         return
 
     for settings_file in settings_files:
@@ -66,15 +67,15 @@ def load(obj, env=None, silent=True, key=None, filename=None):
             file_path = Path(settings_file)
             # Security: Only allow .toml files
             if file_path.suffix.lower() != ".toml":
-                get_logger().warning(f"Only .toml files are allowed. Skipping: {settings_file}")
+                logger.warning(f"Only .toml files are allowed. Skipping: {settings_file}")
                 continue
 
             if not file_path.exists():
-                get_logger().warning(f"Settings file not found: {settings_file}. Skipping it.")
+                logger.warning(f"Settings file not found: {settings_file}. Skipping it.")
                 continue
 
             if file_path.stat().st_size > MAX_TOML_SIZE_IN_BYTES:
-                get_logger().warning(
+                logger.warning(
                     f"Settings file too large (> {MAX_TOML_SIZE_IN_BYTES} bytes): {settings_file}. Skipping it."
                 )
                 continue
@@ -84,7 +85,7 @@ def load(obj, env=None, silent=True, key=None, filename=None):
 
             # Handle sections (like [config], [default], etc.)
             if not isinstance(file_data, dict):
-                get_logger().warning(f"TOML root is not a table in '{settings_file}'. Skipping.")
+                logger.warning(f"TOML root is not a table in '{settings_file}'. Skipping.")
                 continue
 
             # Security: Check file contents for forbidden directives
@@ -92,7 +93,7 @@ def load(obj, env=None, silent=True, key=None, filename=None):
 
             for section_name, section_data in file_data.items():
                 if not isinstance(section_data, dict):
-                    get_logger().warning(f"Section '{section_name}' in '{settings_file}' is not a table. Skipping.")
+                    logger.warning(f"Section '{section_name}' in '{settings_file}' is not a table. Skipping.")
                     continue
                 for field, field_value in section_data.items():
                     if section_name not in accumulated_data:
@@ -102,7 +103,7 @@ def load(obj, env=None, silent=True, key=None, filename=None):
         except Exception as e:
             if not silent:
                 raise e
-            get_logger().exception(f"Exception loading settings file: {settings_file}. Skipping.")
+            logger.exception(f"Exception loading settings file: {settings_file}. Skipping.")
 
     # Update the settings object
     for k, v in accumulated_data.items():
@@ -156,9 +157,7 @@ def validate_file_security(file_data, filename):
     # Check at the top level and in all sections
     def check_dict(data, path="", max_depth=MAX_DEPTH):
         if max_depth <= 0:
-            raise SecurityError(
-                f"Maximum nesting depth exceeded at {path}. " f"Possible attempt to cause stack overflow."
-            )
+            raise SecurityError(f"Maximum nesting depth exceeded at {path}. Possible attempt to cause stack overflow.")
 
         for key, value in data.items():
             full_path = f"{path}.{key}" if path else key
